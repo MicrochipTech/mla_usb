@@ -18,4 +18,3 @@ For the PIC32 USB support, please visit http://www.microchip.com/harmony.
 * src - the source files (.c) that make up implementation and any private interface files (.h) local to the library.
 * inc - the public interface files (.h)
 * doc - the compiled documentation how to use this library.
-* doc-o-matic - the documentation source files used in conjunction with the '/src' and '/inc' files to generate the output in the '/doc' folder.
