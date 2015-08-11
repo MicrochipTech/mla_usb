@@ -298,6 +298,10 @@ void USBDeviceInit(void)
 
     USBDisableInterrupts();
 
+    //Make sure that if a GPIO output driver exists on VBUS, that it is 
+    //tri-stated to avoid potential contention with the host
+    USB_HAL_VBUSTristate();
+    
     // Clear all USB error flags
     USBClearInterruptRegister(U1EIR);  
        
@@ -2412,18 +2416,11 @@ static void USBCtrlEPService(void)
 		//If the current EP0 OUT buffer has a SETUP packet
         if(pBDTEntryEP0OutCurrent->STAT.PID == PID_SETUP)
         {
-            unsigned char setup_cnt;
-
 	        //The SETUP transaction data may have gone into the the CtrlTrfData 
 	        //buffer, or elsewhere, depending upon how the BDT was prepared
 	        //before the transaction.  Therefore, we should copy the data to the 
 	        //SetupPkt buffer so it can be processed correctly by USBCtrlTrfSetupHandler().		    
-            for(setup_cnt = 0; setup_cnt < 8u; setup_cnt++) //SETUP data packets always contain exactly 8 bytes.
-            {
-                *(uint8_t*)((uint8_t*)&SetupPkt + setup_cnt) = *(uint8_t*)ConvertToVirtualAddress(pBDTEntryEP0OutCurrent->ADR);
-                pBDTEntryEP0OutCurrent->ADR++;
-            }    
-            pBDTEntryEP0OutCurrent->ADR = ConvertToPhysicalAddress(&SetupPkt);
+            memcpy((uint8_t*)&SetupPkt, (uint8_t*)ConvertToVirtualAddress(pBDTEntryEP0OutCurrent->ADR), 8);
 
 			//Handle the control transfer (parse the 8-byte SETUP command and figure out what to do)
             USBCtrlTrfSetupHandler();

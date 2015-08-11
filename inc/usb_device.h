@@ -1362,7 +1362,11 @@ void USBSoftDetach(void);
   *************************************************************************/
 bool USBHandleBusy(USB_HANDLE handle);
 /*DOM-IGNORE-BEGIN*/
-#define USBHandleBusy(handle) (handle==0?0:((volatile BDT_ENTRY*)handle)->STAT.UOWN)
+#if defined(__XC8__)
+    #define USBHandleBusy(handle) ((handle != 0x0000) && ((*(volatile uint8_t*)handle & _USIE) != 0x00))
+#else
+    #define USBHandleBusy(handle) (handle==0?0:((volatile BDT_ENTRY*)handle)->STAT.UOWN)
+#endif
 /*DOM-IGNORE-END*/
 
 /********************************************************************

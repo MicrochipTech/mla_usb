@@ -139,7 +139,9 @@ internal variables to support the device.
 #define SUBSUBSTATE_WAIT_FOR_SET_OTG_DONE               0x0002  //
 #define SUBSUBSTATE_SET_OTG_COMPLETE                    0x0003  //
 
-#define SUBSTATE_SET_CONFIGURATION                      0x0040  //
+#define SUBSTATE_APPLICATION_CONFIGURATION              0x0040  //
+
+#define SUBSTATE_SET_CONFIGURATION                      0x0050  //
 #define SUBSUBSTATE_SEND_SET_CONFIGURATION              0x0000  //
 #define SUBSUBSTATE_WAIT_FOR_SET_CONFIGURATION          0x0001  //
 #define SUBSUBSTATE_SET_CONFIGURATION_COMPLETE          0x0002  //

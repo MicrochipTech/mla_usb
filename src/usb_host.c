@@ -1864,7 +1864,16 @@ void USBHostTasks( void )
                         USB_FREE_AND_CLEAR( usbDeviceInfo.pConfigurationDescriptorList );
                         usbDeviceInfo.pConfigurationDescriptorList = (USB_CONFIGURATION *)pTemp;
                     }
-                    _USB_SetNextSubState();
+
+                    if(countConfigurations == 0)
+                    {
+                        _USB_SetErrorCode( USB_HOLDING_CLIENT_INIT_ERROR );
+                        _USB_SetHoldState();
+                    }
+                    else
+                    {
+                        _USB_SetNextSubState();
+                    }
                     break;
 
                 case SUBSTATE_GET_CONFIG_DESCRIPTOR_SIZE:
@@ -1879,10 +1888,7 @@ void USBHostTasks( void )
                             // Set up and send GET CONFIGURATION (n) DESCRIPTOR with a length of 8
                             pEP0Data[0] = USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_DEVICE;
                             pEP0Data[1] = USB_REQUEST_GET_DESCRIPTOR;
-
-                            //MCHP: probably should get all of the configuration descriptors.
-                            pEP0Data[2] = 0;
-//                            pEP0Data[2] = countConfigurations-1;    // USB 2.0 - range is 0 - count-1
+                            pEP0Data[2] = countConfigurations-1;    // USB 2.0 - range is 0 - count-1
                             pEP0Data[3] = USB_DESCRIPTOR_CONFIGURATION;
                             pEP0Data[4] = 0;
                             pEP0Data[5] = 0;
@@ -1965,8 +1971,7 @@ void USBHostTasks( void )
                             // Set up and send GET CONFIGURATION (n) DESCRIPTOR.
                             pEP0Data[0] = USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_DEVICE;
                             pEP0Data[1] = USB_REQUEST_GET_DESCRIPTOR;
-                            //MCHP: probably should get all of the configuration descriptors.
-                            pEP0Data[2] = 0;
+                            pEP0Data[2] = countConfigurations-1;
                             pEP0Data[3] = USB_DESCRIPTOR_CONFIGURATION;
                             pEP0Data[4] = 0;
                             pEP0Data[5] = 0;
@@ -2182,6 +2187,14 @@ void USBHostTasks( void )
 
                         default:
                             break;
+                    }
+                    break;
+
+                case SUBSTATE_APPLICATION_CONFIGURATION:
+                    if ( USB_HOST_APP_EVENT_HANDLER( USB_ROOT_HUB, EVENT_HOLD_BEFORE_CONFIGURATION,
+                            NULL, usbDeviceInfo.deviceAddress ) == false )
+                    {
+                        _USB_SetNextSubState();
                     }
                     break;
 
@@ -4646,7 +4659,10 @@ void _USB_NotifyAllDataClients( uint8_t address, USB_EVENT event, void *data, un
         default:
             for(i=0;i<NUM_CLIENT_DRIVER_ENTRIES;i++)
             {
-                usbClientDrvTable[i].DataEventHandler(address, event, data, size);
+                if ( usbClientDrvTable[i].DataEventHandler != NULL )
+                {
+                    usbClientDrvTable[i].DataEventHandler(address, event, data, size);
+                }
             }
             break;
     }

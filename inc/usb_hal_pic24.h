@@ -48,23 +48,38 @@ please contact mla_licensing@microchip.com
 //IEC0-IEC7 on PIC24FJ128GB204 Family devices
 //IEC0-IEC7 on PIC24FJ256GB412 Family devices
 #if defined(__PIC24FJ64GB004__) || defined(__PIC24FJ32GB004__) || defined(__PIC24FJ32GB004__) || defined(__PIC24FJ32GB002__)    \
-    || defined(__PIC24FJ256GB110__) || defined(__PIC24FJ192GB110__) || defined(__PIC24FJ128GB110__) || defined(__PIC24FJ64GB110__) || defined(__PIC24FJ256GB108__) || defined(__PIC24FJ192GB108__) || defined(__PIC24FJ128GB108__) || defined(__PIC24FJ64GB108__)  || defined(__PIC24FJ256GB106__) || defined(__PIC24FJ192GB106__) || defined(__PIC24FJ128GB106__) || defined(__PIC24FJ64GB106__)   \
-    || defined(__PIC24FJ256GB210__) || defined(__PIC24FJ128GB210__)  || defined(__PIC24FJ256GB206__) || defined(__PIC24FJ128GB206__)
+    || defined(__PIC24FJ256GB110__) || defined(__PIC24FJ192GB110__) || defined(__PIC24FJ128GB110__) || defined(__PIC24FJ64GB110__) || defined(__PIC24FJ256GB108__) || defined(__PIC24FJ192GB108__) || defined(__PIC24FJ128GB108__) || defined(__PIC24FJ64GB108__)  || defined(__PIC24FJ256GB106__) || defined(__PIC24FJ192GB106__) || defined(__PIC24FJ128GB106__) || defined(__PIC24FJ64GB106__) 
 
     #define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  6   //Number of IECx registers implemented in the microcontroller (varies from device to device, make sure this is set correctly for the intended CPU)
+    #define USB_HAL_VBUSTristate()                  //No GPIO driver on VBUS on these devices.
+
+#elif defined(__PIC24FJ256GB210__) || defined(__PIC24FJ128GB210__)  || defined(__PIC24FJ256GB206__) || defined(__PIC24FJ128GB206__)
+
+    #define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  6   //Number of IECx registers implemented in the microcontroller (varies from device to device, make sure this is set correctly for the intended CPU)
+    #define USB_HAL_VBUSTristate()    {TRISFbits.TRISF7 = 1;}
 
 #elif defined(__PIC24FJ256DA210__) || defined(__PIC24FJ128DA210__) || defined(__PIC24FJ256DA206__) || defined(__PIC24FJ128DA206__) || defined(__PIC24FJ256DA110__) || defined(__PIC24FJ128DA110__) || defined(__PIC24FJ256DA106__) || defined(__PIC24FJ128DA106__)
 
     #define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  7   //Number of IECx registers implemented in the microcontroller (varies from device to device, make sure this is set correctly for the intended CPU)
+    #define USB_HAL_VBUSTristate()    {TRISFbits.TRISF7 = 1;}
 
-#elif defined(__PIC24FJ128GC010__) || defined(__PIC24FJ64GC010__) || defined(__PIC24FJ128GC006__) || defined(__PIC24FJ64GC006__)    \
-    || defined(__PIC24FJ128GB204__) || defined(__PIC24FJ64GB204) || defined(__PIC24FJ128GB202__) || defined(__PIC24FJ64GB202)       
+#elif defined(__PIC24FJ128GB204__) || defined(__PIC24FJ64GB204__) || defined(__PIC24FJ128GB202__) || defined(__PIC24FJ64GB202__)
 
     #define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  8   //Number of IECx registers implemented in the microcontroller (varies from device to device, make sure this is set correctly for the intended CPU)
+    #define USB_HAL_VBUSTristate()    {TRISBbits.TRISB6 = 1;}
 
+#elif defined(__PIC24FJ128GC010__) || defined(__PIC24FJ64GC010__) || defined(__PIC24FJ128GC006__) || defined(__PIC24FJ64GC006__)    \
+    || defined(__PIC24FJ128GB204__) || defined(__PIC24FJ64GB204__) || defined(__PIC24FJ128GB202__) || defined(__PIC24FJ64GB202__) \
+    || defined(__PIC24FJ256GB410__) || defined(__PIC24FJ256GB412__) || defined(__PIC24FJ256GB406__) \
+    || defined(__PIC24FJ128GB410__) || defined(__PIC24FJ128GB412__) || defined(__PIC24FJ128GB406__) \
+    || defined(__PIC24FJ64GB410__) || defined(__PIC24FJ64GB412__) || defined(__PIC24FJ64GB406__)
+    #define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  8   //Number of IECx registers implemented in the microcontroller (varies from device to device, make sure this is set correctly for the intended CPU)
+    #define USB_HAL_VBUSTristate()    {TRISFbits.TRISF7 = 1;}
 #else
     #error "Unknown processor type selected.  Refer to device datasheet and update the definition for DEVICE_SPECIFIC_IEC_REGISTER_COUNT."
-    //#define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  8    // <--- Update this number with the real number for your device and uncomment (and delete the above #error).
+    //#define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  8              // <--- Update this number with the real number for your device and uncomment (and delete the above #error).
+    //#define USB_HAL_VBUSTristate()    {TRISxbits.TRISxx = 1;}  // <-- replace the "x" characters with the correct values for the VBUS GPIO pin (if the microcontroller selected has GPIO functionality on VBUS)
+
 #endif
 
 

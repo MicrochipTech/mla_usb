@@ -35,11 +35,11 @@ please contact mla_licensing@microchip.com
 #endif
 
 #if defined(USE_INTERNAL_FLASH)
-    #include "driver/fileio/internal_flash.h"
+    #include "internal_flash.h"
 #endif
 
 #if defined(USE_SD_INTERFACE_WITH_SPI)
-    #include "driver/fileio/sd_spi.h"
+    #include "sd_spi.h"
 #endif
 
 extern LUN_FUNCTIONS LUN[MAX_LUN + 1];

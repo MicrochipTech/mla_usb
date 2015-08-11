@@ -37,7 +37,7 @@ please contact mla_licensing@microchip.com
 /****** Constant definitions *************************************************/
 /*****************************************************************************/
 #define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  9   //Number of IECx registers implemented in the microcontroller (varies from device to device, make sure this is set correctly for the intended CPU)
-
+#define USB_HAL_VBUSTristate()                  //No GPIO driver on VBUS on these devices.
 
 #if(USB_PING_PONG_MODE != USB_PING_PONG__FULL_PING_PONG)
     #error "Unsupported ping pong mode for this device"

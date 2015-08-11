@@ -42,7 +42,9 @@ please contact mla_licensing@microchip.com
 // Section: Constants
 // *****************************************************************************
 // *****************************************************************************
+#define USB_HAL_VBUSTristate()                 //No dedicated VBUS pin on these devices.
 
+        
 //----- USBEnableEndpoint() input definitions ----------------------------------
 #define USB_HANDSHAKE_ENABLED   0x10
 #define USB_HANDSHAKE_DISABLED  0x00

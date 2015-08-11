@@ -38,8 +38,10 @@ please contact mla_licensing@microchip.com
     not defined by the USB specification.
 *******************************************************************************/
 
+//DOM-IGNORE-BEGIN
 #ifndef _USB_COMMON_H_
 #define _USB_COMMON_H_
+//DOM-IGNORE-END
 
 #include <limits.h>
 #include <stdbool.h>
@@ -322,6 +324,19 @@ typedef enum
     // per call to these functions.
     EVENT_1MS,
 
+    // In device mode, this event is thrown when we receive a Set Interface request from
+    // the host.  The stack will automatically handle the interface switch, but the app
+    // may need to know about the interface switch for performing tasks such as powering
+    // up/down audio hardware.
+    EVENT_ALT_INTERFACE,
+
+    // If the application layer must do things to the device before the device is 
+    // configured, they should be done at this point.  The application layer should
+    // return true to hold the USB state machine at this point, while any USB or other
+    // processing continues.  When the USB state machine can safely proceed, the application
+    // layer should return FALSE.
+    EVENT_HOLD_BEFORE_CONFIGURATION,
+
     // Class-defined event offsets start here:
     EVENT_GENERIC_BASE  = 400,      // Offset for Generic class events
 
@@ -350,7 +365,7 @@ typedef enum
 // *****************************************************************************
 /* EVENT_TRANSFER Data
 
-This data structure is passed to the appropriate layer
+This data structure is passed to the appropriate layer's
 USB_EVENT_HANDLER when an EVT_XFER event has occurred, indicating
 that a transfer has completed on the USB.  It provides the endpoint,
 direction, and actual size of the transfer.
@@ -368,7 +383,7 @@ typedef struct _transfer_event_data
 // *****************************************************************************
 /* EVENT_VBUS_REQUEST_POWER and EVENT_VBUS_RELEASE_POWER Data
 
-This data structure is passed to the appropriate layer
+This data structure is passed to the appropriate layer's
 USB_EVENT_HANDLER when an EVENT_VBUS_REQUEST_POWER or EVENT_VBUS_RELEASE_POWER
 event has occurred, indicating that a change in Vbus power is being requested.
 */

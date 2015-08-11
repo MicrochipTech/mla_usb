@@ -48,23 +48,38 @@ please contact mla_licensing@microchip.com
 //IEC0-IEC7 on PIC24FJ128GB204 Family devices
 //IEC0-IEC7 on PIC24FJ256GB412 Family devices
 #if defined(__PIC24FJ64GB004__) || defined(__PIC24FJ32GB004__) || defined(__PIC24FJ32GB004__) || defined(__PIC24FJ32GB002__)    \
-    || defined(__PIC24FJ256GB110__) || defined(__PIC24FJ192GB110__) || defined(__PIC24FJ128GB110__) || defined(__PIC24FJ64GB110__) || defined(__PIC24FJ256GB108__) || defined(__PIC24FJ192GB108__) || defined(__PIC24FJ128GB108__) || defined(__PIC24FJ64GB108__)  || defined(__PIC24FJ256GB106__) || defined(__PIC24FJ192GB106__) || defined(__PIC24FJ128GB106__) || defined(__PIC24FJ64GB106__)   \
-    || defined(__PIC24FJ256GB210__) || defined(__PIC24FJ128GB210__)  || defined(__PIC24FJ256GB206__) || defined(__PIC24FJ128GB206__)
+    || defined(__PIC24FJ256GB110__) || defined(__PIC24FJ192GB110__) || defined(__PIC24FJ128GB110__) || defined(__PIC24FJ64GB110__) || defined(__PIC24FJ256GB108__) || defined(__PIC24FJ192GB108__) || defined(__PIC24FJ128GB108__) || defined(__PIC24FJ64GB108__)  || defined(__PIC24FJ256GB106__) || defined(__PIC24FJ192GB106__) || defined(__PIC24FJ128GB106__) || defined(__PIC24FJ64GB106__) 
 
     #define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  6   //Number of IECx registers implemented in the microcontroller (varies from device to device, make sure this is set correctly for the intended CPU)
+    #define USB_HAL_VBUSTristate()                  //No GPIO driver on VBUS on these devices.
+
+#elif defined(__PIC24FJ256GB210__) || defined(__PIC24FJ128GB210__)  || defined(__PIC24FJ256GB206__) || defined(__PIC24FJ128GB206__)
+
+    #define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  6   //Number of IECx registers implemented in the microcontroller (varies from device to device, make sure this is set correctly for the intended CPU)
+    #define USB_HAL_VBUSTristate()    {TRISFbits.TRISF7 = 1;}
 
 #elif defined(__PIC24FJ256DA210__) || defined(__PIC24FJ128DA210__) || defined(__PIC24FJ256DA206__) || defined(__PIC24FJ128DA206__) || defined(__PIC24FJ256DA110__) || defined(__PIC24FJ128DA110__) || defined(__PIC24FJ256DA106__) || defined(__PIC24FJ128DA106__)
 
     #define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  7   //Number of IECx registers implemented in the microcontroller (varies from device to device, make sure this is set correctly for the intended CPU)
+    #define USB_HAL_VBUSTristate()    {TRISFbits.TRISF7 = 1;}
 
-#elif defined(__PIC24FJ128GC010__) || defined(__PIC24FJ64GC010__) || defined(__PIC24FJ128GC006__) || defined(__PIC24FJ64GC006__)    \
-    || defined(__PIC24FJ128GB204__) || defined(__PIC24FJ64GB204) || defined(__PIC24FJ128GB202__) || defined(__PIC24FJ64GB202)       
+#elif defined(__PIC24FJ128GB204__) || defined(__PIC24FJ64GB204__) || defined(__PIC24FJ128GB202__) || defined(__PIC24FJ64GB202__)
 
     #define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  8   //Number of IECx registers implemented in the microcontroller (varies from device to device, make sure this is set correctly for the intended CPU)
+    #define USB_HAL_VBUSTristate()    {TRISBbits.TRISB6 = 1;}
 
+#elif defined(__PIC24FJ128GC010__) || defined(__PIC24FJ64GC010__) || defined(__PIC24FJ128GC006__) || defined(__PIC24FJ64GC006__)    \
+    || defined(__PIC24FJ128GB204__) || defined(__PIC24FJ64GB204__) || defined(__PIC24FJ128GB202__) || defined(__PIC24FJ64GB202__) \
+    || defined(__PIC24FJ256GB410__) || defined(__PIC24FJ256GB412__) || defined(__PIC24FJ256GB406__) \
+    || defined(__PIC24FJ128GB410__) || defined(__PIC24FJ128GB412__) || defined(__PIC24FJ128GB406__) \
+    || defined(__PIC24FJ64GB410__) || defined(__PIC24FJ64GB412__) || defined(__PIC24FJ64GB406__)
+    #define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  8   //Number of IECx registers implemented in the microcontroller (varies from device to device, make sure this is set correctly for the intended CPU)
+    #define USB_HAL_VBUSTristate()    {TRISFbits.TRISF7 = 1;}
 #else
     #error "Unknown processor type selected.  Refer to device datasheet and update the definition for DEVICE_SPECIFIC_IEC_REGISTER_COUNT."
-    //#define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  8    // <--- Update this number with the real number for your device and uncomment (and delete the above #error).
+    //#define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  8              // <--- Update this number with the real number for your device and uncomment (and delete the above #error).
+    //#define USB_HAL_VBUSTristate()    {TRISxbits.TRISxx = 1;}  // <-- replace the "x" characters with the correct values for the VBUS GPIO pin (if the microcontroller selected has GPIO functionality on VBUS)
+
 #endif
 
 
@@ -83,7 +98,7 @@ please contact mla_licensing@microchip.com
 #endif
 
 
-//----- USBEnableEndpoint() input defintions ----------------------------------
+//----- USBEnableEndpoint() input definitions ----------------------------------
 #define USB_HANDSHAKE_ENABLED           0x01
 #define USB_HANDSHAKE_DISABLED          0x00
 
@@ -98,7 +113,7 @@ please contact mla_licensing@microchip.com
 
 #define USB_STALL_ENDPOINT              0x02
 
-//----- usb_config.h input defintions -----------------------------------------
+//----- usb_config.h input definitions -----------------------------------------
 #define USB_PULLUP_ENABLE               0x00
 //#define USB_PULLUP_DISABLE            0x00
 
@@ -166,7 +181,7 @@ please contact mla_licensing@microchip.com
 #define USBRESUMEIFReg                  U1IR
 #define USBRESUMEIFBitNum               5
 
-//----- Event call back defintions --------------------------------------------
+//----- Event call back definitions --------------------------------------------
 #if defined(USB_DISABLE_SOF_HANDLER)
     #define USB_SOF_INTERRUPT           0x00
 #else
@@ -620,12 +635,12 @@ Parameters:
     that the read could not be performed (ex: if the comparators are currently off).
 
     Specify true, if you want this function to perform a forceful read operation.
-    In this case, this function will turn on the USB module and/or un-suspend it if
+    In this case, this function will turn on the USB module and/or unsuspend it if
     needed, in order to read the actual value.  The function will always return 0 or 1
     in this case.  However, the function may block for as much time as required to
     ensure that any necessary analog startup/settling/propagation times have
     elapsed, so as to get an accurate reading.  If invasive reads are allowed, and
-    this function turns on the USB module or un-suspends it, the module will remain
+    this function turns on the USB module or unsuspends it, the module will remain
     on and unsuspended subsequent to returning from this function.
     It is the caller's responsibility to turn the USB module off if
     desired/appropriate for the application (ex: because the returned value was

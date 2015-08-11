@@ -56,47 +56,8 @@ Currently this must be set to 1, due to limitations in the USB Host layer.
 // State Machine Constants
 // *****************************************************************************
 
-#ifndef USB_ENABLE_TRANSFER_EVENT
-
-#define STATE_MASK                          0x00F0 //
-#define SUBSTATE_MASK                       0x000F //
-
-#define NEXT_STATE                          0x0010 //
-#define NEXT_SUBSTATE                       0x0001 //
-
-
-#define STATE_DETACHED                      0x0000 //
-
-#define STATE_INITIALIZE_DEVICE             0x0010 //
-#define SUBSTATE_WAIT_FOR_ENUMERATION       0x0000 //
-#define SUBSTATE_DEVICE_ENUMERATED          0x0001 //
-
-/* Get Report Descriptor & parse */                //
-#define STATE_GET_REPORT_DSC                0x0020 //
-#define SUBSTATE_SEND_GET_REPORT_DSC        0x0000 //
-#define SUBSTATE_WAIT_FOR_REPORT_DSC        0x0001 //
-#define SUBSTATE_GET_REPORT_DSC_COMPLETE    0x0002 //
-#define SUBSTATE_PARSE_REPORT_DSC           0x0003 //
-#define SUBSTATE_PARSING_COMPLETE           0x0004 //
-
-#define STATE_RUNNING                       0x0030 //
-#define SUBSTATE_WAITING_FOR_REQ            0x0000 //
-#define SUBSTATE_SEND_READ_REQ              0x0001 //
-#define SUBSTATE_READ_REQ_WAIT              0x0002 //
-#define SUBSTATE_READ_REQ_DONE              0x0003 //
-#define SUBSTATE_SEND_WRITE_REQ             0x0004 //
-#define SUBSTATE_WRITE_REQ_WAIT             0x0005 //
-#define SUBSTATE_WRITE_REQ_DONE             0x0006 //
-
-#define STATE_HID_RESET_RECOVERY            0x0040 //
-#define SUBSTATE_SEND_RESET                 0x0000 //
-#define SUBSTATE_WAIT_FOR_RESET             0x0001 //
-
-#define STATE_HOLDING                       0x0060 //
-
-
-#else
-
+//------------------------------------------------------------------------------
+// Constants for the overall HID device state machine
 
 #define STATE_DETACHED                      0x0000 //
 
@@ -105,15 +66,18 @@ Currently this must be set to 1, due to limitations in the USB Host layer.
 #define STATE_PARSING_COMPLETE              0x0003 //
 
 #define STATE_RUNNING                       0x0004 //
-#define STATE_READ_REQ_WAIT                 0x0005 //
-#define STATE_WRITE_REQ_WAIT                0x0006 //
 
 #define STATE_WAIT_FOR_RESET                0x0007 //
 #define STATE_RESET_COMPLETE                0x0008 //
 
 #define STATE_HOLDING                       0x0009 //
 
-#endif
+//------------------------------------------------------------------------------
+// Constants for the the individual HID request (read or write)
+
+#define STATE_TRANSFER_WAITING                  0
+#define STATE_TRANSFER_REQUESTED                1
+#define STATE_TRANSFER_COMPLETE                 2
 
 // *****************************************************************************
 // Other Constants
@@ -139,55 +103,74 @@ Currently this must be set to 1, due to limitations in the USB Host layer.
 //******************************************************************************
 // Data Structures
 //******************************************************************************
-//******************************************************************************
-/*  USB HID Device Information
-   This structure is used to hold information of all the interfaces in a device that unique
+
+//------------------------------------------------------------------------------
+/*  USB HID Interface Information
+
+   This structure is used to hold interface specific information.
 */
 typedef struct _USB_HID_INTERFACE_DETAILS
 {
     struct _USB_HID_INTERFACE_DETAILS   *next;                // Pointer to next interface in the list.
-    uint16_t                                sizeOfRptDescriptor;  // Size of report descriptor of a particular interface.
-    uint16_t                                endpointMaxDataSize;  // Max data size for a interface.
-    uint8_t                                endpointIN;           // HID IN endpoint for corresponding interface.
-    uint8_t                                endpointOUT;          // HID OUT endpoint for corresponding interface.
-    uint8_t                                interfaceNumber;      // Interface number.
-    uint8_t                                endpointPollInterval; // Polling rate of corresponding interface.
+    uint16_t                            sizeOfRptDescriptor;  // Size of report descriptor of a particular interface.
+    uint16_t                            endpointMaxDataSize;  // Max data size for a interface.
+    uint8_t                             endpointIN;           // HID IN endpoint for corresponding interface.
+    uint8_t                             endpointOUT;          // HID OUT endpoint for corresponding interface.
+    uint8_t                             interfaceNumber;      // Interface number.
+    uint8_t                             endpointPollInterval; // Polling rate of corresponding interface.
 }   USB_HID_INTERFACE_DETAILS;
 
-/*
-   This structure is used to hold information about device common to all the interfaces
+//------------------------------------------------------------------------------
+/*  USB HID Transfer Information
+
+   This structure is used to hold information about a current read or write transfer.
+*/
+typedef struct _USB_HID_TRANSFER_INFO
+{
+    uint8_t                             state;                 // State of the endpoint.
+    uint16_t                            reportId;              // Report ID of the current transfer.
+    uint8_t                             *userData;              // Data pointer to application buffer.
+    uint8_t                             bytesTransferred;      // Number of bytes transferred to/from the user's data buffer.
+    uint8_t                             endpoint;              // Endpoint to use for the transfer.
+    uint8_t                             reportSize;            // Size of report currently requested for transfer.
+    uint8_t                             interface;             // Interface number of current transfer.
+} USB_HID_TRANSFER_INFO;
+
+
+//------------------------------------------------------------------------------
+/*  USB HID Device Information
+
+   This structure is used to hold information about the entire device.
 */
 typedef struct _USB_HID_DEVICE_INFO
 {
     USB_HID_DEVICE_ID                   ID;                    // Information about the device.
-    uint16_t                                reportId;              // Report ID of the current transfer.
-    uint8_t*                               userData;              // Data pointer to application buffer.
-    uint8_t*                               rptDescriptor;         // Common pointer to report descritor for all the interfaces.
+    uint16_t                            reportId;              // Report ID of the current transfer.
+    uint8_t*                            userData;              // Data pointer to application buffer.
+    uint8_t*                            rptDescriptor;         // Common pointer to report descriptor for all the interfaces.
     USB_HID_RPT_DESC_ERROR              HIDparserError;        // Error code incase report descriptor is not in proper format.
     union
     {
         struct
         {
-            uint8_t                        bfDirection          : 1;   // Direction of current transfer (0=OUT, 1=IN).
-            uint8_t                        bfReset              : 1;   // Flag indicating to perform HID Reset.
-            uint8_t                        bfClearDataIN        : 1;   // Flag indicating to clear the IN endpoint.
-            uint8_t                        bfClearDataOUT       : 1;   // Flag indicating to clear the OUT endpoint.
-            uint8_t                        breportDataCollected : 1;   // Flag indicationg report data is collected ny application
+            uint8_t                     bfDirection           : 1;   // Direction of current transfer (0=OUT, 1=IN).
+            uint8_t                     bfReset               : 1;   // Flag indicating to perform HID Reset.
+            uint8_t                     bfClearDataIN         : 1;   // Flag indicating to clear the IN endpoint.
+            uint8_t                     bfClearDataOUT        : 1;   // Flag indicating to clear the OUT endpoint.
+            uint8_t                     bfReportDataCollected : 1;   // Flag indicating report data is collected
+            uint8_t                     bfAddressReported     : 1;   // Flag indicating if the device address has been reported to the user yet.
         };
-        uint8_t                            val;
+        uint8_t                         val;
     }                                   flags;
-    uint8_t                                driverSupported;       // If HID driver supports requested Class,Subclass & Protocol.
-    uint8_t                                errorCode;             // Error code of last error.
-    uint8_t                                state;                 // State machine state of the device.
-    uint8_t                                returnState;           // State to return to after performing error handling.
-    uint8_t                                noOfInterfaces;        // Total number of interfaces in the device.
-    uint8_t                                interface;             // Interface number of current transfer.
-    uint8_t                                bytesTransferred;      // Number of bytes transferred to/from the user's data buffer.
-    uint8_t                                reportSize;            // Size of report currently requested for transfer.
-    uint8_t                                endpointDATA;          // Endpoint to use for the current transfer.
+    uint8_t                             driverSupported;        // If HID driver supports requested Class,Subclass & Protocol.
+    uint8_t                             errorCode;              // Error code of last error.
+    uint8_t                             state;                  // State machine state of the device.
+    uint8_t                             returnState;            // State to return to after performing error handling.
+    uint8_t                             noOfInterfaces;         // Total number of interfaces in the device.
+
+    USB_HID_TRANSFER_INFO               transferIN;             // IN transfer information
+    USB_HID_TRANSFER_INFO               transferOUT;            // OUT transfer information
 } USB_HID_DEVICE_INFO;
-
-
 
 
 //******************************************************************************
@@ -195,8 +178,9 @@ typedef struct _USB_HID_DEVICE_INFO
 // Section: Local Prototypes
 //******************************************************************************
 //******************************************************************************
-void _USBHostHID_FreeRptDecriptorDataMem(uint8_t deviceAddress);
-void _USBHostHID_ResetStateJump( uint8_t i );
+
+static void _USBHostHID_FreeRptDecriptorDataMem(uint8_t deviceAddress);
+static void _USBHostHID_ResetStateJump( uint8_t i );
 
 
 //******************************************************************************
@@ -204,6 +188,7 @@ void _USBHostHID_ResetStateJump( uint8_t i );
 // Macros
 //******************************************************************************
 //******************************************************************************
+
 #ifndef USB_MALLOC
     #define USB_MALLOC(size) malloc(size)
 #endif
@@ -219,40 +204,32 @@ void _USBHostHID_ResetStateJump( uint8_t i );
                                                         deviceInfoHID[i].state      = STATE_HOLDING;    \
                                                     }
 
-#ifndef USB_ENABLE_TRANSFER_EVENT
-
-    #define _USBHostHID_SetNextState()                  { deviceInfoHID[i].state = (deviceInfoHID[i].state & STATE_MASK) + NEXT_STATE; }
-    #define _USBHostHID_SetNextSubState()               { deviceInfoHID[i].state += NEXT_SUBSTATE; }
-    #define _USBHostHID_TerminateReadTransfer( error )  {                                                                       \
-                                                            deviceInfoHID[i].errorCode    = error;                                 \
-                                                            deviceInfoHID[i].state        = STATE_RUNNING | SUBSTATE_WAITING_FOR_REQ;\
+#ifdef USB_HID_ENABLE_TRANSFER_EVENT
+    #define _USBHostHID_TerminateReadTransfer( error )  {                                                                                   \
+                                                            deviceInfoHID[i].errorCode          = error;                                    \
+                                                            deviceInfoHID[i].state              = STATE_RUNNING;                            \
+                                                            deviceInfoHID[i].transferIN.state   = STATE_TRANSFER_WAITING;                   \
+                                                            USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress,                  \
+                                                                    EVENT_HID_READ_DONE, &transferEventData, sizeof(HID_TRANSFER_DATA) );   \
                                                         }
-    #define _USBHostHID_TerminateWriteTransfer( error ) {                                                                       \
-                                                            deviceInfoHID[i].errorCode    = error;                                 \
-                                                            deviceInfoHID[i].state        = STATE_RUNNING | SUBSTATE_WAITING_FOR_REQ;\
+    #define _USBHostHID_TerminateWriteTransfer( error ) {                                                                                   \
+                                                            deviceInfoHID[i].errorCode          = error;                                    \
+                                                            deviceInfoHID[i].state              = STATE_RUNNING;                            \
+                                                            deviceInfoHID[i].transferOUT.state  = STATE_TRANSFER_WAITING;                   \
+                                                            USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress,                  \
+                                                                    EVENT_HID_WRITE_DONE, &transferEventData, sizeof(HID_TRANSFER_DATA) );  \
                                                         }
 #else
-    #ifdef USB_HID_ENABLE_TRANSFER_EVENT
-        #define _USBHostHID_TerminateReadTransfer( error )  {                                                                       \
-                                                                deviceInfoHID[i].errorCode    = error;                                 \
-                                                                deviceInfoHID[i].state        = STATE_RUNNING;\
-                                                                USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress, EVENT_HID_READ_DONE, &transferEventData, sizeof(HID_TRANSFER_DATA) );\
-                                                            }
-        #define _USBHostHID_TerminateWriteTransfer( error ) {                                                                       \
-                                                                deviceInfoHID[i].errorCode    = error;                                 \
-                                                                deviceInfoHID[i].state        = STATE_RUNNING;\
-                                                                USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress, EVENT_HID_WRITE_DONE, &transferEventData, sizeof(HID_TRANSFER_DATA) );\
-                                                            }
-    #else
-        #define _USBHostHID_TerminateReadTransfer( error )  {                                                                       \
-                                                                deviceInfoHID[i].errorCode    = error;                                 \
-                                                                deviceInfoHID[i].state        = STATE_RUNNING;\
-                                                            }
-        #define _USBHostHID_TerminateWriteTransfer( error ) {                                                                       \
-                                                                deviceInfoHID[i].errorCode    = error;                                 \
-                                                                deviceInfoHID[i].state        = STATE_RUNNING;\
-                                                            }
-    #endif
+    #define _USBHostHID_TerminateReadTransfer( error )  {                                                                   \
+                                                            deviceInfoHID[i].errorCode          = error;                    \
+                                                            deviceInfoHID[i].state              = STATE_RUNNING;            \
+                                                            deviceInfoHID[i].transferIN.state   = STATE_TRANSFER_WAITING;   \
+                                                        }
+    #define _USBHostHID_TerminateWriteTransfer( error ) {                                                                   \
+                                                            deviceInfoHID[i].errorCode          = error;                    \
+                                                            deviceInfoHID[i].state              = STATE_RUNNING;            \
+                                                            deviceInfoHID[i].transferOUT.state  = STATE_TRANSFER_WAITING;   \
+                                                        }
 #endif
 
 //******************************************************************************
@@ -296,33 +273,34 @@ extern USB_HID_RPT_DESC_ERROR _USBHostHID_Parse_Report(uint8_t*, uint16_t, uint1
     None
 
   Parameters:
-    uint8_t deviceAddress  - Address of the attached device.
+    none
 
   Return Values:
-    true   -  HID present and ready
-    false  -  HID not present or not ready
+    uint8_t deviceAddress  - Address of the newly attached device or 0 if there
+ are no newly attached devices.
 
   Remarks:
     This function replaces the USBHostHID_ApiDeviceDetect() function.
 *******************************************************************************/
-bool USBHostHIDDeviceDetect( uint8_t deviceAddress )
+uint8_t USBHostHIDDeviceDetect( void )
 {
     uint8_t    i;
     
     // Find the correct device.
-    for (i=0; (i<USB_MAX_HID_DEVICES) && (deviceInfoHID[i].ID.deviceAddress != deviceAddress); i++);
+    for (i=0; (i<USB_MAX_HID_DEVICES) && (deviceInfoHID[i].flags.bfAddressReported == 1); i++);
     if (i == USB_MAX_HID_DEVICES)
     {
         return false;
     }
     
-    if ((USBHostHIDDeviceStatus(deviceAddress) == USB_HID_NORMAL_RUNNING) &&
-        (deviceAddress != 0))
+    if ((USBHostHIDDeviceStatus(deviceInfoHID[i].ID.deviceAddress) == USB_HID_NORMAL_RUNNING) &&
+        (deviceInfoHID[i].ID.deviceAddress != 0))
     {
-        return true;
+        deviceInfoHID[i].flags.bfAddressReported = 1;
+        return deviceInfoHID[i].ID.deviceAddress;
     }
     
-    return false;
+    return 0;
 }
 
 
@@ -376,59 +354,30 @@ uint8_t    USBHostHIDDeviceStatus( uint8_t deviceAddress )
     else
     {
         // The device is attached and done enumerating.  We can get more specific now.
-        #ifndef USB_ENABLE_TRANSFER_EVENT
-           switch (deviceInfoHID[i].state & STATE_MASK)
-           {
-               case STATE_INITIALIZE_DEVICE:
-                   return USB_HID_INITIALIZING;
-                   break;
-               case STATE_GET_REPORT_DSC:
-                   return USB_PROCESSING_REPORT_DESCRIPTOR;
-                   break;
+        switch (deviceInfoHID[i].state)
+        {
+            case STATE_INITIALIZE_DEVICE:
+            case STATE_PARSING_COMPLETE:
+                return USB_HID_INITIALIZING;
+                break;
 
-               case STATE_RUNNING:
-                   return USB_HID_NORMAL_RUNNING;
-                   break;
-               case STATE_HOLDING:
-                   return USB_HID_DEVICE_HOLDING;
-                   break;
+            case STATE_RUNNING:
+                return USB_HID_NORMAL_RUNNING;
+                break;
 
-               case STATE_HID_RESET_RECOVERY:
-                   return USB_HID_RESETTING_DEVICE;
-                   break;
+            case STATE_HOLDING:
+                return USB_HID_DEVICE_HOLDING;
+                break;
 
-               default:
-                   return USB_HID_DEVICE_DETACHED;
-                   break;
-           }
-        #else
-           switch (deviceInfoHID[i].state)
-           {
-               case STATE_INITIALIZE_DEVICE:
-               case STATE_PARSING_COMPLETE:
-                   return USB_HID_INITIALIZING;
-                   break;
+            case STATE_WAIT_FOR_RESET:
+            case STATE_RESET_COMPLETE:
+                return USB_HID_RESETTING_DEVICE;
+                break;
 
-               case STATE_RUNNING:
-               case STATE_READ_REQ_WAIT:
-               case STATE_WRITE_REQ_WAIT:
-                   return USB_HID_NORMAL_RUNNING;
-                   break;
-
-               case STATE_HOLDING:
-                   return USB_HID_DEVICE_HOLDING;
-                   break;
-
-               case STATE_WAIT_FOR_RESET:
-               case STATE_RESET_COMPLETE:
-                   return USB_HID_RESETTING_DEVICE;
-                   break;
-
-               default:
-                   return USB_HID_DEVICE_DETACHED;
-                   break;
-           }
-        #endif
+            default:
+                return USB_HID_DEVICE_DETACHED;
+                break;
+        }
     }
 }
 
@@ -438,8 +387,7 @@ uint8_t    USBHostHIDDeviceStatus( uint8_t deviceAddress )
                 uint8_t size, uint8_t *data)
 
   Summary:
-     This function starts a Get report transfer reuest from the device,
-     utilizing the function USBHostHIDTransfer();
+     This function starts a Get report transfer request from the device.
 
   Precondition:
     None
@@ -461,8 +409,156 @@ uint8_t    USBHostHIDDeviceStatus( uint8_t deviceAddress )
   Remarks:
     None
 *******************************************************************************/
- // Implemented as a macro. See usb_host_hid.h
+uint8_t USBHostHIDRead( uint8_t deviceAddress, uint8_t reportid, uint8_t interface,
+                uint8_t size, uint8_t *data )
+{
+    uint8_t    i;
+    uint8_t    errorCode;
 
+    // Find the correct device.
+    for (i=0; (i<USB_MAX_HID_DEVICES) && (deviceInfoHID[i].ID.deviceAddress != deviceAddress); i++);
+    if (i == USB_MAX_HID_DEVICES)
+    {
+        return USB_HID_DEVICE_NOT_FOUND;
+    }
+
+    pCurrInterfaceDetails = pInterfaceDetails;
+    while((pCurrInterfaceDetails != NULL) && (pCurrInterfaceDetails->interfaceNumber != interface))
+    {
+        pCurrInterfaceDetails = pCurrInterfaceDetails->next;
+    }
+    // Make sure the device is in a state ready to read/write.
+    if ( ! ( ( deviceInfoHID[i].state == STATE_RUNNING ) &&
+             ( deviceInfoHID[i].transferIN.state == STATE_TRANSFER_WAITING ) ) )
+    {
+        return USB_HID_DEVICE_BUSY;
+    }
+
+    // Initialize the transfer information.
+    deviceInfoHID[i].transferIN.bytesTransferred  = 0;
+    deviceInfoHID[i].transferIN.userData          = data;
+    deviceInfoHID[i].transferIN.endpoint          = pCurrInterfaceDetails->endpointIN;
+    deviceInfoHID[i].transferIN.reportSize        = size;
+    deviceInfoHID[i].transferIN.reportId          = reportid;
+    deviceInfoHID[i].transferIN.interface         = interface;
+    deviceInfoHID[i].errorCode                    = USB_SUCCESS;
+
+    errorCode = USBHostRead( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].transferIN.endpoint,
+                             deviceInfoHID[i].transferIN.userData, deviceInfoHID[i].transferIN.reportSize );
+    if (!errorCode)
+    {
+        deviceInfoHID[i].transferIN.state  = STATE_TRANSFER_REQUESTED;
+    }
+    else
+    {
+        deviceInfoHID[i].errorCode          = errorCode;
+    }
+
+    return errorCode;
+}
+
+/*******************************************************************************
+  Function:
+    bool USBHostHIDReadIsComplete( uint8_t deviceAddress, uint8_t *errorCode, uint32_t *byteCount )
+
+  Summary:
+    This function indicates whether or not the last read request is complete.
+
+  Description:
+    This function indicates whether or not the last read request is complete.
+    If the functions returns true, the returned byte count and error
+    code are valid. Since only one read request can be performed at once
+    and only one endpoint can be used, we only need to know the
+    device address.
+
+  Precondition:
+    None
+
+  Parameters:
+    uint8_t deviceAddress  - Device address
+    uint8_t *errorCode     - Error code from last transfer
+    uint32_t *byteCount    - Number of bytes transferred
+
+  Return Values:
+    true    - Transfer is complete, errorCode and byteCount are valid
+    false   - Transfer is not complete, errorCode and byteCount are not valid
+*******************************************************************************/
+bool USBHostHIDReadIsComplete ( uint8_t deviceAddress, uint8_t *errorCode, uint8_t *byteCount )
+{
+    uint8_t    i;
+
+    // Find the correct device.
+    for (i=0; (i<USB_MAX_HID_DEVICES) && (deviceInfoHID[i].ID.deviceAddress != deviceAddress); i++);
+    if ((i == USB_MAX_HID_DEVICES) || (deviceInfoHID[i].state == STATE_DETACHED))
+    {
+        *errorCode = USB_HID_DEVICE_NOT_FOUND;
+        *byteCount = 0;
+        return true;
+    }
+
+    *errorCode = deviceInfoHID[i].errorCode;
+    *byteCount = deviceInfoHID[i].transferIN.bytesTransferred;
+
+    if(deviceInfoHID[i].transferIN.state == STATE_TRANSFER_WAITING)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+/*******************************************************************************
+  Function:
+     uint8_t USBHostHIDReadTerminate( uint8_t deviceAddress, uint8_t interfaceNum )
+
+  Summary:
+    This function terminates a read request that is in progress.
+
+  Description:
+    This function terminates a read request that is in progress.
+
+  Precondition:
+    None
+
+  Parameters:
+    uint8_t deviceAddress  - Device address
+    uint8_t interfaceNum   - Interface number
+                            
+  Return Values:
+    USB_SUCCESS                 - read request terminated
+    USB_HID_DEVICE_NOT_FOUND    - No device with specified address
+    
+  Remarks:
+    None
+*******************************************************************************/
+uint8_t USBHostHIDReadTerminate ( uint8_t deviceAddress, uint8_t interfaceNum )
+{
+    uint8_t    i;
+    uint8_t    endpoint;
+
+    // Find the correct device.
+    for (i=0; (i<USB_MAX_HID_DEVICES) && (deviceInfoHID[i].ID.deviceAddress != deviceAddress); i++);
+    if (i == USB_MAX_HID_DEVICES)
+    {
+        return USB_HID_DEVICE_NOT_FOUND;
+    }
+
+    pCurrInterfaceDetails = pInterfaceDetails;
+    while((pCurrInterfaceDetails != NULL) && (pCurrInterfaceDetails->interfaceNumber != interfaceNum))
+    {
+        pCurrInterfaceDetails = pCurrInterfaceDetails->next;
+    }
+
+    endpoint = pCurrInterfaceDetails->endpointIN;
+
+    USBHostTerminateTransfer( deviceAddress, endpoint );
+
+    deviceInfoHID[i].transferIN.state = STATE_TRANSFER_WAITING;
+
+    return USB_SUCCESS;
+}
 
 /*******************************************************************************
   Function:
@@ -500,21 +596,12 @@ uint8_t USBHostHIDResetDevice( uint8_t deviceAddress )
         return USB_HID_DEVICE_NOT_FOUND;
     }
 
-    #ifndef USB_ENABLE_TRANSFER_EVENT
-    if (((deviceInfoHID[i].state & STATE_MASK) != STATE_DETACHED) &&
-        ((deviceInfoHID[i].state & STATE_MASK) != STATE_INITIALIZE_DEVICE))
-    #else
     if ((deviceInfoHID[i].state != STATE_DETACHED) &&
         (deviceInfoHID[i].state != STATE_INITIALIZE_DEVICE))
-    #endif
     {
         deviceInfoHID[i].flags.val |= MARK_RESET_RECOVERY;
         deviceInfoHID[i].flags.bfReset = 1;
-        #ifndef USB_ENABLE_TRANSFER_EVENT
-            deviceInfoHID[i].returnState = STATE_RUNNING | SUBSTATE_WAITING_FOR_REQ;
-        #else
-            deviceInfoHID[i].returnState = STATE_RUNNING;
-        #endif
+        deviceInfoHID[i].returnState = STATE_RUNNING;
 
         _USBHostHID_ResetStateJump( i );
         return USB_SUCCESS;
@@ -543,7 +630,7 @@ uint8_t USBHostHIDResetDevice( uint8_t deviceAddress )
     Others                      - See return values for USBHostHIDResetDevice()
                                     and error codes that can be returned
                                     in the errorCode parameter of
-                                    USBHostHIDTransferIsComplete();
+                                    USBHostHIDWriteIsComplete();
                                     
   Remarks:
     None
@@ -567,7 +654,7 @@ uint8_t USBHostHIDResetDeviceWithWait( uint8_t deviceAddress  )
     } while (errorCode == USB_HID_RESETTING_DEVICE);
 
 
-    if (USBHostHIDTransferIsComplete( deviceAddress, &errorCode, (uint8_t*)&byteCount ))
+    if (USBHostHIDWriteIsComplete( deviceAddress, &errorCode, (uint8_t*)&byteCount ))
     {
         return errorCode;
     }
@@ -603,559 +690,7 @@ uint8_t USBHostHIDResetDeviceWithWait( uint8_t deviceAddress  )
 *******************************************************************************/
 void USBHostHIDTasks( void )
 {
-#ifndef USB_ENABLE_TRANSFER_EVENT
-    uint32_t   byteCount;
-    uint8_t    errorCode;
-    uint8_t    i;
-
-    for (i=0; i<USB_MAX_HID_DEVICES; i++)
-    {
-        if (deviceInfoHID[i].ID.deviceAddress == 0) /* device address updated by lower layer */
-        {
-            deviceInfoHID[i].state = STATE_DETACHED;
-        }
-
-        switch (deviceInfoHID[i].state & STATE_MASK)
-        {
-            case STATE_DETACHED:
-                // No device attached.
-                break;
-
-            case STATE_INITIALIZE_DEVICE:
-                switch (deviceInfoHID[i].state & SUBSTATE_MASK)
-                {
-                    case SUBSTATE_WAIT_FOR_ENUMERATION:
-                        if (USBHostDeviceStatus( deviceInfoHID[i].ID.deviceAddress ) == USB_DEVICE_ATTACHED)
-                        {
-                            _USBHostHID_SetNextSubState();
-                            pCurrInterfaceDetails = pInterfaceDetails; // assign current interface to top of list
-                        }
-                        break;
-
-                    case SUBSTATE_DEVICE_ENUMERATED:
-                        _USBHostHID_SetNextState(); /* need to add sub states to Set Config, Get LANGID & String Descriptors */
-                        break;
-
-                    default :
-                        break;
-                }
-                break;
-
-            case STATE_GET_REPORT_DSC:
-                switch (deviceInfoHID[i].state & SUBSTATE_MASK)
-                {
-                    case SUBSTATE_SEND_GET_REPORT_DSC:
-                        // If we are currently sending a token, we cannot do anything.
-                        if (U1CONbits.TOKBUSY)
-                            break;
-
-                        if(pCurrInterfaceDetails != NULL) // end of interface list
-                        {
-                            if(pCurrInterfaceDetails->sizeOfRptDescriptor !=0) // interface must have a Report Descriptor
-                            {
-                                if((deviceInfoHID[i].rptDescriptor = (uint8_t *)USB_MALLOC(pCurrInterfaceDetails->sizeOfRptDescriptor)) == NULL)
-                                {
-                                    _USBHostHID_LockDevice( USB_MEMORY_ALLOCATION_ERROR );
-                                    break;
-                                }
-                                // send new interface request
-                                if (!USBHostIssueDeviceRequest( deviceInfoHID[i].ID.deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_INTERFACE,
-                                     USB_REQUEST_GET_DESCRIPTOR, HOST_DSC_RPT, pCurrInterfaceDetails->interfaceNumber,pCurrInterfaceDetails->sizeOfRptDescriptor, deviceInfoHID[i].rptDescriptor,
-                                     USB_DEVICE_REQUEST_GET, deviceInfoHID[i].ID.clientDriverID ))
-                                {
-                                     _USBHostHID_SetNextSubState();
-                                }
-                                else
-                                {
-                                    USB_FREE_AND_CLEAR(deviceInfoHID[i].rptDescriptor);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            _USBHostHID_LockDevice( USB_HID_INTERFACE_ERROR );
-                        }
-                        break;
-
-                    case SUBSTATE_WAIT_FOR_REPORT_DSC:
-                        if (USBHostTransferIsComplete( deviceInfoHID[i].ID.deviceAddress, 0, &errorCode, &byteCount ))
-                        {
-                            if (errorCode)
-                            {
-                                /* Set error code */
-                                _USBHostHID_LockDevice( errorCode );
-                            }
-                            else
-                            {
-                                // Clear the STALL.  Since it is EP0, we do not have to clear the stall.
-                                USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, 0 );
-                            }
-                            _USBHostHID_SetNextSubState();
-                        }
-                        break;
-
-                    case SUBSTATE_GET_REPORT_DSC_COMPLETE:
-                        _USBHostHID_SetNextSubState();
-                        break;
-
-                    case SUBSTATE_PARSE_REPORT_DSC:
-                        /* Invoke HID Parser ,, validate for all the errors in report Descriptor */
-                        deviceInfoHID[i].HIDparserError = _USBHostHID_Parse_Report((uint8_t*)deviceInfoHID[i].rptDescriptor , (uint16_t)pCurrInterfaceDetails->sizeOfRptDescriptor,
-                                                                               (uint16_t)pCurrInterfaceDetails->endpointPollInterval, pCurrInterfaceDetails->interfaceNumber);
-                        if(deviceInfoHID[i].HIDparserError)
-                        {
-                            /* Report Descriptor is flawed , flag error and free memory ,
-                               retry by requesting again */
-                            _USBHostHID_FreeRptDecriptorDataMem(deviceInfoHID[i].ID.deviceAddress);
-                            _USBHostHID_LockDevice( USB_HID_REPORT_DESCRIPTOR_BAD );
-                            USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress, EVENT_HID_BAD_REPORT_DESCRIPTOR, NULL, 0 );
-                        }
-                        else
-                        {
-                            _USBHostHID_SetNextSubState();
-                        }
-                        break;
-
-                    case SUBSTATE_PARSING_COMPLETE:
-                        if (USB_HOST_APP_EVENT_HANDLER(deviceInfoHID[i].ID.deviceAddress, EVENT_HID_RPT_DESC_PARSED, NULL, 0 ))
-                        {
-                            deviceInfoHID[i].flags.breportDataCollected = 1;
-                        }
-                        else
-                        {
-                            // At least once report must be present.  If not, flag error.
-                            if((pCurrInterfaceDetails->interfaceNumber == (deviceInfoHID[i].noOfInterfaces-1)) &&
-                                   (deviceInfoHID[i].flags.breportDataCollected == 0))
-                            {
-                                _USBHostHID_FreeRptDecriptorDataMem(deviceInfoHID[i].ID.deviceAddress);
-                                _USBHostHID_LockDevice( USB_HID_REPORT_DESCRIPTOR_BAD );
-                                USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress, EVENT_HID_BAD_REPORT_DESCRIPTOR, NULL, 0 );
-                            }
-                        }
-                        // free the previous allocated memory, reallocate for new interface if needed
-                        USB_FREE_AND_CLEAR(deviceInfoHID[i].rptDescriptor);
-                        pCurrInterfaceDetails = pCurrInterfaceDetails->next;
-                        if(pCurrInterfaceDetails != NULL)
-                        {
-                            deviceInfoHID[i].state = STATE_GET_REPORT_DSC;
-                        }
-                        else
-                        {
-                            if(deviceInfoHID[i].flags.breportDataCollected == 0)
-                            {
-                                _USBHostHID_FreeRptDecriptorDataMem(deviceInfoHID[i].ID.deviceAddress);
-                                _USBHostHID_LockDevice( USB_HID_REPORT_DESCRIPTOR_BAD );
-                                USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress, EVENT_HID_BAD_REPORT_DESCRIPTOR, NULL, 0 );
-                            }
-                            else
-                            {
-                                deviceInfoHID[i].state = STATE_RUNNING;
-                            }
-                        }
-                        break;
-
-                    default :
-                        break;
-                }
-                break;
-
-            case STATE_RUNNING:
-                switch (deviceInfoHID[i].state & SUBSTATE_MASK)
-                {
-                    case SUBSTATE_WAITING_FOR_REQ:
-                        /* waiting for request from application */
-                        break;
-
-                    case SUBSTATE_SEND_READ_REQ:
-                        // State removed with new architecture.  Functionality is consolidated elsewhere.
-                        break;
-
-                    case SUBSTATE_READ_REQ_WAIT:
-                        if (USBHostTransferIsComplete( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].endpointDATA, &errorCode, &byteCount ))
-                        {
-                            if (errorCode)
-                            {
-                                if(USB_ENDPOINT_STALLED == errorCode)
-                                {
-                                     USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].endpointDATA );
-                                     deviceInfoHID[i].returnState = STATE_RUNNING | SUBSTATE_WAITING_FOR_REQ;
-                                     deviceInfoHID[i].flags.bfReset = 1;
-                                     _USBHostHID_ResetStateJump( i );
-                                }
-                                else
-                                {
-                                    /* Set proper error code as per HID guideline */
-                                    #ifdef USB_HID_ENABLE_TRANSFER_EVENT    
-                                        transferEventData.dataCount         = byteCount;
-                                        transferEventData.bErrorCode        = errorCode;
-                                    #endif
-                                    _USBHostHID_TerminateReadTransfer(errorCode);
-                                }
-                            }
-                            else
-                            {
-                                // Clear the STALL.  Since it is EP0, we do not have to clear the stall.
-                                USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].endpointDATA );
-                               
-                                deviceInfoHID[i].bytesTransferred = (uint8_t)byteCount; /* Can compare with report size and flag error ???*/
-
-                                #if defined(__XC16)
-                                    #if (__XC16_VERSION__ == 1011)
-                                        /* This line is needed to work around an issue in the XC16
-                                         * compiler in regards to certain optimization settings for
-                                         * version 1.11 only. */
-                                        if(byteCount==0){Nop();}
-                                    #endif
-                                #endif
-
-                               _USBHostHID_SetNextSubState();
-                            }
-                        }
-                        break;
-
-                    case SUBSTATE_READ_REQ_DONE:
-                        /* Next transfer */
-                        deviceInfoHID[i].state = STATE_RUNNING | SUBSTATE_WAITING_FOR_REQ;
-                        #ifdef USB_HID_ENABLE_TRANSFER_EVENT
-                            USB_HOST_APP_EVENT_HANDLER(deviceInfoHID[i].ID.deviceAddress, EVENT_HID_READ_DONE, NULL, 0 );
-                        #endif
-                        break;
-
-                    case SUBSTATE_SEND_WRITE_REQ:
-                        // State removed with new architecture.  Functionality is consolidated elsewhere.
-                        break;
-
-                    case SUBSTATE_WRITE_REQ_WAIT:
-                        if (USBHostTransferIsComplete( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].endpointDATA, &errorCode, &byteCount ))
-                        {
-                            if (errorCode)
-                            {
-                                if(USB_ENDPOINT_STALLED == errorCode)
-                                {
-                                     USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].endpointDATA );
-                                     deviceInfoHID[i].returnState = STATE_RUNNING | SUBSTATE_WAITING_FOR_REQ;
-                                     deviceInfoHID[i].flags.bfReset = 1;
-                                     _USBHostHID_ResetStateJump( i );
-                                }
-                                else
-                                {
-                                    /* Set proper error code as per HID guideline */
-                                    #ifdef USB_HID_ENABLE_TRANSFER_EVENT    
-                                        transferEventData.dataCount         = byteCount;
-                                        transferEventData.bErrorCode        = errorCode;
-                                    #endif
-                                    _USBHostHID_TerminateWriteTransfer(errorCode);
-                                }
-                            }
-                            else
-                            {
-                                // MCHP - assuming only a STALL here
-                                // Clear the STALL.  Since it is EP0, we do not have to clear the stall.
-                                USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].endpointDATA);
-                                _USBHostHID_SetNextSubState();
-                            }
-                        }
-                        break;
-
-                    case SUBSTATE_WRITE_REQ_DONE:
-                        deviceInfoHID[i].state = STATE_RUNNING | SUBSTATE_WAITING_FOR_REQ;
-                        #ifdef USB_HID_ENABLE_TRANSFER_EVENT
-                            USB_HOST_APP_EVENT_HANDLER(deviceInfoHID[i].ID.deviceAddress, EVENT_HID_WRITE_DONE, NULL, 0 );
-                        #endif
-                    break;
-
-                }
-                break;
-
-            case STATE_HID_RESET_RECOVERY:
-                switch (deviceInfoHID[i].state & SUBSTATE_MASK)
-                {
-                    case SUBSTATE_SEND_RESET:   /* Not sure of rest request */
-                        // State removed with new architecture.  Functionality is consolidated elsewhere.
-                        break;
-
-                    case SUBSTATE_WAIT_FOR_RESET:
-                        if (USBHostTransferIsComplete( deviceInfoHID[i].ID.deviceAddress, 0, &errorCode, &byteCount ))
-                        {
-                            deviceInfoHID[i].flags.bfReset  = 0;
-                            if (errorCode)
-                            {
-                                if(USB_ENDPOINT_STALLED == errorCode)
-                                {
-                                    // If it stalled, try again.
-                                     USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, 0 );
-                                     deviceInfoHID[i].returnState = STATE_RUNNING | SUBSTATE_WAITING_FOR_REQ;
-                                     deviceInfoHID[i].flags.bfReset = 1;
-                                }
-                            }
-                            deviceInfoHID[i].errorCode = errorCode;
-                            _USBHostHID_ResetStateJump( i );
-                        }
-                        break;
-                }
-                break;
-
-            case STATE_HOLDING:
-                break;
-
-            default :
-                break;
-        }
-    }
-#endif
-}
-
-
-/*******************************************************************************
-  Function:
-     uint8_t USBHostHIDTerminateTransfer( uint8_t deviceAddress, uint8_t direction, uint8_t interfaceNum )
-
-  Summary:
-    This function terminates a transfer that is in progress.
-
-  Description:
-    This function terminates a transfer that is in progress.
-
-  Precondition:
-    None
-
-  Parameters:
-    uint8_t deviceAddress  - Device address
-    uint8_t direction      - Transfer direction.  Valid values are:
-                            * 1 = In (Read)
-                            * 0 = Out (Write)
-    uint8_t interfaceNum   - Interface number
-                            
-  Return Values:
-    USB_SUCCESS                 - Transfer terminated
-    USB_HID_DEVICE_NOT_FOUND    - No device with specified address
-    
-  Remarks:
-    None
-*******************************************************************************/
-uint8_t USBHostHIDTerminateTransfer( uint8_t deviceAddress, uint8_t direction, uint8_t interfaceNum )
-{
-    uint8_t    i;
-    uint8_t    endpoint;
-
-    // Find the correct device.
-    for (i=0; (i<USB_MAX_HID_DEVICES) && (deviceInfoHID[i].ID.deviceAddress != deviceAddress); i++);
-    if (i == USB_MAX_HID_DEVICES)
-    {
-        return USB_HID_DEVICE_NOT_FOUND;
-    }
-
-    pCurrInterfaceDetails = pInterfaceDetails;
-    while((pCurrInterfaceDetails != NULL) && (pCurrInterfaceDetails->interfaceNumber != interfaceNum))
-    {
-        pCurrInterfaceDetails = pCurrInterfaceDetails->next;
-    }
-    
-    endpoint = pCurrInterfaceDetails->endpointIN;
-    if (direction == 0)
-    {
-        endpoint = pCurrInterfaceDetails->endpointOUT;
-    }
-        
-    USBHostTerminateTransfer( deviceAddress, endpoint );
-    
-    // Reset the state.
-    deviceInfoHID[i].state = STATE_RUNNING;
-    
-    return USB_SUCCESS;
-}
-
-    
-/*******************************************************************************
-  Function:
-    USBHostHIDTransfer( uint8_t deviceAddress, uint8_t direction, uint8_t interfaceNum,
-                uint8_t reportid, uint8_t size, uint8_t *data)
-
-  Summary:
-    This function starts a HID transfer.
-
-  Description:
-    This function starts a HID transfer. A read/write wrapper is provided in application
-    interface file to access this function.
-
-  Preconditions:
-    None
-
-  Parameters:
-    uint8_t deviceAddress      - Device address
-    uint8_t direction          - 1=read, 0=write
-    uint8_t interfaceNum       - Interface number
-    uint8_t reportid           - Report ID of the requested report
-    uint8_t size               - Byte size of the data buffer
-    uint8_t *data              - Pointer to the data buffer
-
-  Return Values:
-    USB_SUCCESS                 - Request started successfully
-    USB_HID_DEVICE_NOT_FOUND    - No device with specified address
-    USB_HID_DEVICE_BUSY         - Device not in proper state for
-                                  performing a transfer
-    Others                      - Return values from USBHostIssueDeviceRequest(),
-                                    USBHostRead(), and USBHostWrite()
-
-  Remarks:
-    None
-*******************************************************************************/
-
-uint8_t USBHostHIDTransfer( uint8_t deviceAddress, uint8_t direction, uint8_t interfaceNum, uint16_t reportid, uint16_t size, uint8_t *data)
-{
-    uint8_t    i;
-    uint8_t    errorCode;
-
-    // Find the correct device.
-    for (i=0; (i<USB_MAX_HID_DEVICES) && (deviceInfoHID[i].ID.deviceAddress != deviceAddress); i++);
-    if (i == USB_MAX_HID_DEVICES)
-    {
-        return USB_HID_DEVICE_NOT_FOUND;
-    }
-
-    pCurrInterfaceDetails = pInterfaceDetails;
-    while((pCurrInterfaceDetails != NULL) && (pCurrInterfaceDetails->interfaceNumber != interfaceNum))
-    {
-        pCurrInterfaceDetails = pCurrInterfaceDetails->next;
-    }
-    // Make sure the device is in a state ready to read/write.
-    // Make sure the device is in a state ready to read/write.
-    #ifndef USB_ENABLE_TRANSFER_EVENT
-        if (deviceInfoHID[i].state != (STATE_RUNNING) &&
-           (deviceInfoHID[i].state & SUBSTATE_MASK) != (SUBSTATE_WAITING_FOR_REQ))
-    #else
-        if (deviceInfoHID[i].state != STATE_RUNNING)
-    #endif
-        {
-            return USB_HID_DEVICE_BUSY;
-        }
-
-    // Initialize the transfer information.
-    deviceInfoHID[i].bytesTransferred  = 0;
-    deviceInfoHID[i].errorCode         = USB_SUCCESS;
-    deviceInfoHID[i].userData          = data;
-    deviceInfoHID[i].endpointDATA      = pCurrInterfaceDetails->endpointIN;
-    deviceInfoHID[i].reportSize        = size;
-    deviceInfoHID[i].reportId          = reportid;
-    deviceInfoHID[i].interface         = interfaceNum;
-
-    if (!direction) // OUT
-    {
-        deviceInfoHID[i].endpointDATA  = pCurrInterfaceDetails->endpointOUT;
-        deviceInfoHID[i].reportId      = (reportid |((uint16_t)USB_HID_OUTPUT_REPORT<<8));
-    }
-    else
-    {
-        deviceInfoHID[i].endpointDATA      = pCurrInterfaceDetails->endpointIN;
-    }    
-
-    if(!direction)
-    {
-        if(deviceInfoHID[i].endpointDATA == 0x00)// if endpoint 0 then use control transfer
-        {
-            errorCode = USBHostIssueDeviceRequest( deviceInfoHID[i].ID.deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
-                                                     USB_HID_SET_REPORT, deviceInfoHID[i].reportId, deviceInfoHID[i].interface,deviceInfoHID[i].reportSize, deviceInfoHID[i].userData,
-                                                     USB_DEVICE_REQUEST_SET, deviceInfoHID[i].ID.clientDriverID );
-        }
-        else
-        {
-            errorCode = USBHostWrite( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].endpointDATA,
-                                      deviceInfoHID[i].userData, deviceInfoHID[i].reportSize );
-        }
-
-        if (!errorCode)
-        {
-            #ifndef USB_ENABLE_TRANSFER_EVENT
-                deviceInfoHID[i].state  = STATE_RUNNING | SUBSTATE_WRITE_REQ_WAIT;
-            #else
-                deviceInfoHID[i].state  = STATE_WRITE_REQ_WAIT;
-            #endif
-        }
-        else
-        {
-            deviceInfoHID[i].errorCode    = errorCode;
-            deviceInfoHID[i].state        = STATE_RUNNING;
-        }
-    }
-    else
-    {
-        errorCode = USBHostRead( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].endpointDATA,
-                                 deviceInfoHID[i].userData, deviceInfoHID[i].reportSize );
-        if (!errorCode)
-        {
-            #ifndef USB_ENABLE_TRANSFER_EVENT
-                deviceInfoHID[i].state  = STATE_RUNNING | SUBSTATE_READ_REQ_WAIT;
-            #else
-                deviceInfoHID[i].state  = STATE_READ_REQ_WAIT;
-            #endif
-        }
-        else
-        {
-            deviceInfoHID[i].errorCode    = errorCode;
-            deviceInfoHID[i].state        = STATE_RUNNING;
-        }
-    }
-
-    return errorCode;
-}
-
-
-/*******************************************************************************
-  Function:
-    bool USBHostHIDTransferIsComplete( uint8_t deviceAddress,
-                        uint8_t *errorCode, uint32_t *byteCount )
-
-  Summary:
-    This function indicates whether or not the last transfer is complete.
-
-  Description:
-    This function indicates whether or not the last transfer is complete.
-    If the functions returns true, the returned byte count and error
-    code are valid. Since only one transfer can be performed at once
-    and only one endpoint can be used, we only need to know the
-    device address.
-
-  Precondition:
-    None
-
-  Parameters:
-    uint8_t deviceAddress  - Device address
-    uint8_t *errorCode     - Error code from last transfer
-    uint32_t *byteCount    - Number of bytes transferred
-
-  Return Values:
-    true    - Transfer is complete, errorCode is valid
-    false   - Transfer is not complete, errorCode is not valid
-*******************************************************************************/
-
-bool USBHostHIDTransferIsComplete( uint8_t deviceAddress, uint8_t *errorCode, uint8_t *byteCount )
-{
-    uint8_t    i;
-
-    // Find the correct device.
-    for (i=0; (i<USB_MAX_HID_DEVICES) && (deviceInfoHID[i].ID.deviceAddress != deviceAddress); i++);
-    if ((i == USB_MAX_HID_DEVICES) || (deviceInfoHID[i].state == STATE_DETACHED))
-    {
-        *errorCode = USB_HID_DEVICE_NOT_FOUND;
-        *byteCount = 0;
-        return true;
-    }
-
-    *byteCount = deviceInfoHID[i].bytesTransferred;
-    *errorCode = deviceInfoHID[i].errorCode;
-
-    #ifndef USB_ENABLE_TRANSFER_EVENT
-    if(deviceInfoHID[i].state == (STATE_RUNNING | SUBSTATE_WAITING_FOR_REQ))
-    #else
-    if(deviceInfoHID[i].state == STATE_RUNNING)
-    #endif
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    // This function isn't used when USB_ENABLE_TRANSFER_EVENT is defined.
 }
 
 /*******************************************************************************
@@ -1164,8 +699,7 @@ bool USBHostHIDTransferIsComplete( uint8_t deviceAddress, uint8_t *errorCode, ui
                 uint8_t size, uint8_t *data)
 
   Summary:
-    This function starts a Set report transfer request to the device,
-    utilizing the function USBHostHIDTransfer();
+    This function starts a Set report transfer request to the device.
 
   Precondition:
     None
@@ -1188,7 +722,174 @@ bool USBHostHIDTransferIsComplete( uint8_t deviceAddress, uint8_t *errorCode, ui
   Remarks:
     None
 *******************************************************************************/
- // Implemented as a macro. See usb_host_hid.h
+uint8_t USBHostHIDWrite( uint8_t deviceAddress, uint8_t reportid, uint8_t interface,
+                uint8_t size, uint8_t *data )
+{
+    uint8_t    i;
+    uint8_t    errorCode;
+
+    // Find the correct device.
+    for (i=0; (i<USB_MAX_HID_DEVICES) && (deviceInfoHID[i].ID.deviceAddress != deviceAddress); i++);
+    if (i == USB_MAX_HID_DEVICES)
+    {
+        return USB_HID_DEVICE_NOT_FOUND;
+    }
+
+    pCurrInterfaceDetails = pInterfaceDetails;
+    while((pCurrInterfaceDetails != NULL) && (pCurrInterfaceDetails->interfaceNumber != interface))
+    {
+        pCurrInterfaceDetails = pCurrInterfaceDetails->next;
+    }
+
+    // Make sure the device is in a state ready to read/write.
+    if ( ! ( ( deviceInfoHID[i].state == STATE_RUNNING ) &&
+             ( deviceInfoHID[i].transferOUT.state == STATE_TRANSFER_WAITING ) ) )
+    {
+        return USB_HID_DEVICE_BUSY;
+    }
+
+    // Initialize the transfer information.
+    deviceInfoHID[i].transferOUT.bytesTransferred  = 0;
+    deviceInfoHID[i].transferOUT.userData          = data;
+    deviceInfoHID[i].transferOUT.endpoint          = pCurrInterfaceDetails->endpointOUT;
+    deviceInfoHID[i].transferOUT.reportSize        = size;
+    deviceInfoHID[i].transferOUT.reportId          = (reportid |((uint16_t)USB_HID_OUTPUT_REPORT<<8));
+    deviceInfoHID[i].transferOUT.interface         = interface;
+    deviceInfoHID[i].errorCode                     = USB_SUCCESS;
+
+    if(deviceInfoHID[i].transferOUT.endpoint == 0x00)// if endpoint 0 then use control transfer
+    {
+        errorCode = USBHostIssueDeviceRequest( deviceInfoHID[i].ID.deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
+                        USB_HID_SET_REPORT, deviceInfoHID[i].transferOUT.reportId, deviceInfoHID[i].transferOUT.interface,deviceInfoHID[i].transferOUT.reportSize,
+                        deviceInfoHID[i].transferOUT.userData, USB_DEVICE_REQUEST_SET, deviceInfoHID[i].ID.clientDriverID );
+    }
+    else
+    {
+        errorCode = USBHostWrite( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].transferOUT.endpoint,
+                                  deviceInfoHID[i].transferOUT.userData, deviceInfoHID[i].transferOUT.reportSize );
+    }
+
+    if (!errorCode)
+    {
+        deviceInfoHID[i].transferOUT.state  = STATE_TRANSFER_REQUESTED;
+    }
+    else
+    {
+        deviceInfoHID[i].errorCode          = errorCode;
+    }
+
+    return errorCode;
+}
+
+/*******************************************************************************
+  Function:
+    bool USBHostHIDWriteIsComplete( uint8_t deviceAddress, uint8_t *errorCode, uint32_t *byteCount )
+
+  Summary:
+    This function indicates whether or not the last write request is complete.
+
+  Description:
+    This function indicates whether or not the last write request is complete.
+    If the functions returns true, the returned byte count and error
+    code are valid. Since only one write can be performed at once
+    and only one endpoint can be used, we only need to know the
+    device address.
+
+  Precondition:
+    None
+
+  Parameters:
+    uint8_t deviceAddress  - Device address
+    uint8_t *errorCode     - Error code from last transfer
+    uint32_t *byteCount    - Number of bytes transferred
+
+  Return Values:
+    true    - Transfer is complete, errorCode and byteCount are valid
+    false   - Transfer is not complete, errorCode and byteCount are not valid
+*******************************************************************************/
+bool USBHostHIDWriteIsComplete ( uint8_t deviceAddress, uint8_t *errorCode, uint8_t *byteCount )
+{
+    uint8_t    i;
+
+    // Find the correct device.
+    for (i=0; (i<USB_MAX_HID_DEVICES) && (deviceInfoHID[i].ID.deviceAddress != deviceAddress); i++);
+    if ((i == USB_MAX_HID_DEVICES) || (deviceInfoHID[i].state == STATE_DETACHED))
+    {
+        *errorCode = USB_HID_DEVICE_NOT_FOUND;
+        *byteCount = 0;
+        return true;
+    }
+
+    *errorCode = deviceInfoHID[i].errorCode;
+    *byteCount = deviceInfoHID[i].transferOUT.bytesTransferred;
+
+    if(deviceInfoHID[i].transferOUT.state == STATE_TRANSFER_WAITING)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+/*******************************************************************************
+  Function:
+     uint8_t USBHostHIDWriteTerminate( uint8_t deviceAddress, uint8_t interfaceNum )
+
+  Summary:
+    This function terminates a write request that is in progress.
+
+  Description:
+    This function terminates a write request that is in progress.
+
+  Precondition:
+    None
+
+  Parameters:
+    uint8_t deviceAddress  - Device address
+    uint8_t interfaceNum   - Interface number
+                            
+  Return Values:
+    USB_SUCCESS                 - write request terminated
+    USB_HID_DEVICE_NOT_FOUND    - No device with specified address
+    
+  Remarks:
+    None
+*******************************************************************************/
+uint8_t USBHostHIDWriteTerminate ( uint8_t deviceAddress, uint8_t interfaceNum )
+{
+    uint8_t    i;
+    uint8_t    endpoint;
+
+    // Find the correct device.
+    for (i=0; (i<USB_MAX_HID_DEVICES) && (deviceInfoHID[i].ID.deviceAddress != deviceAddress); i++);
+    if (i == USB_MAX_HID_DEVICES)
+    {
+        return USB_HID_DEVICE_NOT_FOUND;
+    }
+
+    pCurrInterfaceDetails = pInterfaceDetails;
+    while((pCurrInterfaceDetails != NULL) && (pCurrInterfaceDetails->interfaceNumber != interfaceNum))
+    {
+        pCurrInterfaceDetails = pCurrInterfaceDetails->next;
+    }
+
+    endpoint = pCurrInterfaceDetails->endpointOUT;
+
+    USBHostTerminateTransfer( deviceAddress, endpoint );
+
+    deviceInfoHID[i].transferOUT.state = STATE_TRANSFER_WAITING;
+
+    return USB_SUCCESS;
+}
+
+// *****************************************************************************
+// *****************************************************************************
+// Section: USB Host HID Report Functions
+// *****************************************************************************
+// *****************************************************************************
 
 /*******************************************************************************
   Function:
@@ -1350,78 +1051,6 @@ bool USBHostHID_ApiFindValue(uint16_t usagePage,uint16_t usage,HIDReportTypeEnum
 
 /*******************************************************************************
   Function:
-    uint8_t USBHostHID_ApiGetCurrentInterfaceNum(void)
-
-  Description:
-    This function reurns the interface number of the cuurent report descriptor
-    parsed. This function must be called to fill data interface detail data
-    structure and passed as parameter when requesinf for report transfers.
-
-  Precondition:
-    None
-
-  Parameters:
-    None
-
-  Return Values:
-    true    - Transfer is complete, errorCode is valid
-    false   - Transfer is not complete, errorCode is not valid
-
-  Remarks:
-    None
-*******************************************************************************/
-uint8_t USBHostHID_ApiGetCurrentInterfaceNum(void)
-{
-    return(deviceRptInfo.interfaceNumber);
-}
-
-/****************************************************************************
-  Function:
-    uint8_t* USBHostHID_GetCurrentReportInfo(void)
-
-  Description:
-    This function returns a pointer to the current report info structure.
-
-  Precondition:
-    None
-
-  Parameters:
-    None
-
-  Returns:
-    uint8_t * - Pointer to the report Info structure.
-
-  Remarks:
-    None
-  ***************************************************************************/
- // Implemented as a macro. See usb_host_hid.h
-
-
-/****************************************************************************
-  Function:
-    uint8_t* USBHostHID_GetItemListPointers()
-
-  Description:
-    This function returns a pointer to list of item pointers stored in a
-    structure.
-
-  Precondition:
-    None
-
-  Parameters:
-    None
-
-  Returns:
-    uint8_t * - Pointer to list of item pointers structure.
-
-  Remarks:
-    None
-  ***************************************************************************/
- // Implemented as a macro. See usb_host_hid.h
-
-
-/*******************************************************************************
-  Function:
     bool USBHostHID_ApiImportData(uint8_t *report, uint16_t reportLength,
                      HID_USER_DATA_SIZE *buffer,HID_DATA_DETAILS *pDataDetails)
   Description:
@@ -1526,9 +1155,81 @@ bool USBHostHID_ApiImportData(uint8_t *report, uint16_t reportLength, HID_USER_D
 }
 
 
+/*******************************************************************************
+  Function:
+    uint8_t USBHostHID_ApiGetCurrentInterfaceNum(void)
+
+  Description:
+    This function reurns the interface number of the cuurent report descriptor
+    parsed. This function must be called to fill data interface detail data
+    structure and passed as parameter when requesinf for report transfers.
+
+  Precondition:
+    None
+
+  Parameters:
+    None
+
+  Return Values:
+    true    - Transfer is complete, errorCode is valid
+    false   - Transfer is not complete, errorCode is not valid
+
+  Remarks:
+    None
+*******************************************************************************/
+uint8_t USBHostHID_ApiGetCurrentInterfaceNum(void)
+{
+    return(deviceRptInfo.interfaceNumber);
+}
+
+/****************************************************************************
+  Function:
+    uint8_t* USBHostHID_GetCurrentReportInfo(void)
+
+  Description:
+    This function returns a pointer to the current report info structure.
+
+  Precondition:
+    None
+
+  Parameters:
+    None
+
+  Returns:
+    uint8_t * - Pointer to the report Info structure.
+
+  Remarks:
+    None
+  ***************************************************************************/
+ // Implemented as a macro. See usb_host_hid.h
+
+
+/****************************************************************************
+  Function:
+    uint8_t* USBHostHID_GetItemListPointers()
+
+  Description:
+    This function returns a pointer to list of item pointers stored in a
+    structure.
+
+  Precondition:
+    None
+
+  Parameters:
+    None
+
+  Returns:
+    uint8_t * - Pointer to list of item pointers structure.
+
+  Remarks:
+    None
+  ***************************************************************************/
+ // Implemented as a macro. See usb_host_hid.h
+
+
 // *****************************************************************************
 // *****************************************************************************
-// Section: Host Stack Interface Functions
+// Section: USB Host Stack Interface Functions
 // *****************************************************************************
 // *****************************************************************************
 
@@ -1591,151 +1292,132 @@ bool USBHostHIDEventHandler( uint8_t address, USB_EVENT event, void *data, uint3
             break;
 
         case EVENT_TRANSFER:         // A USB transfer has completed
-            #if defined( USB_ENABLE_TRANSFER_EVENT )
-                #ifdef DEBUG_MODE
-                    UART2PrintString( "HID: transfer event\r\n" );
-                #endif
+            #ifdef DEBUG_MODE
+                UART2PrintString( "HID: transfer event\r\n" );
+            #endif
 
-                for (i=0; (i<USB_MAX_HID_DEVICES) && (deviceInfoHID[i].ID.deviceAddress != address); i++) {}
-                if (i == USB_MAX_HID_DEVICES)
-                {
+            for (i=0; (i<USB_MAX_HID_DEVICES) && (deviceInfoHID[i].ID.deviceAddress != address); i++) {}
+            if (i == USB_MAX_HID_DEVICES)
+            {
+                #ifdef DEBUG_MODE
+                    UART2PrintString( "HID: Unknown device\r\n" );
+                #endif
+                return false;
+            }
+
+            switch (deviceInfoHID[i].state)
+            {
+                case STATE_WAIT_FOR_REPORT_DSC:
                     #ifdef DEBUG_MODE
-                        UART2PrintString( "HID: Unknown device\r\n" );
+                        UART2PrintString( "HID: Got Report Descriptor\r\n" );
                     #endif
-                    return false;
-                }
-                #ifdef DEBUG_MODE
- //                   UART2PrintString( "HID: Device state: " );
- //                   UART2PutHex( deviceInfoHID[i].state );
- //                   UART2PrintString( "\r\n" );
-                #endif
-
-                switch (deviceInfoHID[i].state)
-                {
-                    case STATE_WAIT_FOR_REPORT_DSC:
-                        #ifdef DEBUG_MODE
-                            UART2PrintString( "HID: Got Report Descriptor\r\n" );
-                        #endif
-                        deviceInfoHID[i].bytesTransferred = ((HOST_TRANSFER_DATA *)data)->dataCount;
-                        if ((!((HOST_TRANSFER_DATA *)data)->bErrorCode) && (deviceInfoHID[i].bytesTransferred == pCurrInterfaceDetails->sizeOfRptDescriptor ))
-                        {
-                            /* Invoke HID Parser ,, validate for all the errors in report Descriptor */
+                    deviceInfoHID[i].transferIN.bytesTransferred = ((HOST_TRANSFER_DATA *)data)->dataCount;
+                    if ((!((HOST_TRANSFER_DATA *)data)->bErrorCode) && (deviceInfoHID[i].transferIN.bytesTransferred == pCurrInterfaceDetails->sizeOfRptDescriptor ))
+                    {
+                        /* Invoke HID Parser ,, validate for all the errors in report Descriptor */
 //                             deviceInfoHID[i].bytesTransferred = ((HOST_TRANSFER_DATA *)data)->dataCount;
-                             deviceInfoHID[i].HIDparserError = _USBHostHID_Parse_Report((uint8_t*)deviceInfoHID[i].rptDescriptor , (uint16_t)pCurrInterfaceDetails->sizeOfRptDescriptor,
-                                                                                    (uint16_t)pCurrInterfaceDetails->endpointPollInterval, pCurrInterfaceDetails->interfaceNumber);
+                         deviceInfoHID[i].HIDparserError = _USBHostHID_Parse_Report((uint8_t*)deviceInfoHID[i].rptDescriptor , (uint16_t)pCurrInterfaceDetails->sizeOfRptDescriptor,
+                                                                                (uint16_t)pCurrInterfaceDetails->endpointPollInterval, pCurrInterfaceDetails->interfaceNumber);
 
-                            if(deviceInfoHID[i].HIDparserError)
-                            {
-                                /* Report Descriptor is flawed , flag error and free memory ,
-                                   retry by requesting again */
-                                #ifdef DEBUG_MODE
-                                    UART2PrintString("\r\nHID Error Reported :  ");
-                                    UART2PutHex(deviceInfoHID[i].HIDparserError);
-                                #endif
+                        if(deviceInfoHID[i].HIDparserError)
+                        {
+                            /* Report Descriptor is flawed , flag error and free memory ,
+                               retry by requesting again */
+                            #ifdef DEBUG_MODE
+                                UART2PrintString("\r\nHID Error Reported :  ");
+                                UART2PutHex(deviceInfoHID[i].HIDparserError);
+                            #endif
 
-                                _USBHostHID_FreeRptDecriptorDataMem(deviceInfoHID[i].ID.deviceAddress);
-                                _USBHostHID_LockDevice( USB_HID_REPORT_DESCRIPTOR_BAD );
-                                USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress, EVENT_HID_BAD_REPORT_DESCRIPTOR, NULL, 0 );
-                            }
-                            else
-                            {
-                                /* Inform Application layer of new device attached */
-                                #ifdef DEBUG_MODE
-                                    UART2PrintString( "HID: Sending Report Descriptor Parsed event\r\n" );
-                                #endif
-                                if (USB_HOST_APP_EVENT_HANDLER(deviceInfoHID[i].ID.deviceAddress, EVENT_HID_RPT_DESC_PARSED, NULL, 0 ))
-                                {
-                                    deviceInfoHID[i].flags.breportDataCollected = 1;
-                                }
-                                else
-                                {
-                                    if ((pCurrInterfaceDetails->interfaceNumber == (deviceInfoHID[i].noOfInterfaces-1)) &&
-                                        (deviceInfoHID[i].flags.breportDataCollected == 0))
-                                    {
-                                        #ifdef DEBUG_MODE
-                                            UART2PrintString( "HID: Error parsing descriptor\r\n" );
-                                        #endif
-                                        _USBHostHID_FreeRptDecriptorDataMem(deviceInfoHID[i].ID.deviceAddress);
-                                        _USBHostHID_LockDevice( USB_HID_REPORT_DESCRIPTOR_BAD );
-                                        USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress, EVENT_HID_BAD_REPORT_DESCRIPTOR, NULL, 0 );
-                                    }
-                                }
-                                USB_FREE_AND_CLEAR(deviceInfoHID[i].rptDescriptor);
-                                pCurrInterfaceDetails = pCurrInterfaceDetails->next;
-
-                                if(pCurrInterfaceDetails != NULL)
-                                {
-                                    if(pCurrInterfaceDetails->sizeOfRptDescriptor !=0)
-                                    {
-                                        if((deviceInfoHID[i].rptDescriptor = (uint8_t *)USB_MALLOC(pCurrInterfaceDetails->sizeOfRptDescriptor)) == NULL)
-                                        {
-                                            #ifdef DEBUG_MODE
-                                                UART2PrintString( "HID: Out of memory\r\n" );
-                                            #endif
-                                            _USBHostHID_LockDevice( USB_MEMORY_ALLOCATION_ERROR );
-                                            break;
-                                        }
-                                    }
-                                    if(USBHostIssueDeviceRequest( deviceInfoHID[i].ID.deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_INTERFACE,
-                                            USB_REQUEST_GET_DESCRIPTOR, HOST_DSC_RPT, pCurrInterfaceDetails->interfaceNumber, pCurrInterfaceDetails->sizeOfRptDescriptor, deviceInfoHID[i].rptDescriptor,
-                                            USB_DEVICE_REQUEST_GET, deviceInfoHID[i].ID.clientDriverID ))
-                                    {
-                                        #ifdef DEBUG_MODE
-                                            UART2PrintString( "HID: Error getting descriptor\r\n" );
-                                        #endif
-                                        USB_FREE_AND_CLEAR(deviceInfoHID[i].rptDescriptor);
-                                        break;
-                                    }
-                                    deviceInfoHID[i].state = STATE_WAIT_FOR_REPORT_DSC;
-                                }
-                                else
-                                {
-                                    if(deviceInfoHID[i].flags.breportDataCollected == 0)
-                                    {
-                                        #ifdef DEBUG_MODE
-                                            UART2PrintString( "HID: Problem collecting report data\r\n" );
-                                        #endif
-                                        _USBHostHID_FreeRptDecriptorDataMem(deviceInfoHID[i].ID.deviceAddress);
-                                        _USBHostHID_LockDevice( USB_HID_REPORT_DESCRIPTOR_BAD );
-                                        USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress, EVENT_HID_BAD_REPORT_DESCRIPTOR, NULL, 0 );
-                                    }
-                                    else
-                                    {
-                                        #ifdef DEBUG_MODE
-                                            UART2PrintString( "HID: Proceeding to run state\r\n" );
-                                        #endif
-                                        deviceInfoHID[i].state = STATE_RUNNING;
-
-                                        // Tell the application layer that we have a device.
-                                        USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress, EVENT_HID_ATTACH, &(deviceInfoHID[i].ID), sizeof(USB_HID_DEVICE_ID) );
-                                    }
-                                }
-                            }
+                            _USBHostHID_FreeRptDecriptorDataMem(deviceInfoHID[i].ID.deviceAddress);
+                            _USBHostHID_LockDevice( USB_HID_REPORT_DESCRIPTOR_BAD );
+                            USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress, EVENT_HID_BAD_REPORT_DESCRIPTOR, NULL, 0 );
                         }
                         else
                         {
-                            // Assuming only a STALL here.  Since it is EP0, we do not have to clear the stall.
-                            USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, 0 );
-                        }
-                        break;
-
-                    case STATE_RUNNING:
-                        // These will be events from application issued requests.  Just pass them up.
-                        #ifdef USB_HID_ENABLE_TRANSFER_EVENT    
-                            transferEventData.dataCount         = ((HOST_TRANSFER_DATA *)data)->dataCount;
-                            transferEventData.bErrorCode        = ((HOST_TRANSFER_DATA *)data)->bErrorCode;
-                            if (((HOST_TRANSFER_DATA *)data)->bEndpointAddress & 0x80)
+                            /* Inform Application layer of new device attached */
+                            #ifdef DEBUG_MODE
+                                UART2PrintString( "HID: Sending Report Descriptor Parsed event\r\n" );
+                            #endif
+                            if (USB_HOST_APP_EVENT_HANDLER(deviceInfoHID[i].ID.deviceAddress, EVENT_HID_RPT_DESC_PARSED, NULL, 0 ))
                             {
-                                USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress, EVENT_HID_READ_DONE, &transferEventData, sizeof(HID_TRANSFER_DATA) );
+                                deviceInfoHID[i].flags.bfReportDataCollected = 1;
                             }
                             else
                             {
-                                USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress, EVENT_HID_WRITE_DONE, &transferEventData, sizeof(HID_TRANSFER_DATA) );
+                                if ((pCurrInterfaceDetails->interfaceNumber == (deviceInfoHID[i].noOfInterfaces-1)) &&
+                                    (deviceInfoHID[i].flags.bfReportDataCollected == 0))
+                                {
+                                    #ifdef DEBUG_MODE
+                                        UART2PrintString( "HID: Error parsing descriptor\r\n" );
+                                    #endif
+                                    _USBHostHID_FreeRptDecriptorDataMem(deviceInfoHID[i].ID.deviceAddress);
+                                    _USBHostHID_LockDevice( USB_HID_REPORT_DESCRIPTOR_BAD );
+                                    USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress, EVENT_HID_BAD_REPORT_DESCRIPTOR, NULL, 0 );
+                                }
                             }
-                        #endif
-                        break;
+                            USB_FREE_AND_CLEAR(deviceInfoHID[i].rptDescriptor);
+                            pCurrInterfaceDetails = pCurrInterfaceDetails->next;
 
-                    case STATE_READ_REQ_WAIT:
+                            if(pCurrInterfaceDetails != NULL)
+                            {
+                                if(pCurrInterfaceDetails->sizeOfRptDescriptor !=0)
+                                {
+                                    if((deviceInfoHID[i].rptDescriptor = (uint8_t *)USB_MALLOC(pCurrInterfaceDetails->sizeOfRptDescriptor)) == NULL)
+                                    {
+                                        #ifdef DEBUG_MODE
+                                            UART2PrintString( "HID: Out of memory\r\n" );
+                                        #endif
+                                        _USBHostHID_LockDevice( USB_MEMORY_ALLOCATION_ERROR );
+                                        break;
+                                    }
+                                }
+                                if(USBHostIssueDeviceRequest( deviceInfoHID[i].ID.deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_INTERFACE,
+                                        USB_REQUEST_GET_DESCRIPTOR, DSC_RPT_wValue, pCurrInterfaceDetails->interfaceNumber, pCurrInterfaceDetails->sizeOfRptDescriptor, deviceInfoHID[i].rptDescriptor,
+                                        USB_DEVICE_REQUEST_GET, deviceInfoHID[i].ID.clientDriverID ))
+                                {
+                                    #ifdef DEBUG_MODE
+                                        UART2PrintString( "HID: Error getting descriptor\r\n" );
+                                    #endif
+                                    USB_FREE_AND_CLEAR(deviceInfoHID[i].rptDescriptor);
+                                    break;
+                                }
+                                deviceInfoHID[i].state = STATE_WAIT_FOR_REPORT_DSC;
+                            }
+                            else
+                            {
+                                if(deviceInfoHID[i].flags.bfReportDataCollected == 0)
+                                {
+                                    #ifdef DEBUG_MODE
+                                        UART2PrintString( "HID: Problem collecting report data\r\n" );
+                                    #endif
+                                    _USBHostHID_FreeRptDecriptorDataMem(deviceInfoHID[i].ID.deviceAddress);
+                                    _USBHostHID_LockDevice( USB_HID_REPORT_DESCRIPTOR_BAD );
+                                    USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress, EVENT_HID_BAD_REPORT_DESCRIPTOR, NULL, 0 );
+                                }
+                                else
+                                {
+                                    #ifdef DEBUG_MODE
+                                        UART2PrintString( "HID: Proceeding to run state\r\n" );
+                                    #endif
+                                    deviceInfoHID[i].state = STATE_RUNNING;
+
+                                    // Tell the application layer that we have a device.
+                                    USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress, EVENT_HID_ATTACH, &(deviceInfoHID[i].ID), sizeof(USB_HID_DEVICE_ID) );
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Assuming only a STALL here.  Since it is EP0, we do not have to clear the stall.
+                        USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, 0 );
+                    }
+                    break;
+
+                case STATE_RUNNING:
+                    if ( ( deviceInfoHID[i].transferIN.state == STATE_TRANSFER_REQUESTED ) &&
+                         ( ((HOST_TRANSFER_DATA *)data)->bEndpointAddress == deviceInfoHID[i].transferIN.endpoint ) )
+                    {
                         #ifdef DEBUG_MODE
                             UART2PrintString( "HID: Read Event\r\n" );
                         #endif
@@ -1743,7 +1425,7 @@ bool USBHostHIDEventHandler( uint8_t address, USB_EVENT event, void *data, uint3
                         {
                             if (USB_ENDPOINT_STALLED == ((HOST_TRANSFER_DATA *)data)->bErrorCode)
                             {
-                                 USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].endpointDATA );
+                                 USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].transferIN.endpoint );
                                  deviceInfoHID[i].returnState = STATE_RUNNING;
                                  deviceInfoHID[i].flags.bfReset = 1;
                                  _USBHostHID_ResetStateJump( i );
@@ -1751,7 +1433,7 @@ bool USBHostHIDEventHandler( uint8_t address, USB_EVENT event, void *data, uint3
                             else
                             {
                                 /* Set proper error code as per HID guideline */
-                                #ifdef USB_HID_ENABLE_TRANSFER_EVENT    
+                                #ifdef USB_HID_ENABLE_TRANSFER_EVENT
                                     transferEventData.dataCount         = ((HOST_TRANSFER_DATA *)data)->dataCount;
                                     transferEventData.bErrorCode        = ((HOST_TRANSFER_DATA *)data)->bErrorCode;
                                 #endif
@@ -1760,18 +1442,19 @@ bool USBHostHIDEventHandler( uint8_t address, USB_EVENT event, void *data, uint3
                         }
                         else
                         {
-                            USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].endpointDATA );
-                            deviceInfoHID[i].bytesTransferred = ((HOST_TRANSFER_DATA *)data)->dataCount; /* Can compare with report size and flag error ???*/
-                            #ifdef USB_HID_ENABLE_TRANSFER_EVENT    
+                            USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].transferIN.endpoint );
+                            deviceInfoHID[i].transferIN.bytesTransferred = ((HOST_TRANSFER_DATA *)data)->dataCount; /* Can compare with report size and flag error ???*/
+                            #ifdef USB_HID_ENABLE_TRANSFER_EVENT
                                 transferEventData.dataCount         = ((HOST_TRANSFER_DATA *)data)->dataCount;
                                 transferEventData.bErrorCode        = ((HOST_TRANSFER_DATA *)data)->bErrorCode;
                             #endif
                             _USBHostHID_TerminateReadTransfer(USB_SUCCESS);
                             return true;
                         }
-                        break;
-
-                    case STATE_WRITE_REQ_WAIT:
+                    }
+                    else if ( (deviceInfoHID[i].transferOUT.state == STATE_TRANSFER_REQUESTED ) &&
+                              ( ((HOST_TRANSFER_DATA *)data)->bEndpointAddress == deviceInfoHID[i].transferOUT.endpoint ) )
+                    {
                         #ifdef DEBUG_MODE
                             UART2PrintString( "HID: Write Event\r\n" );
                         #endif
@@ -1779,7 +1462,7 @@ bool USBHostHIDEventHandler( uint8_t address, USB_EVENT event, void *data, uint3
                         {
                             if (USB_ENDPOINT_STALLED == ((HOST_TRANSFER_DATA *)data)->bErrorCode)
                             {
-                                 USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].endpointDATA );
+                                 USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].transferOUT.endpoint );
                                  deviceInfoHID[i].returnState = STATE_RUNNING ;
                                  deviceInfoHID[i].flags.bfReset = 1;
                                  _USBHostHID_ResetStateJump( i );
@@ -1787,7 +1470,7 @@ bool USBHostHIDEventHandler( uint8_t address, USB_EVENT event, void *data, uint3
                             else
                             {
                                 /* Set proper error code as per HID guideline */
-                                #ifdef USB_HID_ENABLE_TRANSFER_EVENT    
+                                #ifdef USB_HID_ENABLE_TRANSFER_EVENT
                                     transferEventData.dataCount         = ((HOST_TRANSFER_DATA *)data)->dataCount;
                                     transferEventData.bErrorCode        = ((HOST_TRANSFER_DATA *)data)->bErrorCode;
                                 #endif
@@ -1796,38 +1479,53 @@ bool USBHostHIDEventHandler( uint8_t address, USB_EVENT event, void *data, uint3
                         }
                         else
                         {
-                            USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].endpointDATA );
-                            deviceInfoHID[i].bytesTransferred = ((HOST_TRANSFER_DATA *)data)->dataCount; /* Can compare with report size and flag error ???*/
-                            #ifdef USB_HID_ENABLE_TRANSFER_EVENT    
+                            USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].transferOUT.endpoint );
+                            deviceInfoHID[i].transferOUT.bytesTransferred = ((HOST_TRANSFER_DATA *)data)->dataCount; /* Can compare with report size and flag error ???*/
+                            #ifdef USB_HID_ENABLE_TRANSFER_EVENT
                                 transferEventData.dataCount         = ((HOST_TRANSFER_DATA *)data)->dataCount;
                                 transferEventData.bErrorCode        = ((HOST_TRANSFER_DATA *)data)->bErrorCode;
                             #endif
                             _USBHostHID_TerminateWriteTransfer(USB_SUCCESS);
                             return true;
                         }
-                        break;
+                    }
+                    // These will be events from application issued requests.  Just pass them up.
+                    #ifdef USB_HID_ENABLE_TRANSFER_EVENT
+                    else
+                    {
+                        transferEventData.dataCount         = ((HOST_TRANSFER_DATA *)data)->dataCount;
+                        transferEventData.bErrorCode        = ((HOST_TRANSFER_DATA *)data)->bErrorCode;
+                        if (((HOST_TRANSFER_DATA *)data)->bEndpointAddress & 0x80)
+                        {
+                            USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress, EVENT_HID_READ_DONE, &transferEventData, sizeof(HID_TRANSFER_DATA) );
+                        }
+                        else
+                        {
+                            USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress, EVENT_HID_WRITE_DONE, &transferEventData, sizeof(HID_TRANSFER_DATA) );
+                        }
+                    }
+                    #endif
+                    break;
 
-                    case STATE_WAIT_FOR_RESET:
-                        #ifdef DEBUG_MODE
-                            UART2PrintString( "HID: Reset Event\r\n" );
-                        #endif
-                        deviceInfoHID[i].errorCode = ((HOST_TRANSFER_DATA *)data)->bErrorCode;
-                        deviceInfoHID[i].flags.bfReset = 0;
-                        _USBHostHID_ResetStateJump( i );
-                        return true;
-                        break;
+                case STATE_WAIT_FOR_RESET:
+                    #ifdef DEBUG_MODE
+                        UART2PrintString( "HID: Reset Event\r\n" );
+                    #endif
+                    deviceInfoHID[i].errorCode = ((HOST_TRANSFER_DATA *)data)->bErrorCode;
+                    deviceInfoHID[i].flags.bfReset = 0;
+                    _USBHostHID_ResetStateJump( i );
+                    return true;
+                    break;
 
-                    case STATE_HOLDING:
-                        return true;
-                        break;
+                case STATE_HOLDING:
+                    return true;
+                    break;
 
-                    default:
-                        return false;
-                }
-            #endif
+                default:
+                    return false;
+            }
 
 // This addition has not been fully tested yet.  It may be included in the future.
-//        #if defined( USB_ENABLE_TRANSFER_EVENT )
 //        case EVENT_BUS_ERROR:
 //            // We will get this error if we have a problem, like too many NAK's 
 //            // on a write, so we know the write failed.
@@ -1856,7 +1554,6 @@ bool USBHostHIDEventHandler( uint8_t address, USB_EVENT event, void *data, uint3
 //                    break;
 //            }            
 //            break;
-//        #endif
             
         case EVENT_SOF:              // Start of frame - NOT NEEDED
         case EVENT_RESUME:           // Device-mode resume received
@@ -1935,15 +1632,15 @@ bool USBHostHIDAppDataEventHandler( uint8_t address, USB_EVENT event, void *data
 *******************************************************************************/
 bool USBHostHIDInitialize( uint8_t address, uint32_t flags, uint8_t clientDriverID )
 {
-    uint8_t                        *descriptor;
+    uint8_t                     *descriptor;
     bool                        validConfiguration      = false;
     bool                        rptDescriptorfound      = false;
-    uint16_t                        i;
-    uint8_t                        endpointIN              = 0;
-    uint8_t                        endpointOUT             = 0;
-    uint8_t                        device;
-    uint8_t                        numofinterfaces         = 0;
-    uint8_t                        temp_i                  = 0;
+    uint16_t                    i;
+    uint8_t                     endpointIN              = 0;
+    uint8_t                     endpointOUT             = 0;
+    uint8_t                     device;
+    uint8_t                     numofinterfaces         = 0;
+    uint8_t                     temp_i                  = 0;
     USB_HID_INTERFACE_DETAILS   *pNewInterfaceDetails   = NULL;
 
     // Find the device in the table.  If it's there, we have already initialized this device.
@@ -1962,6 +1659,7 @@ bool USBHostHIDInitialize( uint8_t address, uint32_t flags, uint8_t clientDriver
 
     // Fill in the VID, PID, and client driver ID. They are not not valid unless deviceAddress is non-zero.
     descriptor = USBHostGetDeviceDescriptor( address );
+    deviceInfoHID[device].flags.bfAddressReported = 0;
     deviceInfoHID[device].ID.vid            = ((USB_DEVICE_DESCRIPTOR *)descriptor)->idVendor;
     deviceInfoHID[device].ID.pid            = ((USB_DEVICE_DESCRIPTOR *)descriptor)->idProduct;
     deviceInfoHID[device].ID.clientDriverID = clientDriverID;
@@ -2102,31 +1800,30 @@ bool USBHostHIDInitialize( uint8_t address, uint32_t flags, uint8_t clientDriver
 
     if(validConfiguration)
     {
-        #ifndef USB_ENABLE_TRANSFER_EVENT
-            deviceInfoHID[device].state                = STATE_INITIALIZE_DEVICE;
-        #else
-            pCurrInterfaceDetails = pInterfaceDetails;
-            if (pCurrInterfaceDetails->sizeOfRptDescriptor !=0)
+        pCurrInterfaceDetails = pInterfaceDetails;
+        if (pCurrInterfaceDetails->sizeOfRptDescriptor !=0)
+        {
+            if (deviceInfoHID[device].rptDescriptor != NULL)
             {
-                if (deviceInfoHID[device].rptDescriptor != NULL)
-                {
-                    USB_FREE_AND_CLEAR( deviceInfoHID[device].rptDescriptor );
-                }
-
-                if((deviceInfoHID[device].rptDescriptor = (uint8_t *)USB_MALLOC(pCurrInterfaceDetails->sizeOfRptDescriptor)) == NULL)
-                {
-                    return false;
-                }
+                USB_FREE_AND_CLEAR( deviceInfoHID[device].rptDescriptor );
             }
-            if (USBHostIssueDeviceRequest( deviceInfoHID[device].ID.deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_INTERFACE,
-                 USB_REQUEST_GET_DESCRIPTOR, HOST_DSC_RPT, pCurrInterfaceDetails->interfaceNumber, pCurrInterfaceDetails->sizeOfRptDescriptor, deviceInfoHID[device].rptDescriptor,
-                 USB_DEVICE_REQUEST_GET, deviceInfoHID[device].ID.clientDriverID ))
+
+            if((deviceInfoHID[device].rptDescriptor = (uint8_t *)USB_MALLOC(pCurrInterfaceDetails->sizeOfRptDescriptor)) == NULL)
             {
-                USB_FREE_AND_CLEAR(deviceInfoHID[device].rptDescriptor);
                 return false;
             }
-            deviceInfoHID[device].state                = STATE_WAIT_FOR_REPORT_DSC;
-        #endif
+        }
+        if (USBHostIssueDeviceRequest( deviceInfoHID[device].ID.deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_INTERFACE,
+             USB_REQUEST_GET_DESCRIPTOR, DSC_RPT_wValue, pCurrInterfaceDetails->interfaceNumber, pCurrInterfaceDetails->sizeOfRptDescriptor, deviceInfoHID[device].rptDescriptor,
+             USB_DEVICE_REQUEST_GET, deviceInfoHID[device].ID.clientDriverID ))
+        {
+            USB_FREE_AND_CLEAR(deviceInfoHID[device].rptDescriptor);
+            return false;
+        }
+        deviceInfoHID[device].state             = STATE_WAIT_FOR_REPORT_DSC;
+
+        deviceInfoHID[device].transferIN.state  = STATE_TRANSFER_WAITING;
+        deviceInfoHID[device].transferOUT.state = STATE_TRANSFER_WAITING;
 
         return true;
     }
@@ -2167,7 +1864,7 @@ bool USBHostHIDInitialize( uint8_t address, uint32_t flags, uint8_t clientDriver
   Remarks:
     None
 ***************************************************************************/
-void _USBHostHID_FreeRptDecriptorDataMem(uint8_t deviceAddress)
+static void _USBHostHID_FreeRptDecriptorDataMem(uint8_t deviceAddress)
 {
     USB_HID_INTERFACE_DETAILS*           ptempInterface;
     uint8_t    i;
@@ -2213,14 +1910,17 @@ Precondition:
   Remarks:
     None
 *******************************************************************************/
-void _USBHostHID_ResetStateJump( uint8_t i )
+static void _USBHostHID_ResetStateJump( uint8_t i )
 {
     uint8_t    errorCode;
 
     if (deviceInfoHID[i].flags.bfReset)
     {
-         errorCode = USBHostIssueDeviceRequest( deviceInfoHID[i].ID.deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
-                        USB_HID_RESET, 0, deviceInfoHID[i].interface, 0, NULL, USB_DEVICE_REQUEST_SET, deviceInfoHID[i].ID.clientDriverID );
+        deviceInfoHID[i].transferIN.state   = STATE_TRANSFER_WAITING;
+        deviceInfoHID[i].transferOUT.state  = STATE_TRANSFER_WAITING;
+                
+        errorCode = USBHostIssueDeviceRequest( deviceInfoHID[i].ID.deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
+                        USB_HID_RESET, 0, deviceInfoHID[i].transferOUT.interface, 0, NULL, USB_DEVICE_REQUEST_SET, deviceInfoHID[i].ID.clientDriverID );
 
         if (errorCode)
         {
@@ -2230,11 +1930,7 @@ void _USBHostHID_ResetStateJump( uint8_t i )
         }
         else
         {
-            #ifndef USB_ENABLE_TRANSFER_EVENT
-                deviceInfoHID[i].state = STATE_HID_RESET_RECOVERY | SUBSTATE_WAIT_FOR_RESET;
-            #else
-                deviceInfoHID[i].state = STATE_WAIT_FOR_RESET;
-            #endif
+            deviceInfoHID[i].state = STATE_WAIT_FOR_RESET;
         }
     }
     else
@@ -2246,7 +1942,7 @@ void _USBHostHID_ResetStateJump( uint8_t i )
         else
         {
             USB_HOST_APP_EVENT_HANDLER(deviceInfoHID[i].ID.deviceAddress, EVENT_HID_RESET_ERROR, NULL, 0 );
-        }        
+        }
 
         deviceInfoHID[i].state = deviceInfoHID[i].returnState;
     }
