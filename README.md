@@ -12,7 +12,7 @@ This library supports the following Microchip product lines:
 * PIC24E
 * dsPIC33E
 
-For the PIC32 USB support, please visit http://www.microchip.com/harmony.
+For  PIC32 USB support, please visit http://www.microchip.com/harmony.
 
 ## Folder Structure
 * src - the source files (.c) that make up implementation and any private interface files (.h) local to the library.
