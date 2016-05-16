@@ -519,8 +519,6 @@ typedef struct
 } LUN_FUNCTIONS;
 
 /** Section: Externs *********************************************************/
-extern USB_HANDLE USBMSDOutHandle;  
-extern USB_HANDLE USBMSDInHandle;
 extern volatile USB_MSD_CBW msd_cbw;
 extern volatile USB_MSD_CSW msd_csw;
 extern volatile char msd_buffer[512];
@@ -618,7 +616,33 @@ void USBMSDInit(void);
   **************************************************************************/
 #define LUNSoftAttach(LUN) SoftDetach[LUN]=false;
 
+/******************************************************************************
+ 	Function:
+ 		void MSDTransferTerminated(USB_HANDLE handle)
+ 		
+ 	Description:
+        Check if the host recently did a clear endpoint halt on the MSD OUT endpoint.
+        In this case, we want to re-arm the MSD OUT endpoint, so we are prepared
+        to receive the next CBW that the host might want to send.
+        Note: If however the STALL was due to a CBW not valid condition,
+        then we are required to have a persistent STALL, where it cannot
+        be cleared (until MSD reset recovery takes place).  See MSD BOT
+        specs v1.0, section 6.6.1.
+ 	PreCondition:
+        A transfer was terminated.  This should be called from the transfer
+        terminated event handler.
+ 		
+ 	Parameters:
+        USB_HANDLE handle - the handle of the transfer that was terminated.
 
+ 	Return Values:
+ 		None
+ 		
+ 	Remarks:
+ 		None
+ 			
+  *****************************************************************************/
+void MSDTransferTerminated(USB_HANDLE handle);
 
 
 #endif

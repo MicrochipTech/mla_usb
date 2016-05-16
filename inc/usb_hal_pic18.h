@@ -47,8 +47,7 @@ please contact mla_licensing@microchip.com
 
 #include <string.h>
 
-#include "system.h"
-#include "system_config.h"
+#include "usb_config.h"
 
 #ifdef __cplusplus  // Provide C++ Compatability
     extern "C" {

@@ -19,8 +19,7 @@ please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
 
-#include <system.h>
-#include <system_config.h>
+#include <usb_config.h>
 #include <stdlib.h>
 #include <string.h>
 #include <usb.h>
@@ -308,7 +307,15 @@ uint8_t USBHostDeviceStatus( uint8_t deviceAddress )
         return usbDeviceInfo.errorCode;
     }
 
-    return USB_DEVICE_ENUMERATING;
+    
+    if ((usbHostState > STATE_ATTACHED) && 
+        (usbHostState < STATE_RUNNING)
+       )
+    {
+        return USB_DEVICE_ENUMERATING;
+    }
+    
+    return USB_HOLDING_UNSUPPORTED_DEVICE;
 }
 
 /****************************************************************************
@@ -1104,6 +1111,7 @@ void USBHostShutdown( void )
             USB_VBUS_POWER_EVENT_DATA   powerRequest;
 
             powerRequest.port = 0;  // Currently was have only one port.
+            powerRequest.current = usbDeviceInfo.currentConfigurationPower;
 
             USB_HOST_APP_EVENT_HANDLER( usbDeviceInfo.deviceAddress,
                                         EVENT_VBUS_RELEASE_POWER,
@@ -3542,7 +3550,10 @@ void _USB_FindNextToken( void )
                                 // If the user wants an event from the interrupt handler to handle the data as quickly as
                                 // possible, send up the event.  Then mark the packet as used.
                                 #ifdef USB_HOST_APP_DATA_EVENT_HANDLER
-                                    usbClientDrvTable[pCurrentEndpoint->clientDriver].DataEventHandler( usbDeviceInfo.deviceAddress, EVENT_DATA_ISOC_READ, ((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].pBuffer, pCurrentEndpoint->dataCount );
+                                    if(usbClientDrvTable[pCurrentEndpoint->clientDriver].DataEventHandler != NULL)
+                                    {
+                                        usbClientDrvTable[pCurrentEndpoint->clientDriver].DataEventHandler( usbDeviceInfo.deviceAddress, EVENT_DATA_ISOC_READ, ((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].pBuffer, pCurrentEndpoint->dataCount );
+                                    }
                                     ((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].bfDataLengthValid = 0;
                                 #endif
                                 
@@ -3637,7 +3648,10 @@ void _USB_FindNextToken( void )
                                 // If the user wants an event from the interrupt handler to handle the data as quickly as
                                 // possible, send up the event.
                                 #ifdef USB_HOST_APP_DATA_EVENT_HANDLER
+                                if(usbClientDrvTable[pCurrentEndpoint->clientDriver].DataEventHandler != NULL)
+                                {
                                     usbClientDrvTable[pCurrentEndpoint->clientDriver].DataEventHandler( usbDeviceInfo.deviceAddress, EVENT_DATA_ISOC_WRITE, ((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].pBuffer, pCurrentEndpoint->dataCount );
+                                }
                                 #endif
                                                                 
                                 // Move to the next data buffer.
@@ -4616,7 +4630,10 @@ void _USB_NotifyDataClients( uint8_t address, USB_EVENT event, void *data, unsig
             pInterface = usbDeviceInfo.pInterfaceList;
             while (pInterface != NULL)  // Scan the interface list for all active drivers.
             {
-                usbClientDrvTable[pInterface->clientDriver].DataEventHandler(address, event, data, size);
+                if(usbClientDrvTable[pInterface->clientDriver].DataEventHandler != NULL)
+                {
+                    usbClientDrvTable[pInterface->clientDriver].DataEventHandler(address, event, data, size);
+                }
                 pInterface = pInterface->next;
             }
             break;

@@ -38,9 +38,10 @@ please contact mla_licensing@microchip.com
 #ifndef _USB_DEVICE_H
 #define _USB_DEVICE_H
 
-#include "usb_common.h"
 #include <stdint.h>
 
+#include "usb_common.h"
+#include "usb_config.h"
 
 #if defined(__XC8)
     #define __attribute__(a)
@@ -2039,14 +2040,6 @@ typedef struct __attribute__ ((packed))
     uint16_t_VAL wCount;
     CTRL_TRF_RETURN (*pFunc)(CTRL_TRF_PARAMS);
 }OUT_PIPE;
-
-/************* DWF - SHOULD BE REIMPLEMENTED AS AN EVENT *******************/
-//#if defined(ENABLE_EP0_DATA_RECEIVED_CALLBACK)
-//    void USBCBEP0DataReceived(void);
-//    #define USBCB_EP0_DATA_RECEIVED() USBCBEP0DataReceived()
-//#else
-//    #define USBCB_EP0_DATA_RECEIVED()
-//#endif
 
 extern USB_VOLATILE bool RemoteWakeup;
 extern USB_VOLATILE bool USBBusIsSuspended;

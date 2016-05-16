@@ -42,16 +42,26 @@ please contact mla_licensing@microchip.com
 // Section: Included Files
 // *****************************************************************************
 // *****************************************************************************
+#include <xc.h>
+
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
-#include "system.h"
-#include "system_config.h"
+#include "usb_config.h"
 
 #include "usb.h"
 #include "usb_ch9.h"
 #include "usb_device.h"
 #include "usb_device_local.h"
+
+#ifndef uintptr_t
+    #if  defined(__XC8__) || defined(__XC16__)
+        #define uintptr_t uint16_t
+    #elif defined (__XC32__)
+        #define uintptr_t uint32_t
+    #endif
+#endif
 
 #if defined(USB_USE_MSD)
     #include "usb_device_msd.h"
@@ -240,34 +250,6 @@ static void USBStallHandler(void);
 // Section: Macros or Functions
 // *****************************************************************************
 // *****************************************************************************
-
-/****************************************************************************
-  Function:
-    void USBAdvancePingPongBuffer(BDT_ENTRY** buffer)
-
-  Description:
-    This function will advance the passed pointer to the next buffer based on
-    the ping pong option setting.  This function should be used for EP1-EP15
-    only.  This function is not valid for EP0.
-
-  Precondition:
-    None
-
-  Parameters:
-    BDT_ENTRY** - pointer to the BDT_ENTRY pointer that you want to be advanced
-    to the next buffer state
-
-  Return Values:
-    None
-
-  Remarks:
-    None
-
-  ***************************************************************************/
-#define USBAdvancePingPongBuffer(buffer) {((uint8_t_VAL*)buffer)->Val ^= USB_NEXT_PING_PONG;}
-#define USBHALPingPongSetToOdd(buffer)   {((uint8_t_VAL*)buffer)->Val |= USB_NEXT_PING_PONG;}
-#define USBHALPingPongSetToEven(buffer)  {((uint8_t_VAL*)buffer)->Val &= ~USB_NEXT_PING_PONG;}
-
 
 /**************************************************************************
     Function:
@@ -1054,12 +1036,12 @@ USB_HANDLE USBTransferOnePacket(uint8_t ep,uint8_t dir,uint8_t* data,uint8_t len
     if(dir != OUT_FROM_HOST)
     {
         //toggle over the to the next buffer for an IN endpoint
-        USBAdvancePingPongBuffer(&pBDTEntryIn[ep]);      
+        pBDTEntryIn[ep] = (BDT_ENTRY*)(((uintptr_t)pBDTEntryIn[ep]) ^ USB_NEXT_PING_PONG);
     }
     else
     {
         //toggle over the to the next buffer for an OUT endpoint
-        USBAdvancePingPongBuffer(&pBDTEntryOut[ep]);     
+        pBDTEntryOut[ep] = (BDT_ENTRY*)(((uintptr_t)pBDTEntryOut[ep]) ^ USB_NEXT_PING_PONG);
     }
     return (USB_HANDLE)handle;
 }
@@ -1158,8 +1140,8 @@ void USBCancelIO(uint8_t endpoint)
         //Point to the next buffer for ping pong purposes.  UOWN getting cleared
         //(either due to SIE clearing it after a transaction, or the firmware
         //clearing it) makes hardware ping pong pointer advance.
-        USBAdvancePingPongBuffer(&pBDTEntryIn[endpoint]);       
-    
+        pBDTEntryIn[endpoint] = (BDT_ENTRY*)(((uintptr_t)pBDTEntryIn[endpoint]) ^ USB_NEXT_PING_PONG);
+        
     	pBDTEntryIn[endpoint]->STAT.Val &= _DTSMASK;
     	pBDTEntryIn[endpoint]->STAT.Val ^= _DTSMASK;
         #endif
@@ -2411,7 +2393,7 @@ static void USBCtrlEPService(void)
 		//Set the next out to the current out packet
         pBDTEntryEP0OutNext = pBDTEntryEP0OutCurrent;
 		//Toggle it to the next ping pong buffer (if applicable)
-        ((uint8_t_VAL*)&pBDTEntryEP0OutNext)->Val ^= USB_NEXT_EP0_OUT_PING_PONG;
+        pBDTEntryEP0OutNext = (volatile BDT_ENTRY*)(((uintptr_t)pBDTEntryEP0OutNext) ^ USB_NEXT_EP0_OUT_PING_PONG);
 
 		//If the current EP0 OUT buffer has a SETUP packet
         if(pBDTEntryEP0OutCurrent->STAT.PID == PID_SETUP)
@@ -2499,10 +2481,11 @@ static void USBCtrlTrfSetupHandler(void)
     //one or more UOWN bits might still be set.  If so, we should clear the UOWN bits,
     //so the EP0 IN/OUT endpoints are in a known inactive state, ready for re-arming
     //by the class request handler that will be called next.
-    pBDTEntryIn[0]->STAT.Val &= ~(_USIE);     
-    ((uint8_t_VAL*)&pBDTEntryIn[0])->Val ^= USB_NEXT_EP0_IN_PING_PONG;
+    pBDTEntryIn[0]->STAT.Val &= ~(_USIE);  
+    
+    pBDTEntryIn[0] = (volatile BDT_ENTRY*)(((uintptr_t)pBDTEntryIn[0]) ^ USB_NEXT_EP0_IN_PING_PONG);
     pBDTEntryIn[0]->STAT.Val &= ~(_USIE);      
-    ((uint8_t_VAL*)&pBDTEntryIn[0])->Val ^= USB_NEXT_EP0_IN_PING_PONG;
+    pBDTEntryIn[0] = (volatile BDT_ENTRY*)(((uintptr_t)pBDTEntryIn[0]) ^ USB_NEXT_EP0_IN_PING_PONG);
     pBDTEntryEP0OutNext->STAT.Val &= ~(_USIE);         
 
     inPipes[0].info.Val = 0;
@@ -2613,7 +2596,7 @@ static void USBCtrlTrfInHandler(void)
     lastDTS = pBDTEntryIn[0]->STAT.DTS;
 
     //switch to the next ping pong buffer
-    ((uint8_t_VAL*)&pBDTEntryIn[0])->Val ^= USB_NEXT_EP0_IN_PING_PONG;
+    pBDTEntryIn[0] = (volatile BDT_ENTRY*)(((uintptr_t)pBDTEntryIn[0]) ^ USB_NEXT_EP0_IN_PING_PONG);
 
     //Must check if in ADR_PENDING_STATE.  If so, we need to update the address
     //now, since the IN status stage of the (set address) control transfer has 
@@ -2851,11 +2834,11 @@ static void USBStdFeatureReqHandler(void)
         #if (USB_PING_PONG_MODE == USB_PING_PONG__ALL_BUT_EP0) || (USB_PING_PONG_MODE == USB_PING_PONG__FULL_PING_PONG)   
             if(current_ep_data.bits.ping_pong_state == 0) //Check if even
             {
-                USBHALPingPongSetToEven(&p);
+                p = (BDT_ENTRY*)(((uintptr_t)p) & (~USB_NEXT_PING_PONG));
             }
             else //else must have been odd
             {
-                USBHALPingPongSetToOdd(&p);
+                p = (BDT_ENTRY*)(((uintptr_t)p) | USB_NEXT_PING_PONG);
             }
         #endif
         
@@ -2896,7 +2879,7 @@ static void USBStdFeatureReqHandler(void)
 			//Else the request must have been a CLEAR_FEATURE endpoint halt.
             #if (USB_PING_PONG_MODE == USB_PING_PONG__ALL_BUT_EP0) || (USB_PING_PONG_MODE == USB_PING_PONG__FULL_PING_PONG)   
                 //toggle over the to the non-active BDT
-                USBAdvancePingPongBuffer(&p);  
+                p = (BDT_ENTRY*)(((uintptr_t)p) ^ USB_NEXT_PING_PONG);  
 
                 if(p->STAT.UOWN == 1)
                 {
@@ -2914,7 +2897,7 @@ static void USBStdFeatureReqHandler(void)
 
                 //toggle back to the active BDT (the one the SIE is currently looking at
                 //and will use for the next successful transaction to take place on the EP
-                USBAdvancePingPongBuffer(&p);    
+                p = (BDT_ENTRY*)(((uintptr_t)p) ^ USB_NEXT_PING_PONG);
                 
                 //Check if we are currently terminating, or have previously terminated
                 //a transaction on the given endpoint.  If so, need to clear UOWN,

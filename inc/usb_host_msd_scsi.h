@@ -23,7 +23,7 @@ please contact mla_licensing@microchip.com
 #define __USBHOSTMSDSCSI_H__
 
 #include "usb.h"
-#include "system_config.h"
+#include "usb_config.h"
 #include "fileio.h"
 
 // *****************************************************************************

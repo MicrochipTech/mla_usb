@@ -47,9 +47,6 @@ please contact mla_licensing@microchip.com
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "system.h"
-#include "system_config.h"
-
 // *****************************************************************************
 // *****************************************************************************
 // Section: USB Constants
@@ -464,108 +461,6 @@ stalled (ie. bit 0 = EP0, bit 1 = EP1, etc.)
 *******************************************************************************/
 
 typedef bool (*USB_EVENT_HANDLER) ( USB_EVENT event, void *data, unsigned int size );
-
-
-// *****************************************************************************
-// *****************************************************************************
-// Section: USB Application Program Interface (API) Routines
-// *****************************************************************************
-// *****************************************************************************
-
-/****************************************************************************
-    Function:
-        bool USBInitialize ( unsigned long flags )
-
-    Summary:
-        This interface initializes the variables of the USB host stack.
-
-    Description:
-        This interface initializes the USB stack.
-
-    Precondition:
-        None
-
-    Parameters:
-        flags - reserved
-
-    Return Values:
-        true  - Initialization successful
-        false - Initialization failure
-
-    Remarks:
-        This interface is implemented as a macro that can be defined by the
-        application or by default is defined correctly for the stack mode.
-        
-  ***************************************************************************/
-
-#ifndef USBInitialize   
-    #if defined( USB_SUPPORT_DEVICE )
-        #if defined( USB_SUPPORT_HOST )
-            #if defined( USB_SUPPORT_OTG )
-                #error "USB OTG is not yet supported."
-            #else
-                #define USBInitialize(f) \
-                        (USBDEVInitialize(f) && USBHostInit(f)) ? \
-                        true : false
-            #endif
-        #else
-            #define USBInitialize(f) USBDeviceInit()
-        #endif
-    #else
-        #if defined( USB_SUPPORT_HOST )
-            #define USBInitialize(f) USBHostInit(f)
-        #else
-            #error "Application must define support mode in usb_config.h"
-        #endif
-    #endif
-#endif
-
-
-/****************************************************************************
-    Function:
-        void USBTasks( void )
-
-    Summary:
-        This function executes the tasks for USB operation.
-
-    Description:
-        This function executes the tasks for USB host operation.  It must be
-        executed on a regular basis to keep everything functioning.
-
-    Precondition:
-        USBInitialize() has been called.
-
-    Parameters:
-        None
-
-    Returns:
-        None
-
-    Remarks:
-        This interface is implemented as a macro that can be defined by the
-        application or by default is defined correctly for the stack mode.
-        
-  ***************************************************************************/
-
-#ifndef USBTasks    // Implemented as a macro that can be overridden.
-    #if defined( USB_SUPPORT_DEVICE )
-        #if defined( USB_SUPPORT_HOST )
-            #if defined( USB_SUPPORT_OTG )
-                #error "USB OTG is not yet supported."
-            #else
-                #define USBTasks() {USBHostTasks(); USBHALHandleBusEvent();}
-            #endif
-        #else
-            #define USBTasks() USBDeviceTasks()
-        #endif
-    #else
-        #if defined( USB_SUPPORT_HOST )
-            #define USBTasks() USBHostTasks()
-        #else
-            #error "Application must define support mode in usb_config.h"
-        #endif
-    #endif
-#endif
 
 #define USB_PING_PONG__NO_PING_PONG         0x00    //0b00
 #define USB_PING_PONG__EP0_OUT_ONLY         0x01    //0b01

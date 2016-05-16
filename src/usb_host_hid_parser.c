@@ -513,7 +513,7 @@ USB_HID_RPT_DESC_ERROR _USBHostHID_Parse_Report(uint8_t* hidReportDescriptor , u
                                     lusageItem->usageMinimum = item.Data.uItemData;
                                  }
 
-                                 if (lusageItem->usagePage != deviceRptInfo.rangeUsagePage);
+                                 if (lusageItem->usagePage != deviceRptInfo.rangeUsagePage)
                                      lhidError = HID_ERR_BadUsageRangePage; /* Error: BadUsageRangePage */
                                     
                                  lusageItem->usageMaximum = deviceRptInfo.usageMaximum;

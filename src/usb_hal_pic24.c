@@ -22,8 +22,6 @@ please contact mla_licensing@microchip.com
 #ifndef USB_HAL_PIC24F_C
 #define USB_HAL_PIC24F_C
 
-#include "system.h"
-#include "system_config.h"
 #include "usb.h"
 
 //Only include the source for this file if you are using C30.  This code

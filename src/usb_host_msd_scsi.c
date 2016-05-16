@@ -21,11 +21,11 @@ please contact mla_licensing@microchip.com
 
 #include <stdlib.h>
 #include <string.h>
-#include "system_config.h"
-#include "fileio.h"
-#include "usb.h"
-#include "usb_host_msd.h"
-#include "usb_host_msd_scsi.h"
+#include <usb_config.h>
+#include <fileio.h>
+#include <usb.h>
+#include <usb_host_msd.h>
+#include <usb_host_msd_scsi.h>
 
 //#define DEBUG_MODE
 #if defined(DEBUG_MODE)

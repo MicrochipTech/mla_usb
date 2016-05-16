@@ -26,8 +26,8 @@ please contact mla_licensing@microchip.com
 /****** include files ********************************************************/
 /*****************************************************************************/
 
-#include "system.h"
-#include "system_config.h"
+#include <xc.h>
+#include "usb_config.h"
 
 #include <stdint.h>
 #include <string.h>

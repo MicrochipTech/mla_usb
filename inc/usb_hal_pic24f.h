@@ -26,11 +26,12 @@ please contact mla_licensing@microchip.com
 /****** include files ********************************************************/
 /*****************************************************************************/
 
-#include "system.h"
-#include "system_config.h"
+#include <xc.h>
 
 #include <stdint.h>
 #include <string.h>
+
+#include "usb_config.h"
 #include "usb_common.h"
 
 /*****************************************************************************/
@@ -73,6 +74,9 @@ please contact mla_licensing@microchip.com
     || defined(__PIC24FJ256GB410__) || defined(__PIC24FJ256GB412__) || defined(__PIC24FJ256GB406__) \
     || defined(__PIC24FJ128GB410__) || defined(__PIC24FJ128GB412__) || defined(__PIC24FJ128GB406__) \
     || defined(__PIC24FJ64GB410__) || defined(__PIC24FJ64GB412__) || defined(__PIC24FJ64GB406__)
+    #define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  8   //Number of IECx registers implemented in the microcontroller (varies from device to device, make sure this is set correctly for the intended CPU)
+    #define USB_HAL_VBUSTristate()    {TRISFbits.TRISF7 = 1;}
+#elif defined(__PIC24FJ1024GB610__) || defined(__PIC24FJ512GB610__) || defined(__PIC24FJ256GB610__) || defined(__PIC24FJ128GB610__) || defined(__PIC24FJ1024GB606__) || defined(__PIC24FJ512GB606__) || defined(__PIC24FJ256GB606__) || defined(__PIC24FJ128GB606__)
     #define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  8   //Number of IECx registers implemented in the microcontroller (varies from device to device, make sure this is set correctly for the intended CPU)
     #define USB_HAL_VBUSTristate()    {TRISFbits.TRISF7 = 1;}
 #else

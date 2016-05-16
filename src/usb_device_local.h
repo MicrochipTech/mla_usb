@@ -19,7 +19,7 @@ please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
 
-#include "system_config.h"
+#include "usb_config.h"
 
 /* Short Packet States - Used by Control Transfer Read  - CTRL_TRF_TX */
 #define SHORT_PKT_NOT_USED  0

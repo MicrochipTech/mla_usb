@@ -42,8 +42,7 @@ please contact mla_licensing@microchip.com
 #ifndef _USB_H_
 #define _USB_H_
 
-#include "system.h"
-#include "system_config.h"          // Must be defined by the application
+#include "usb_config.h"
 
 #include "usb_common.h"         // Common USB library definitions
 #include "usb_ch9.h"            // USB device framework definitions

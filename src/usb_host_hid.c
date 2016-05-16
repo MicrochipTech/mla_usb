@@ -1051,8 +1051,14 @@ bool USBHostHID_ApiFindValue(uint16_t usagePage,uint16_t usage,HIDReportTypeEnum
 
 /*******************************************************************************
   Function:
-    bool USBHostHID_ApiImportData(uint8_t *report, uint16_t reportLength,
-                     HID_USER_DATA_SIZE *buffer,HID_DATA_DETAILS *pDataDetails)
+    bool USBHostHID_ApiImportData
+    (
+        uint8_t *report, 
+        uint16_t reportLength,
+        HID_USER_DATA_SIZE *buffer,
+        HID_DATA_DETAILS *pDataDetails
+    )
+ 
   Description:
     This function can be used by application to extract data from the input 
     reports. On receiving the input report from the device application can call
@@ -1062,8 +1068,8 @@ bool USBHostHID_ApiFindValue(uint16_t usagePage,uint16_t usage,HIDReportTypeEnum
     None
 
   Parameters:
-    uint8_t *report                    - Input report received from device
-    uint16_t reportLength               - Length of input report report
+    uint8_t *report                 - Input report received from device
+    uint16_t reportLength           - Length of input report report
     HID_USER_DATA_SIZE *buffer      - Buffer into which data needs to be
                                       populated
     HID_DATA_DETAILS *pDataDetails  - data details extracted from report
@@ -1075,7 +1081,13 @@ bool USBHostHID_ApiFindValue(uint16_t usagePage,uint16_t usage,HIDReportTypeEnum
   Remarks:
     None
 *******************************************************************************/
-bool USBHostHID_ApiImportData(uint8_t *report, uint16_t reportLength, HID_USER_DATA_SIZE *buffer, HID_DATA_DETAILS *pDataDetails)
+bool USBHostHID_ApiImportData
+(
+    uint8_t *report, 
+    uint16_t reportLength, 
+    HID_USER_DATA_SIZE *buffer, 
+    HID_DATA_DETAILS *pDataDetails
+)
 {
     uint16_t data;
     uint16_t signBit;
@@ -1087,53 +1099,66 @@ bool USBHostHID_ApiImportData(uint8_t *report, uint16_t reportLength, HID_USER_D
     uint16_t lastByte;
     uint16_t i;
 
-//  Report must be ok
+    if (report == NULL)
+    {
+        return false;
+    }
 
-    if (report == NULL) return false;
+    /* Check the report ID. */
+    if ( (pDataDetails->reportID != 0) && 
+         (pDataDetails->reportID != report[0])
+        ) 
+    {
+        return false;
+    }
+                
 
-//  Must be the right report
-
-    if ((pDataDetails->reportID != 0) && (pDataDetails->reportID != report[0])) return false;
-
-//  Length must be ok
-
-    if (pDataDetails->reportLength != reportLength) return false;
+    /* Check the report length. */
+    if (pDataDetails->reportLength != reportLength)
+    {
+        return false;
+    }
+    
     lastByte = (pDataDetails->bitOffset + (pDataDetails->bitLength * pDataDetails->count) - 1)/8;
-    if (lastByte > reportLength) return false;
-
-//  Extract data one count at a time
-
+    
+    if (lastByte > reportLength)
+    {
+        return false;
+    }
+    
+    /* Extract data one count at a time */
     start = pDataDetails->bitOffset;
-    for (i=0; i<pDataDetails->count; i++) {
+    
+    for (i=0; i<pDataDetails->count; i++) 
+    {
         startByte = start/8;
         startBit = start&7;
         lastByte = (start + pDataDetails->bitLength - 1)/8;
 
-//      Pick up the data bytes backwards
-
+        /* Pick up the data bytes backwards */
         data = 0;
-        do {
+        do 
+        {
             data <<= 8;
             data |= (int) report[lastByte];
         }
         while (lastByte-- > startByte);
 
-//      Shift to the right to byte align the least significant bit
+        /* Shift to the right to byte align the least significant bit */
+        if (startBit > 0)
+        {
+            data >>= startBit;
+        }
 
-        if (startBit > 0) data >>= startBit;
-
-//      Done if 16 bits long
-
+        /* Done if 16 bits long */
         if (pDataDetails->bitLength < 16) {
 
-//          Mask off the other bits
-
+            /* Mask off the other bits */
             mask = 1 << pDataDetails->bitLength;
             mask--;
             data &= mask;
 
-//          Sign extend the report item
-
+            /* Sign extend the report item */
             if (pDataDetails->signExtend) {
                 signBit = 1;
                 if (pDataDetails->bitLength > 1) signBit <<= (pDataDetails->bitLength-1);
@@ -1143,12 +1168,10 @@ bool USBHostHID_ApiImportData(uint8_t *report, uint16_t reportLength, HID_USER_D
             }
         }
 
-//      Save the value
-
+        /* Save the value */
         *buffer++ = data;
 
-//      Next one
-
+        /* Next one */
         start += pDataDetails->bitLength;
     }
     return true;

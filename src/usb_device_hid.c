@@ -41,7 +41,7 @@ please contact mla_licensing@microchip.com
 // Section: Included Files
 // *****************************************************************************
 // *****************************************************************************
-#include "system_config.h"
+#include "usb_config.h"
 #include "usb.h"
 #include "usb_device_hid.h"
 
@@ -223,8 +223,8 @@ void USBCheckHIDRequest(void)
             break;
         case SET_IDLE:
             USBEP0Transmit(USB_EP0_NO_DATA);
-            idle_rate = ((USB_SETUP_SET_IDLE_RATE*)&SetupPkt)->duration;
-            USB_DEVICE_HID_IDLE_RATE_CALLBACK(((USB_SETUP_SET_IDLE_RATE*)&SetupPkt)->reportId, idle_rate);
+            idle_rate = SetupPkt.W_Value.byte.HB;
+            USB_DEVICE_HID_IDLE_RATE_CALLBACK(SetupPkt.W_Value.byte.LB, idle_rate);
             break;
         case GET_PROTOCOL:
             USBEP0SendRAMPtr(
@@ -234,7 +234,7 @@ void USBCheckHIDRequest(void)
             break;
         case SET_PROTOCOL:
             USBEP0Transmit(USB_EP0_NO_DATA);
-            active_protocol = ((USB_SETUP_SET_PROTOCOL*)&SetupPkt)->protocol;
+            active_protocol = SetupPkt.W_Value.byte.LB;
             break;
     }//end switch(SetupPkt.bRequest)
 

@@ -22,7 +22,7 @@ please contact mla_licensing@microchip.com
 /** I N C L U D E S **************************************************/
 #include "usb.h"
 #include "system.h"
-#include "system_config.h"
+#include "usb_config.h"
 
 #include <usb_device_msd.h>
 
@@ -1645,6 +1645,50 @@ void MSDErrorHandler(uint8_t ErrorCase)
 }	
 
 
+/******************************************************************************
+ 	Function:
+ 		void MSDTransferTerminated(USB_HANDLE handle)
+ 		
+ 	Description:
+        Check if the host recently did a clear endpoint halt on the MSD OUT endpoint.
+        In this case, we want to re-arm the MSD OUT endpoint, so we are prepared
+        to receive the next CBW that the host might want to send.
+        Note: If however the STALL was due to a CBW not valid condition,
+        then we are required to have a persistent STALL, where it cannot
+        be cleared (until MSD reset recovery takes place).  See MSD BOT
+        specs v1.0, section 6.6.1.
+ 	PreCondition:
+        A transfer was terminated.  This should be called from the transfer
+        terminated event handler.
+ 		
+ 	Parameters:
+        USB_HANDLE handle - the handle of the transfer that was terminated.
+
+ 	Return Values:
+ 		None
+ 		
+ 	Remarks:
+ 		None
+ 			
+  *****************************************************************************/
+void MSDTransferTerminated(USB_HANDLE handle)
+{
+    if(MSDWasLastCBWValid() == false)
+    {
+        //Need to re-stall the endpoints, for persistent STALL behavior.
+        USBStallEndpoint(MSD_DATA_IN_EP, IN_TO_HOST);
+        USBStallEndpoint(MSD_DATA_OUT_EP, OUT_FROM_HOST);
+    }
+    else
+    {
+        //Check if the host cleared halt on the bulk out endpoint.  In this
+        //case, we should re-arm the endpoint, so we can receive the next CBW.
+        if((USB_HANDLE)handle == USBGetNextHandle(MSD_DATA_OUT_EP, OUT_FROM_HOST))
+        {
+            USBMSDOutHandle = USBRxOnePacket(MSD_DATA_OUT_EP, (uint8_t*)&msd_cbw, MSD_OUT_EP_SIZE);
+        }
+    }
+}
 
 //-----------------------------------------------------------------------------------------
 #endif //end of #ifdef USB_USE_MSD

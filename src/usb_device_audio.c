@@ -20,7 +20,7 @@ please contact mla_licensing@microchip.com
 //DOM-IGNORE-END
 
 /** I N C L U D E S *******************************************************/
-#include "system_config.h"
+#include "usb_config.h"
 #include "usb.h"
 #include "usb_device_audio.h"
 
