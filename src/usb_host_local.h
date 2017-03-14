@@ -348,7 +348,7 @@ HOLDING state machine values
 #define USB_RESET_TIME                      (50+1)  // RESET signaling time - 50ms
 #if defined( __C30__ ) || defined __XC16__
     #define USB_RESET_RECOVERY_TIME         (10+1)  // RESET recovery time.
-#elif defined( __PIC32MX__ )
+#elif defined( __PIC32__ )
     #define USB_RESET_RECOVERY_TIME         (100+1) // RESET recovery time - Changed to 100 ms from 10ms.  Some devices take longer.
 #else
     #error Unknown USB_RESET_RECOVERY_TIME

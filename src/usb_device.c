@@ -601,7 +601,7 @@ void USBDeviceTasks(void)
         if(!USBSE0Event)
         {
             //We recently attached, make sure we are in a clean state
-            #if defined(__dsPIC33E__) || defined(_PIC24E__)
+            #if defined(__dsPIC33E__) || defined(_PIC24E__) || defined(__PIC32MM__)
                 U1IR = 0xFFEF;  //Preserve IDLEIF info, so we can detect suspend
                                 //during attach de-bounce interval
             #else

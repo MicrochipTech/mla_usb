@@ -43,6 +43,12 @@ please contact mla_licensing@microchip.com
 	#else
             #include "usb_hal_pic24f.h"
 	#endif
+#elif defined(__XC32__)
+    #if defined(__PIC32MM__)
+        #include "usb_hal_pic32mm.h"
+    #else
+        #error "Silicon Platform not defined"
+    #endif
 #else
     #error "Silicon Platform not defined"
 #endif
