@@ -1399,10 +1399,9 @@ void USBHostTasks( void )
                         U1PWRC                = USB_NORMAL_OPERATION | USB_ENABLED;
 
                         #if defined( __C30__ ) || defined __XC16__
-                            IFS5            &= 0xFFBF;
-                            IPC21           &= 0xF0FF;
-                            IPC21           |= 0x0600;
-                            IEC5            |= 0x0040;
+                            _USB1IF = 0;
+                            _USB1IP = 6;
+                            _USB1IE = 1;
                         #elif defined( __PIC32__ )
                             // Enable the USB interrupt.
                             _ClearUSBIF();
@@ -5425,7 +5424,7 @@ void USB_HostInterruptHandler(void)
 {
 
     #if defined( __C30__) || defined __XC16__
-        IFS5 &= 0xFFBF;
+        _USB1IF = 0;
     #elif defined( __PIC32__)
         _ClearUSBIF();
     #else
