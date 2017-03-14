@@ -48,7 +48,7 @@ please contact mla_licensing@microchip.com
 //IEC0-IEC7 on PIC24FJ128GC010 Family devices
 //IEC0-IEC7 on PIC24FJ128GB204 Family devices
 //IEC0-IEC7 on PIC24FJ256GB412 Family devices
-#if defined(__PIC24FJ64GB004__) || defined(__PIC24FJ32GB004__) || defined(__PIC24FJ32GB004__) || defined(__PIC24FJ32GB002__)    \
+#if defined(__PIC24FJ64GB004__) || defined(__PIC24FJ64GB002__) || defined(__PIC24FJ32GB004__) || defined(__PIC24FJ32GB002__)    \
     || defined(__PIC24FJ256GB110__) || defined(__PIC24FJ192GB110__) || defined(__PIC24FJ128GB110__) || defined(__PIC24FJ64GB110__) || defined(__PIC24FJ256GB108__) || defined(__PIC24FJ192GB108__) || defined(__PIC24FJ128GB108__) || defined(__PIC24FJ64GB108__)  || defined(__PIC24FJ256GB106__) || defined(__PIC24FJ192GB106__) || defined(__PIC24FJ128GB106__) || defined(__PIC24FJ64GB106__) 
 
     #define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  6   //Number of IECx registers implemented in the microcontroller (varies from device to device, make sure this is set correctly for the intended CPU)

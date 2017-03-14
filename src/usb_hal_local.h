@@ -30,13 +30,11 @@ please contact mla_licensing@microchip.com
     #if defined (__dsPIC33EP512MU810__)
     #include <p33Exxxx.h>
     #endif
-#elif defined (__PIC32MX__)
-    #include <p32xxxx.h>
-    #include "usb_pic32.h"
+#elif defined (__PIC32MX__) || defined (__PIC32MM__)
+    #include <p32xxxx.h> 
 #else
     #error "Error!  Unsupported processor"
 #endif
-
 
 // Misc Definitions:
 

@@ -77,7 +77,7 @@ please contact mla_licensing@microchip.com
 //******************************************************************************
 
 // When using the PIC32, ping pong mode must be set to FULL.
-#if defined (__PIC32MX__)
+#if defined (__PIC32__)
     #if (USB_PING_PONG_MODE != USB_PING_PONG__FULL_PING_PONG)
         #undef USB_PING_PONG_MODE
         #define USB_PING_PONG_MODE USB_PING_PONG__FULL_PING_PONG
@@ -1229,7 +1229,7 @@ void USBHostTasks( void )
     // The PIC32MX detach interrupt is not reliable.  If we are not in one of
     // the detached states, we'll do a check here to see if we've detached.
     // If the ATTACH bit is 0, we have detached.
-    #ifdef __PIC32MX__
+    #ifdef __PIC32__
         #ifdef USE_MANUAL_DETACH_DETECT
             if (((usbHostState & STATE_MASK) != STATE_DETACHED) && !U1IRbits.ATTACHIF)
             {
@@ -1249,7 +1249,7 @@ void USBHostTasks( void )
         USB_EVENT_DATA *item;
         #if defined( __C30__ ) || defined __XC16__
             uint16_t        interrupt_mask;
-        #elif defined( __PIC32MX__ )
+        #elif defined( __PIC32__ )
             uint32_t      interrupt_mask;
         #else
             #error Cannot save interrupt status
@@ -1345,7 +1345,7 @@ void USBHostTasks( void )
                     // Initialize the Buffer Descriptor Table pointer.
                     #if defined(__C30__) || defined __XC16__
                        U1BDTP1 = (uint16_t)(&BDT) >> 8;
-                    #elif defined(__PIC32MX__)
+                    #elif defined(__PIC32__)
                        U1BDTP1 = ((uint32_t)KVA_TO_PA(&BDT) & 0x0000FF00) >> 8;
                        U1BDTP2 = ((uint32_t)KVA_TO_PA(&BDT) & 0x00FF0000) >> 16;
                        U1BDTP3 = ((uint32_t)KVA_TO_PA(&BDT) & 0xFF000000) >> 24;
@@ -1363,7 +1363,7 @@ void USBHostTasks( void )
                         U1OTGCON            = USB_DPLUS_PULLDOWN_ENABLE | USB_DMINUS_PULLDOWN_ENABLE; // Pull down D+ and D-
                     #endif
 
-                    #if defined(__PIC32MX__)
+                    #if defined(__PIC32__)
                         U1OTGCON |= USB_VBUS_ON;
                     #endif
 
@@ -1403,9 +1403,9 @@ void USBHostTasks( void )
                             IPC21           &= 0xF0FF;
                             IPC21           |= 0x0600;
                             IEC5            |= 0x0040;
-                        #elif defined( __PIC32MX__ )
+                        #elif defined( __PIC32__ )
                             // Enable the USB interrupt.
-                            IFS1CLR         = _IFS1_USBIF_MASK;
+                            _ClearUSBIF();
                             #if defined(_IPC11_USBIP_MASK)
                                 IPC11CLR        = _IPC11_USBIP_MASK | _IPC11_USBIS_MASK;
                                 IPC11SET        = _IPC11_USBIP_MASK & (0x00000004 << _IPC11_USBIP_POSITION);
@@ -1415,7 +1415,7 @@ void USBHostTasks( void )
                             #else
                                 #error "The selected PIC32 device is not currently supported by usb_host.c."
                             #endif
-                            IEC1SET         = _IEC1_USBIE_MASK;                        
+                            _SetUSBIE(); 
                         #else
                             #error Cannot enable USB interrupt.
                         #endif
@@ -5281,7 +5281,7 @@ void _USB_SetBDT( uint8_t token )
     // Load up the BDT address.
     if (token == USB_TOKEN_SETUP)
     {
-        #if defined(__C30__) || defined(__PIC32MX__) || defined __XC16__
+        #if defined(__C30__) || defined(__PIC32__) || defined __XC16__
             pBDT->ADR  = ConvertToPhysicalAddress(pCurrentEndpoint->pUserDataSETUP);
         #else
             #error Cannot set BDT address.
@@ -5298,7 +5298,7 @@ void _USB_SetBDT( uint8_t token )
             {
                 pBDT->ADR  = ConvertToPhysicalAddress((uint16_t)pCurrentEndpoint->pUserData + (uint16_t)pCurrentEndpoint->dataCount);
             }
-        #elif defined(__PIC32MX__)
+        #elif defined(__PIC32__)
             if (pCurrentEndpoint->bmAttributes.bfTransferType == USB_TRANSFER_TYPE_ISOCHRONOUS)
             {
                 pBDT->ADR  = ConvertToPhysicalAddress(((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].pBuffer);
@@ -5426,8 +5426,8 @@ void USB_HostInterruptHandler(void)
 
     #if defined( __C30__) || defined __XC16__
         IFS5 &= 0xFFBF;
-    #elif defined( __PIC32MX__)
-        IFS1CLR = _IFS1_USBIF_MASK;
+    #elif defined( __PIC32__)
+        _ClearUSBIF();
     #else
         #error Cannot clear USB interrupt.
     #endif
@@ -5650,7 +5650,7 @@ void USB_HostInterruptHandler(void)
     {
         #if defined(__C30__) || defined __XC16__
             U1STATBITS          copyU1STATbits;
-        #elif defined(__PIC32MX__)
+        #elif defined(__PIC32__)
             __U1STATbits_t      copyU1STATbits;
         #else
             #error Need structure name for copyU1STATbits.
@@ -6006,7 +6006,7 @@ void USB_HostInterruptHandler(void)
                     pCurrentEndpoint->bErrorCode = USB_ENDPOINT_ERROR_END_OF_FRAME;
                 if (U1EIRbits.PIDEF)
                     pCurrentEndpoint->bErrorCode = USB_ENDPOINT_ERROR_PID_CHECK;
-                #if defined(__PIC32MX__)
+                #if defined(__PIC32__)
                 if (U1EIRbits.BMXEF)
                     pCurrentEndpoint->bErrorCode = USB_ENDPOINT_ERROR_BMX;
                 #endif
