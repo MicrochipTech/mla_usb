@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -85,14 +85,14 @@ please contact mla_licensing@microchip.com
 #endif
 
     // No event occured (NULL event).
-#define EVENT_AUDIO_NONE            EVENT_AUDIO_BASE + EVENT_AUDIO_OFFSET + 0   
+#define EVENT_AUDIO_NONE            EVENT_AUDIO_BASE + EVENT_AUDIO_OFFSET + 0
     // An audio device has attached.  The returned data pointer points to a
     // USB_AUDIO_V1_DEVICE_ID structure.
-#define EVENT_AUDIO_ATTACH          EVENT_AUDIO_BASE + EVENT_AUDIO_OFFSET + 1   
+#define EVENT_AUDIO_ATTACH          EVENT_AUDIO_BASE + EVENT_AUDIO_OFFSET + 1
     // An audio device has detached.  The returned data pointer points to a
     // uint8_t with the previous address of the detached device.
-#define EVENT_AUDIO_DETACH          EVENT_AUDIO_BASE + EVENT_AUDIO_OFFSET + 2   
-    // An audio stream data packet has been received.  The returned data 
+#define EVENT_AUDIO_DETACH          EVENT_AUDIO_BASE + EVENT_AUDIO_OFFSET + 2
+    // An audio stream data packet has been received.  The returned data
     // pointer points to a HOST_TRANSFER_DATA structure, with information about
     // the most recent transfer.  One event will be returned for each transfer,
     // so the application will know how much data was actually received in
@@ -102,11 +102,11 @@ please contact mla_licensing@microchip.com
     // This event is returned after the sampling frequency is set via
     // USBHostAudioV1SetSamplingFrequency().  The returned data pointer points
     // to a HOST_TRANSFER_DATA structure, with the error code for this request.
-#define EVENT_AUDIO_FREQUENCY_SET   EVENT_AUDIO_BASE + EVENT_AUDIO_OFFSET + 4 
+#define EVENT_AUDIO_FREQUENCY_SET   EVENT_AUDIO_BASE + EVENT_AUDIO_OFFSET + 4
     // This event is returned after the full or zero bandwidth interface has
     // been set.  The returned data pointer is NULL, but the size is the
     // error code from the transfer.
-#define EVENT_AUDIO_INTERFACE_SET   EVENT_AUDIO_BASE + EVENT_AUDIO_OFFSET + 5 
+#define EVENT_AUDIO_INTERFACE_SET   EVENT_AUDIO_BASE + EVENT_AUDIO_OFFSET + 5
 
 // *****************************************************************************
 // *****************************************************************************
@@ -148,7 +148,7 @@ typedef struct _USB_AUDIO_V1_DEVICE_ID
     This function starts the reception of streaming, isochronous audio data.
 
   Precondition:
-    USBHostAudioV1SetInterfaceFullBandwidth() must be called to set the 
+    USBHostAudioV1SetInterfaceFullBandwidth() must be called to set the
     device to its full bandwidth interface.
 
   Parameters:
@@ -167,7 +167,7 @@ typedef struct _USB_AUDIO_V1_DEVICE_ID
 
   Remarks:
     Some devices require other operations between setting the full bandwidth
-    interface and starting the streaming audio data.  Therefore, these two 
+    interface and starting the streaming audio data.  Therefore, these two
     functions are broken out separately.
   ***************************************************************************/
 
@@ -213,7 +213,7 @@ uint8_t USBHostAudioV1SetInterfaceFullBandwidth( uint8_t deviceAddress );
     uint8_t USBHostAudioV1SetInterfaceZeroBandwidth( uint8_t deviceAddress )
 
   Summary:
-    This function sets the zero bandwidth interface. 
+    This function sets the zero bandwidth interface.
 
   Description:
     This function sets the full bandwidth interface.  This function can
@@ -231,7 +231,7 @@ uint8_t USBHostAudioV1SetInterfaceFullBandwidth( uint8_t deviceAddress );
     USB_SUCCESS                 - Request started successfully
     USB_AUDIO_DEVICE_NOT_FOUND  - No device with the specified address.
     Others                      - See USBHostIssueDeviceRequest()
-    
+
   Remarks:
     None
   ***************************************************************************/
@@ -247,28 +247,28 @@ uint8_t USBHostAudioV1SetInterfaceZeroBandwidth( uint8_t deviceAddress );
     This function sets the sampling frequency for the device.
 
   Description:
-    This function sets the sampling frequency for the device.  If the exact 
+    This function sets the sampling frequency for the device.  If the exact
     frequency is not supported by the device, the device will round it to the
     closest supported value.
 
-    IMPORTANT: If the request is initiated successfully, the frequency value 
-    must remain valid until the EVENT_AUDIO_FREQUENCY_SET event is received.  
+    IMPORTANT: If the request is initiated successfully, the frequency value
+    must remain valid until the EVENT_AUDIO_FREQUENCY_SET event is received.
     Therefore, this value cannot be a local (stack) variable.  The application
-    can either use a global variable for this value, or it can use the 
+    can either use a global variable for this value, or it can use the
     function USBHostAudioV1SupportedFrequencies() to obtain a pointer to the
     number and list of supported frequencies, and pass a pointer to the desired
     frequency in this list.
-    
+
   Precondition:
     None
 
   Parameters:
     uint8_t deviceAddress  - Device address
     uint8_t *frequency     - Pointer to three uint8_ts that specify the desired
-                            sampling frequency.  NOTE: If the request is 
-                            initiated successfully, this location must 
-                            remain valid until the EVENT_AUDIO_FREQUENCY_SET 
-                            event is received.  
+                            sampling frequency.  NOTE: If the request is
+                            initiated successfully, this location must
+                            remain valid until the EVENT_AUDIO_FREQUENCY_SET
+                            event is received.
 
   Return Values:
     USB_SUCCESS                 - Request started successfully
@@ -289,7 +289,7 @@ uint8_t USBHostAudioV1SetInterfaceZeroBandwidth( uint8_t deviceAddress );
             // Continuous sampling, minimum and maximum are specified.
             uint32_t   minFrequency;
             uint32_t   maxFrequency;
-            
+
             minFrequency = *ptr + (*(ptr+1) << 8) + (*(ptr+2) << 16);
             ptr += 3;
             maxFrequency = *ptr + (*(ptr+1) << 8) + (*(ptr+2) << 16);
@@ -304,9 +304,9 @@ uint8_t USBHostAudioV1SetInterfaceZeroBandwidth( uint8_t deviceAddress );
         }
         else
         {
-            // Discrete sampling frequencies are specified.    
+            // Discrete sampling frequencies are specified.
             uint32_t frequency;
-            
+
             while (numFrequencies)
             {
                 frequency = *ptr + (*(ptr+1) << 8) + (*(ptr+2) << 16);
@@ -325,7 +325,7 @@ uint8_t USBHostAudioV1SetInterfaceZeroBandwidth( uint8_t deviceAddress );
         }
     }
     </code>
-  
+
   Remarks:
     If a global variable is used to old the frequency, it can be declared as
     a uint32_t.  Since PIC Microcontrollers are little endian machines, a
@@ -335,7 +335,7 @@ uint8_t USBHostAudioV1SetInterfaceZeroBandwidth( uint8_t deviceAddress );
 
     rc = USBHostAudioV1SetSamplingFrequency( deviceAddress, (uint8_t *)(&desiredFrequency) );
     </code>
-    
+
   ***************************************************************************/
 
 uint8_t USBHostAudioV1SetSamplingFrequency( uint8_t deviceAddress, uint8_t *frequency );
@@ -344,7 +344,7 @@ uint8_t USBHostAudioV1SetSamplingFrequency( uint8_t deviceAddress, uint8_t *freq
 /****************************************************************************
   Function:
     uint8_t * USBHostAudioV1SupportedFrequencies( uint8_t deviceAddress )
-    
+
   Summary:
     This function returns a pointer to the list of supported frequencies.
 
@@ -379,7 +379,7 @@ uint8_t USBHostAudioV1SetSamplingFrequency( uint8_t deviceAddress, uint8_t *freq
             // Continuous sampling, minimum and maximum are specified.
             uint32_t   minFrequency;
             uint32_t   maxFrequency;
-            
+
             minFrequency = *ptr + (*(ptr+1) << 8) + (*(ptr+2) << 16);
             ptr += 3;
             maxFrequency = *ptr + (*(ptr+1) << 8) + (*(ptr+2) << 16);
@@ -394,9 +394,9 @@ uint8_t USBHostAudioV1SetSamplingFrequency( uint8_t deviceAddress, uint8_t *freq
         }
         else
         {
-            // Discrete sampling frequencies are specified.    
+            // Discrete sampling frequencies are specified.
             uint32_t frequency;
-            
+
             while (numFrequencies)
             {
                 frequency = *ptr + (*(ptr+1) << 8) + (*(ptr+2) << 16);
@@ -415,7 +415,7 @@ uint8_t USBHostAudioV1SetSamplingFrequency( uint8_t deviceAddress, uint8_t *freq
         }
     }
     </code>
-  
+
   Remarks:
     None
   ***************************************************************************/
@@ -428,18 +428,18 @@ uint8_t * USBHostAudioV1SupportedFrequencies( uint8_t deviceAddress );
     void USBHostAudioV1TerminateTransfer( uint8_t deviceAddress )
 
   Summary:
-    This function terminates an audio stream.  
+    This function terminates an audio stream.
 
   Description:
     This function terminates an audio stream.  It does not change the device's
-    selected interface.  The application may wish to call 
+    selected interface.  The application may wish to call
     USBHostAudioV1SetInterfaceZeroBandwidth() after this function to set
     the device to the zero bandwidth interface.
 
     Between terminating one audio stream and starting another, the application
-    should call USBHostIsochronousBuffersReset() to reset the data buffers.  
+    should call USBHostIsochronousBuffersReset() to reset the data buffers.
     This is done from the application layer rather than from this function, so
-    the application can process all received audio data. 
+    the application can process all received audio data.
 
   Precondition:
     None
@@ -490,7 +490,7 @@ void    USBHostAudioV1TerminateTransfer( uint8_t deviceAddress );
     false  - Event was not handled
 
   Remarks:
-    The client driver does not need to process the data.  Just pass the event 
+    The client driver does not need to process the data.  Just pass the event
     up to the application layer.
   ***************************************************************************/
 

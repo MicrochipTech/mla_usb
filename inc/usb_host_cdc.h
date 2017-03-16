@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -384,8 +384,8 @@ typedef struct _USB_CDC_DEVICE_INFO
                                           process of initializing
     USB_PROCESSING_REPORT_DESCRIPTOR   -  CDC device is detected and report
                                           descriptor is being parsed
-    USB_CDC_NORMAL_RUNNING             -  CDC Device is running normal, 
-                                          ready to send and receive reports 
+    USB_CDC_NORMAL_RUNNING             -  CDC Device is running normal,
+                                          ready to send and receive reports
     USB_CDC_DEVICE_HOLDING             -  Device is holding due to error
     USB_CDC_DEVICE_DETACHED            -  CDC detached.
 

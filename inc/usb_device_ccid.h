@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -81,7 +81,7 @@ please contact mla_licensing@microchip.com
 #define USB_CCID_CMD_SLOT_BUSY               0xE0
 #define USB_CCID_CMD_NOT_SUPPORTED           0x00
 
-    
+
 //protocols
 #define USB_CCID_T0_PROTOCOL 0
 #define USB_CCID_T1_PROTOCOL 1
@@ -99,30 +99,30 @@ extern unsigned char usbCcidBulkInEndpoint[USB_EP_SIZE];	//User application buff
 /******************************************************************************
     Function:
         void mUSBCCIDBulkInRam(BYTE *pData, BYTE len)
-        
+
     Description:
         Use this macro to transfer data located in data memory.
         Use this macro when:
             1. Data stream is not null-terminated
             2. Transfer length is known
         Remember: usbCcidBulkInTrfState must == USB_CCID_BULK_IN_READY
-   		Unexpected behavior will occur if this function is called when 
+   		Unexpected behavior will occur if this function is called when
 		usbCcidBulkInTrfState != USB_CCID_BULK_IN_READY
-        
+
     PreCondition:
         usbCcidBulkInTrfState must be in the USB_CCID_BULK_IN_READY state.
-        
+
     Paramters:
         pDdata  : Pointer to the starting location of data bytes
         len     : Number of bytes to be transferred
-        
+
     Return Values:
         None
-        
+
     Remarks:
         This macro only handles the setup of the transfer. The
         actual transfer is handled by USBCCIDBulkInService().
-  
+
  *****************************************************************************/
 #define mUSBCCIDBulkInRam(pData,len)   \
 {                                      \
@@ -134,30 +134,30 @@ extern unsigned char usbCcidBulkInEndpoint[USB_EP_SIZE];	//User application buff
 /******************************************************************************
  	Function:
  		void USBCheckCCIDRequest(void)
- 
+
  	Description:
  		This routine checks the setup data packet to see if it
  		knows how to handle it
- 		
+
  	PreCondition:
  		None
 
 	Parameters:
 		None
-		
+
 	Return Values:
 		None
-		
+
 	Remarks:
 		None
-		 
+
   *****************************************************************************/
 void USBCheckCCIDRequest(void);
 
 /**************************************************************************
   Function:
         void USBCCIDInitEP(void)
-    
+
   Summary:
     This function initializes the CCID function driver. This function should
     be called after the SET_CONFIGURATION command.
@@ -166,11 +166,11 @@ void USBCheckCCIDRequest(void);
     the default line coding (baud rate, bit parity, number of data bits,
     and format). This function also enables the endpoints and prepares for
     the first transfer from the host.
-    
+
     This function should be called after the SET_CONFIGURATION command.
     This is most simply done by calling this function from the
     USBCBInitEP() function.
-    
+
     Typical Usage:
     <code>
         void USBCBInitEP(void)
@@ -181,14 +181,14 @@ void USBCheckCCIDRequest(void);
   Conditions:
     None
   Remarks:
-    None                                                                   
+    None
   **************************************************************************/
 void USBCCIDInitEP(void);
 
 /************************************************************************
   Function:
         void USBCCIDBulkInService(void)
-    
+
   Summary:
     USBCCIDBulkInService handles device-to-host transaction(s). This function
     should be called once per Main Program loop after the device reaches
@@ -197,7 +197,7 @@ void USBCCIDInitEP(void);
     USBCCIDBulkInService handles device-to-host transaction(s). This function
     should be called once per Main Program loop after the device reaches
     the configured state.
-    
+
     Typical Usage:
     <code>
     void main(void)
@@ -227,14 +227,14 @@ void USBCCIDInitEP(void);
   Conditions:
     None
   Remarks:
-    None                                                                 
+    None
   ************************************************************************/
 void USBCCIDBulkInService(void);
 
 /******************************************************************************
   Function:
 	void USBCCIDSendDataToHost(BYTE *data, WORD length)
-		
+
   Summary:
     USBCCIDSendDataToHost writes an array of data to the USB. Use this version, is
     capable of transfering 0x00 (what is typically a NULL character in any of
@@ -244,8 +244,8 @@ void USBCCIDBulkInService(void);
     USBCCIDSendDataToHost writes an array of data to the USB. Use this version, is
     capable of transfering 0x00 (what is typically a NULL character in any of
     the string transfer functions).
-    
-    
+
+
     The transfer mechanism for device-to-host(put) is more flexible than
     host-to-device(get). It can handle a string of data larger than the
     maximum size of bulk IN endpoint. A state machine is used to transfer a
@@ -253,19 +253,19 @@ void USBCCIDBulkInService(void);
     must be called periodically to keep sending blocks of data to the host.
 
   Conditions:
-    
+
 
   Input:
     BYTE *data - pointer to a RAM array of data to be transfered to the host
-    WORD length - the number of bytes to be transfered 
-		
+    WORD length - the number of bytes to be transfered
+
  *****************************************************************************/
 void USBCCIDSendDataToHost(BYTE *pData, WORD len);
 
 /** Section: STRUCTURES **********************************************/
 typedef union {
     BYTE CCID_BulkOutBuffer[271];
-    BYTE CCID_BulkInBuffer[267]; 
-} USB_CCID_BUFFER;  
+    BYTE CCID_BulkInBuffer[267];
+} USB_CCID_BUFFER;
 
 #endif //CCID_H

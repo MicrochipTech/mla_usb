@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -27,7 +27,7 @@ please contact mla_licensing@microchip.com
   2.7    Created USBSleepOnSuspend() function to simply process of putting
            the PIC24F device in the correct state before issuing the sleep
            instruction and returning the device to the correct state after
-           exiting sleep. 
+           exiting sleep.
 ********************************************************************/
 //DOM-IGNORE-END
 
@@ -43,21 +43,21 @@ please contact mla_licensing@microchip.com
 /********************************************************************
 Function:
     BOOL USBSleepOnSuspend(void)
-    
+
 Summary:
     Places the PIC24F core into sleep and sets up the USB module
     to wake up the device on USB activity.
-    
+
 PreCondition:
     IPL (in the SR register) must be non-zero.
-    
+
 Parameters:
     None
-    
+
 Return Values:
     TRUE  - if entered sleep successfully
     FALSE - if there was an error entering sleep
-    
+
 Remarks:
     Please note that before calling this function that it is the
     responsibility of the application to place all of the other
@@ -72,7 +72,7 @@ BOOL USBSleepOnSuspend(void)
 
     #if defined(USB_POLLING)
         //If IPL is equal to 0 then there is no way for the USB module to
-        //  generate an interrupt to wake up the device.  
+        //  generate an interrupt to wake up the device.
         if(_IPL == 0)
         {
             return FALSE;
@@ -81,7 +81,7 @@ BOOL USBSleepOnSuspend(void)
         //Set the interrupt priority to a level that will wake up the part (>0)
         //  but will not cause a interrupt vector jump (USB1IP<=IPL)
         _USB1IP = 1;
-    #endif 
+    #endif
 
     //Save the old interrupt and CPU settings
     U1EIE_save = U1EIE;
@@ -92,7 +92,7 @@ BOOL USBSleepOnSuspend(void)
     //Disable all USB interrupts
     U1EIE = 0;
     U1IE = 0;
-    U1OTGIE = 0; 
+    U1OTGIE = 0;
 
     //Enable the interrupt
     IFS5bits.USB1IF = 0;
@@ -105,7 +105,7 @@ BOOL USBSleepOnSuspend(void)
     #if defined(USB_POLLING)
         //Disable the interrupt
         _USB1IP = 0;
-    #endif  
+    #endif
 
     //restore the previous interrupt settings
     IEC5bits.USB1IE = USB1IE_save;

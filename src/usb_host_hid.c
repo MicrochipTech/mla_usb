@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -285,21 +285,21 @@ extern USB_HID_RPT_DESC_ERROR _USBHostHID_Parse_Report(uint8_t*, uint16_t, uint1
 uint8_t USBHostHIDDeviceDetect( void )
 {
     uint8_t    i;
-    
+
     // Find the correct device.
     for (i=0; (i<USB_MAX_HID_DEVICES) && (deviceInfoHID[i].flags.bfAddressReported == 1); i++);
     if (i == USB_MAX_HID_DEVICES)
     {
         return false;
     }
-    
+
     if ((USBHostHIDDeviceStatus(deviceInfoHID[i].ID.deviceAddress) == USB_HID_NORMAL_RUNNING) &&
         (deviceInfoHID[i].ID.deviceAddress != 0))
     {
         deviceInfoHID[i].flags.bfAddressReported = 1;
         return deviceInfoHID[i].ID.deviceAddress;
     }
-    
+
     return 0;
 }
 
@@ -323,10 +323,10 @@ uint8_t USBHostHIDDeviceDetect( void )
                                           device is not an HID
     USB_HID_INITIALIZING               -  HID is attached and in the
                                           process of initializing
-    USB_PROCESSING_REPORT_DESCRIPTOR   -  HID device is detected and report 
+    USB_PROCESSING_REPORT_DESCRIPTOR   -  HID device is detected and report
                                           descriptor is being parsed
-    USB_HID_NORMAL_RUNNING             -  HID Device is running normal, 
-                                          ready to send and receive reports 
+    USB_HID_NORMAL_RUNNING             -  HID Device is running normal,
+                                          ready to send and receive reports
     USB_HID_DEVICE_HOLDING             -  Driver has encountered error and
                                           could not recover
     USB_HID_DEVICE_DETACHED            -  HID detached.
@@ -525,11 +525,11 @@ bool USBHostHIDReadIsComplete ( uint8_t deviceAddress, uint8_t *errorCode, uint8
   Parameters:
     uint8_t deviceAddress  - Device address
     uint8_t interfaceNum   - Interface number
-                            
+
   Return Values:
     USB_SUCCESS                 - read request terminated
     USB_HID_DEVICE_NOT_FOUND    - No device with specified address
-    
+
   Remarks:
     None
 *******************************************************************************/
@@ -606,7 +606,7 @@ uint8_t USBHostHIDResetDevice( uint8_t deviceAddress )
         _USBHostHID_ResetStateJump( i );
         return USB_SUCCESS;
     }
-    
+
     return USB_HID_ILLEGAL_REQUEST;
 }
 
@@ -631,7 +631,7 @@ uint8_t USBHostHIDResetDevice( uint8_t deviceAddress )
                                     and error codes that can be returned
                                     in the errorCode parameter of
                                     USBHostHIDWriteIsComplete();
-                                    
+
   Remarks:
     None
   ***************************************************************************/
@@ -718,7 +718,7 @@ void USBHostHIDTasks( void )
                                   performing a transfer
     Others                      - Return values from USBHostIssueDeviceRequest(),
                                     and USBHostWrite()
-                                    
+
   Remarks:
     None
 *******************************************************************************/
@@ -850,11 +850,11 @@ bool USBHostHIDWriteIsComplete ( uint8_t deviceAddress, uint8_t *errorCode, uint
   Parameters:
     uint8_t deviceAddress  - Device address
     uint8_t interfaceNum   - Interface number
-                            
+
   Return Values:
     USB_SUCCESS                 - write request terminated
     USB_HID_DEVICE_NOT_FOUND    - No device with specified address
-    
+
   Remarks:
     None
 *******************************************************************************/
@@ -1053,14 +1053,14 @@ bool USBHostHID_ApiFindValue(uint16_t usagePage,uint16_t usage,HIDReportTypeEnum
   Function:
     bool USBHostHID_ApiImportData
     (
-        uint8_t *report, 
+        uint8_t *report,
         uint16_t reportLength,
         HID_USER_DATA_SIZE *buffer,
         HID_DATA_DETAILS *pDataDetails
     )
- 
+
   Description:
-    This function can be used by application to extract data from the input 
+    This function can be used by application to extract data from the input
     reports. On receiving the input report from the device application can call
     the function with required inputs 'HID_DATA_DETAILS'.
 
@@ -1083,9 +1083,9 @@ bool USBHostHID_ApiFindValue(uint16_t usagePage,uint16_t usage,HIDReportTypeEnum
 *******************************************************************************/
 bool USBHostHID_ApiImportData
 (
-    uint8_t *report, 
-    uint16_t reportLength, 
-    HID_USER_DATA_SIZE *buffer, 
+    uint8_t *report,
+    uint16_t reportLength,
+    HID_USER_DATA_SIZE *buffer,
     HID_DATA_DETAILS *pDataDetails
 )
 {
@@ -1105,31 +1105,31 @@ bool USBHostHID_ApiImportData
     }
 
     /* Check the report ID. */
-    if ( (pDataDetails->reportID != 0) && 
+    if ( (pDataDetails->reportID != 0) &&
          (pDataDetails->reportID != report[0])
-        ) 
+        )
     {
         return false;
     }
-                
+
 
     /* Check the report length. */
     if (pDataDetails->reportLength != reportLength)
     {
         return false;
     }
-    
+
     lastByte = (pDataDetails->bitOffset + (pDataDetails->bitLength * pDataDetails->count) - 1)/8;
-    
+
     if (lastByte > reportLength)
     {
         return false;
     }
-    
+
     /* Extract data one count at a time */
     start = pDataDetails->bitOffset;
-    
-    for (i=0; i<pDataDetails->count; i++) 
+
+    for (i=0; i<pDataDetails->count; i++)
     {
         startByte = start/8;
         startBit = start&7;
@@ -1137,7 +1137,7 @@ bool USBHostHID_ApiImportData
 
         /* Pick up the data bytes backwards */
         data = 0;
-        do 
+        do
         {
             data <<= 8;
             data |= (int) report[lastByte];
@@ -1550,34 +1550,34 @@ bool USBHostHIDEventHandler( uint8_t address, USB_EVENT event, void *data, uint3
 
 // This addition has not been fully tested yet.  It may be included in the future.
 //        case EVENT_BUS_ERROR:
-//            // We will get this error if we have a problem, like too many NAK's 
+//            // We will get this error if we have a problem, like too many NAK's
 //            // on a write, so we know the write failed.
 //            switch (deviceInfoHID[i].state)
 //            {
 //                case STATE_READ_REQ_WAIT:
 //                    USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].endpointDATA );
 //                    deviceInfoHID[i].bytesTransferred = 0;
-//                    #ifdef USB_HID_ENABLE_TRANSFER_EVENT    
+//                    #ifdef USB_HID_ENABLE_TRANSFER_EVENT
 //                        transferEventData.dataCount         = 0;
 //                        transferEventData.bErrorCode        = ((HOST_TRANSFER_DATA *)data)->bErrorCode;
 //                    #endif
 //                    _USBHostHID_TerminateReadTransfer( ((HOST_TRANSFER_DATA *)data)->bErrorCode );
 //                    return true;
 //                    break;
-//                    
+//
 //                case STATE_WRITE_REQ_WAIT:
 //                    USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].endpointDATA );
 //                    deviceInfoHID[i].bytesTransferred = 0;
-//                    #ifdef USB_HID_ENABLE_TRANSFER_EVENT    
+//                    #ifdef USB_HID_ENABLE_TRANSFER_EVENT
 //                        transferEventData.dataCount         = 0;
 //                        transferEventData.bErrorCode        = ((HOST_TRANSFER_DATA *)data)->bErrorCode;
 //                    #endif
 //                    _USBHostHID_TerminateWriteTransfer( ((HOST_TRANSFER_DATA *)data)->bErrorCode );
 //                    return true;
 //                    break;
-//            }            
+//            }
 //            break;
-            
+
         case EVENT_SOF:              // Start of frame - NOT NEEDED
         case EVENT_RESUME:           // Device-mode resume received
         case EVENT_SUSPEND:          // Device-mode suspend/idle event received
@@ -1634,8 +1634,8 @@ bool USBHostHIDAppDataEventHandler( uint8_t address, USB_EVENT event, void *data
 
   Description:
     This function is the initialization routine for this client driver.  It
-    is called by the host layer when the USB device is being enumerated.For a 
-    HID device we need to look into HID descriptor, interface descriptor and 
+    is called by the host layer when the USB device is being enumerated.For a
+    HID device we need to look into HID descriptor, interface descriptor and
     endpoint descriptor.
 
   Precondition:
@@ -1941,7 +1941,7 @@ static void _USBHostHID_ResetStateJump( uint8_t i )
     {
         deviceInfoHID[i].transferIN.state   = STATE_TRANSFER_WAITING;
         deviceInfoHID[i].transferOUT.state  = STATE_TRANSFER_WAITING;
-                
+
         errorCode = USBHostIssueDeviceRequest( deviceInfoHID[i].ID.deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
                         USB_HID_RESET, 0, deviceInfoHID[i].transferOUT.interface, 0, NULL, USB_DEVICE_REQUEST_SET, deviceInfoHID[i].ID.clientDriverID );
 

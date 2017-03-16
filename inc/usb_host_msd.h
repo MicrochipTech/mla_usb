@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -388,7 +388,7 @@ bool    USBHostMSDTransferIsComplete( uint8_t deviceAddress, uint8_t *errorCode,
     uint32_t flags         - Initialization flags
     uint8_t clientDriverID - ID to send when issuing a Device Request via
                             USBHostSendDeviceRequest(), USBHostSetDeviceConfiguration(),
-                            or USBHostSetDeviceInterface().  
+                            or USBHostSetDeviceInterface().
 
   Return Values:
     true   - We can support the device.

@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -28,7 +28,7 @@ please contact mla_licensing@microchip.com
 
 #if defined USB_AUDIO_INPUT_TERMINAL_CONTROL_REQUESTS_HANDLER
     void USB_AUDIO_INPUT_TERMINAL_CONTROL_REQUESTS_HANDLER(void);
-#endif 
+#endif
 
 #if defined USB_AUDIO_OUTPUT_TERMINAL_CONTROL_REQUESTS_HANDLER
     void USB_AUDIO_OUTPUT_TERMINAL_CONTROL_REQUESTS_HANDLER(void);
@@ -113,7 +113,7 @@ void USBCheckAudioRequest(void)
      */
     if((SetupPkt.bIntfID != AUDIO_CONTROL_INTERFACE_ID)&&
        (SetupPkt.bIntfID != AUDIO_STREAMING_INTERFACE_ID)) return;
-    
+
     switch(SetupPkt.wIndex >> 8)// checking for the Entity ID (Entity ID are defined in the config.h file)
     {
         case ID_INPUT_TERMINAL:

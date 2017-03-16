@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -23,7 +23,7 @@ please contact mla_licensing@microchip.com
  Change History:
   Rev    Description
   ----   -----------
-  2.3    Deprecated the mUSBUSARTIsTxTrfReady() macro.  It is 
+  2.3    Deprecated the mUSBUSARTIsTxTrfReady() macro.  It is
          replaced by the USBUSARTIsTxTrfReady() function.
 
   2.6    Minor definition changes
@@ -31,7 +31,7 @@ please contact mla_licensing@microchip.com
   2.6a   No Changes
 
   2.7    Fixed error in the part support list of the variables section
-         where the address of the CDC variables are defined.  The 
+         where the address of the CDC variables are defined.  The
          PIC18F2553 was incorrectly named PIC18F2453 and the PIC18F4558
          was incorrectly named PIC18F4458.
 
@@ -39,7 +39,7 @@ please contact mla_licensing@microchip.com
 
   2.8    Minor change to CDCInitEP() to enhance ruggedness in
          multi0-threaded usage scenarios.
-  
+
   2.9b   Updated to implement optional support for DTS reporting.
 
 ********************************************************************/
@@ -123,26 +123,26 @@ void USBCDCSetLineCoding(void);
 /******************************************************************************
  	Function:
  		void USBCheckCDCRequest(void)
- 
+
  	Description:
- 		This routine checks the most recently received SETUP data packet to 
+ 		This routine checks the most recently received SETUP data packet to
  		see if the request is specific to the CDC class.  If the request was
  		a CDC specific request, this function will take care of handling the
  		request and responding appropriately.
- 		
+
  	PreCondition:
  		This function should only be called after a control transfer SETUP
  		packet has arrived from the host.
 
 	Parameters:
 		None
-		
+
 	Return Values:
 		None
-		
+
 	Remarks:
 		This function does not change status or do anything if the SETUP packet
-		did not contain a CDC class specific request.		 
+		did not contain a CDC class specific request.
   *****************************************************************************/
 void USBCheckCDCRequest(void)
 {
@@ -162,7 +162,7 @@ void USBCheckCDCRequest(void)
      */
     if((SetupPkt.bIntfID != CDC_COMM_INTF_ID)&&
        (SetupPkt.bIntfID != CDC_DATA_INTF_ID)) return;
-    
+
     switch(SetupPkt.bRequest)
     {
         //****** These commands are required ******//
@@ -187,7 +187,7 @@ void USBCheckCDCRequest(void)
             outPipes[0].pFunc = LINE_CODING_PFUNC;
             outPipes[0].info.bits.busy = 1;
             break;
-            
+
         case GET_LINE_CODING:
             USBEP0SendRAMPtr(
                 (uint8_t*)&line_coding,
@@ -197,11 +197,11 @@ void USBCheckCDCRequest(void)
 
         case SET_CONTROL_LINE_STATE:
             control_signal_bitmap._byte = (uint8_t)SetupPkt.wValue;
-            //------------------------------------------------------------------            
+            //------------------------------------------------------------------
             //One way to control the RTS pin is to allow the USB host to decide the value
             //that should be output on the RTS pin.  Although RTS and CTS pin functions
             //are technically intended for UART hardware based flow control, some legacy
-            //UART devices use the RTS pin like a "general purpose" output pin 
+            //UART devices use the RTS pin like a "general purpose" output pin
             //from the PC host.  In this usage model, the RTS pin is not related
             //to flow control for RX/TX.
             //In this scenario, the USB host would want to be able to control the RTS
@@ -209,15 +209,15 @@ void USBCheckCDCRequest(void)
             //However, if the intention is to implement true RTS/CTS flow control
             //for the RX/TX pair, then this application firmware should override
             //the USB host's setting for RTS, and instead generate a real RTS signal,
-            //based on the amount of remaining buffer space available for the 
-            //actual hardware UART of this microcontroller.  In this case, the 
-            //below code should be left commented out, but instead RTS should be 
-            //controlled in the application firmware responsible for operating the 
+            //based on the amount of remaining buffer space available for the
+            //actual hardware UART of this microcontroller.  In this case, the
+            //below code should be left commented out, but instead RTS should be
+            //controlled in the application firmware responsible for operating the
             //hardware UART of this microcontroller.
-            //---------            
-            //CONFIGURE_RTS(control_signal_bitmap.CARRIER_CONTROL);  
-            //------------------------------------------------------------------            
-            
+            //---------
+            //CONFIGURE_RTS(control_signal_bitmap.CARRIER_CONTROL);
+            //------------------------------------------------------------------
+
             #if defined(USB_CDC_SUPPORT_DTR_SIGNALING)
                 if(control_signal_bitmap.DTE_PRESENT == 1)
                 {
@@ -226,7 +226,7 @@ void USBCheckCDCRequest(void)
                 else
                 {
                     UART_DTR = (USB_CDC_DTR_ACTIVE_LEVEL ^ 1);
-                }        
+                }
             #endif
             inPipes[0].info.bits.busy = 1;
             break;
@@ -241,7 +241,7 @@ void USBCheckCDCRequest(void)
 				UART_TRISTx = 0;   // Make sure TX pin configured as an output
 				UART_ENABLE = 0;   // Turn off USART (to relinquish TX pin control)
 			}
-			else if (SetupPkt.wValue == 0x0000) //0x0000 means stop sending indefinite break 
+			else if (SetupPkt.wValue == 0x0000) //0x0000 means stop sending indefinite break
 			{
     			UART_ENABLE = 1;   // turn on USART
 				UART_TRISTx = 1;   // Make TX pin an input
@@ -264,7 +264,7 @@ void USBCheckCDCRequest(void)
 /**************************************************************************
   Function:
         void CDCInitEP(void)
-    
+
   Summary:
     This function initializes the CDC function driver. This function should
     be called after the SET_CONFIGURATION command (ex: within the context of
@@ -274,11 +274,11 @@ void USBCheckCDCRequest(void)
     the default line coding (baud rate, bit parity, number of data bits,
     and format). This function also enables the endpoints and prepares for
     the first transfer from the host.
-    
+
     This function should be called after the SET_CONFIGURATION command.
     This is most simply done by calling this function from the
     USBCBInitEP() function.
-    
+
     Typical Usage:
     <code>
         void USBCBInitEP(void)
@@ -289,7 +289,7 @@ void USBCheckCDCRequest(void)
   Conditions:
     None
   Remarks:
-    None                                                                   
+    None
   **************************************************************************/
 void CDCInitEP(void)
 {
@@ -300,7 +300,7 @@ void CDCInitEP(void)
     line_coding.bDataBits = 0x08;               // 5,6,7,8, or 16
 
     cdc_rx_len = 0;
-    
+
     /*
      * Do not have to init Cnt of IN pipes here.
      * Reason:  Number of BYTEs to send to the host
@@ -327,22 +327,22 @@ void CDCInitEP(void)
         SerialStatePacket.bmRequestType = 0xA1; //Always 0xA1 for this type of packet.
         SerialStatePacket.bNotification = SERIAL_STATE;
         SerialStatePacket.wValue = 0x0000;  //Always 0x0000 for this type of packet
-        SerialStatePacket.wIndex = CDC_COMM_INTF_ID;  //Interface number  
+        SerialStatePacket.wIndex = CDC_COMM_INTF_ID;  //Interface number
         SerialStatePacket.SerialState.byte = 0x00;
         SerialStatePacket.Reserved = 0x00;
-        SerialStatePacket.wLength = 0x02;   //Always 2 bytes for this type of packet    
+        SerialStatePacket.wLength = 0x02;   //Always 2 bytes for this type of packet
         CDCNotificationHandler();
   	#endif
-  	
+
   	#if defined(USB_CDC_SUPPORT_DTR_SIGNALING)
   	    mInitDTRPin();
   	#endif
-  	
+
   	#if defined(USB_CDC_SUPPORT_HARDWARE_FLOW_CONTROL)
   	    mInitRTSPin();
   	    mInitCTSPin();
   	#endif
-    
+
     cdc_trf_state = CDC_TX_READY;
 }//end CDCInitEP
 
@@ -351,31 +351,31 @@ void CDCInitEP(void)
   Function: void CDCNotificationHandler(void)
   Summary: Checks for changes in DSR status and reports them to the USB host.
   Description: Checks for changes in DSR pin state and reports any changes
-               to the USB host. 
+               to the USB host.
   Conditions: CDCInitEP() must have been called previously, prior to calling
               CDCNotificationHandler() for the first time.
   Remarks:
-    This function is only implemented and needed when the 
+    This function is only implemented and needed when the
     USB_CDC_SUPPORT_DSR_REPORTING option has been enabled.  If the function is
     enabled, it should be called periodically to sample the DSR pin and feed
-    the information to the USB host.  This can be done by calling 
+    the information to the USB host.  This can be done by calling
     CDCNotificationHandler() by itself, or, by calling CDCTxService() which
     also calls CDCNotificationHandler() internally, when appropriate.
   **************************************************************************/
 #if defined(USB_CDC_SUPPORT_DSR_REPORTING)
 void CDCNotificationHandler(void)
 {
-    //Check the DTS I/O pin and if a state change is detected, notify the 
+    //Check the DTS I/O pin and if a state change is detected, notify the
     //USB host by sending a serial state notification element packet.
     if(UART_DTS == USB_CDC_DSR_ACTIVE_LEVEL) //UART_DTS must be defined to be an I/O pin in the hardware profile to use the DTS feature (ex: "PORTXbits.RXY")
     {
         SerialStateBitmap.bits.DSR = 1;
-    }  
+    }
     else
     {
         SerialStateBitmap.bits.DSR = 0;
-    }        
-    
+    }
+
     //If the state has changed, and the endpoint is available, send a packet to
     //notify the hUSB host of the change.
     if((SerialStateBitmap.byte != OldSerialStateBitmap.byte) && (!USBHandleBusy(CDCNotificationInHandle)))
@@ -388,11 +388,11 @@ void CDCNotificationHandler(void)
 
         //Send the packet over USB to the host.
         CDCNotificationInHandle = USBTransferOnePacket(CDC_COMM_EP, IN_TO_HOST, (uint8_t*)&SerialStatePacket, sizeof(SERIAL_STATE_NOTIFICATION));
-        
+
         //Save the old value, so we can detect changes later.
         OldSerialStateBitmap.byte = SerialStateBitmap.byte;
-    }    
-}//void CDCNotificationHandler(void)    
+    }
+}//void CDCNotificationHandler(void)
 #else
     #define CDCNotificationHandler() {}
 #endif
@@ -401,15 +401,15 @@ void CDCNotificationHandler(void)
 /**********************************************************************************
   Function:
     bool USBCDCEventHandler(USB_EVENT event, void *pdata, uint16_t size)
-    
+
   Summary:
-    Handles events from the USB stack, which may have an effect on the CDC 
+    Handles events from the USB stack, which may have an effect on the CDC
     endpoint(s).
 
   Description:
-    Handles events from the USB stack.  This function should be called when 
+    Handles events from the USB stack.  This function should be called when
     there is a USB event that needs to be processed by the CDC driver.
-    
+
   Conditions:
     Value of input argument 'len' should be smaller than the maximum
     endpoint size responsible for receiving bulk data from USB host for CDC
@@ -419,12 +419,12 @@ void CDCNotificationHandler(void)
     event - the type of event that occurred
     pdata - pointer to the data that caused the event
     size - the size of the data that is pointed to by pdata
-                                                                                   
+
   **********************************************************************************/
 bool USBCDCEventHandler(USB_EVENT event, void *pdata, uint16_t size)
 {
     switch( (uint16_t)event )
-    {  
+    {
         case EVENT_TRANSFER_TERMINATED:
             if(pdata == CDCDataOutHandle)
             {
@@ -439,14 +439,14 @@ bool USBCDCEventHandler(USB_EVENT event, void *pdata, uint16_t size)
             break;
         default:
             return false;
-    }      
+    }
     return true;
 }
 
 /**********************************************************************************
   Function:
         uint8_t getsUSBUSART(char *buffer, uint8_t len)
-    
+
   Summary:
     getsUSBUSART copies a string of BYTEs received through USB CDC Bulk OUT
     endpoint to a user's specified location. It is a non-blocking function.
@@ -458,12 +458,12 @@ bool USBCDCEventHandler(USB_EVENT event, void *pdata, uint16_t size)
     endpoint to a user's specified location. It is a non-blocking function.
     It does not wait for data if there is no data available. Instead it
     returns '0' to notify the caller that there is no data available.
-    
+
     Typical Usage:
     <code>
         uint8_t numBytes;
         uint8_t buffer[64]
-    
+
         numBytes = getsUSBUSART(buffer,sizeof(buffer)); //until the buffer is free.
         if(numBytes \> 0)
         {
@@ -480,12 +480,12 @@ bool USBCDCEventHandler(USB_EVENT event, void *pdata, uint16_t size)
   Input:
     buffer -  Pointer to where received BYTEs are to be stored
     len -     The number of BYTEs expected.
-                                                                                   
+
   **********************************************************************************/
 uint8_t getsUSBUSART(uint8_t *buffer, uint8_t len)
 {
     cdc_rx_len = 0;
-    
+
     if(!USBHandleBusy(CDCDataOutHandle))
     {
         /*
@@ -494,7 +494,7 @@ uint8_t getsUSBUSART(uint8_t *buffer, uint8_t len)
          */
         if(len > USBHandleGetLength(CDCDataOutHandle))
             len = USBHandleGetLength(CDCDataOutHandle);
-        
+
         /*
          * Copy data from dual-ram buffer to user's buffer
          */
@@ -508,15 +508,15 @@ uint8_t getsUSBUSART(uint8_t *buffer, uint8_t len)
         CDCDataOutHandle = USBRxOnePacket(CDC_DATA_EP,(uint8_t*)&cdc_data_rx,sizeof(cdc_data_rx));
 
     }//end if
-    
+
     return cdc_rx_len;
-    
+
 }//end getsUSBUSART
 
 /******************************************************************************
   Function:
 	void putUSBUSART(char *data, uint8_t length)
-		
+
   Summary:
     putUSBUSART writes an array of data to the USB. Use this version, is
     capable of transferring 0x00 (what is typically a NULL character in any of
@@ -526,7 +526,7 @@ uint8_t getsUSBUSART(uint8_t *buffer, uint8_t len)
     putUSBUSART writes an array of data to the USB. Use this version, is
     capable of transferring 0x00 (what is typically a NULL character in any of
     the string transfer functions).
-    
+
     Typical Usage:
     <code>
         if(USBUSARTIsTxTrfReady())
@@ -535,7 +535,7 @@ uint8_t getsUSBUSART(uint8_t *buffer, uint8_t len)
             putUSBUSART(data,5);
         }
     </code>
-    
+
     The transfer mechanism for device-to-host(put) is more flexible than
     host-to-device(get). It can handle a string of data larger than the
     maximum size of bulk IN endpoint. A state machine is used to transfer a
@@ -551,7 +551,7 @@ uint8_t getsUSBUSART(uint8_t *buffer, uint8_t len)
   Input:
     char *data - pointer to a RAM array of data to be transfered to the host
     uint8_t length - the number of bytes to be transfered (must be less than 255).
-		
+
  *****************************************************************************/
 void putUSBUSART(uint8_t *data, uint8_t  length)
 {
@@ -589,7 +589,7 @@ void putUSBUSART(uint8_t *data, uint8_t  length)
 /******************************************************************************
 	Function:
 		void putsUSBUSART(char *data)
-		
+
   Summary:
     putsUSBUSART writes a string of data to the USB including the null
     character. Use this version, 'puts', to transfer data from a RAM buffer.
@@ -597,7 +597,7 @@ void putUSBUSART(uint8_t *data, uint8_t  length)
   Description:
     putsUSBUSART writes a string of data to the USB including the null
     character. Use this version, 'puts', to transfer data from a RAM buffer.
-    
+
     Typical Usage:
     <code>
         if(USBUSARTIsTxTrfReady())
@@ -606,7 +606,7 @@ void putUSBUSART(uint8_t *data, uint8_t  length)
             putsUSBUSART(data);
         }
     </code>
-    
+
     The transfer mechanism for device-to-host(put) is more flexible than
     host-to-device(get). It can handle a string of data larger than the
     maximum size of bulk IN endpoint. A state machine is used to transfer a
@@ -623,9 +623,9 @@ void putUSBUSART(uint8_t *data, uint8_t  length)
     char *data -  null\-terminated string of constant data. If a
                             null character is not found, 255 BYTEs of data
                             will be transferred to the host.
-		
+
  *****************************************************************************/
- 
+
 void putsUSBUSART(char *data)
 {
     uint8_t len;
@@ -660,7 +660,7 @@ void putsUSBUSART(char *data)
         USBUnmaskInterrupts();
         return;
     }
-    
+
     /*
      * While loop counts the number of BYTEs to send including the
      * null character.
@@ -672,7 +672,7 @@ void putsUSBUSART(char *data)
         len++;
         if(len == 255) break;       // Break loop once max len is reached.
     }while(*pData++);
-    
+
     /*
      * Second piece of information (length of data to send) is ready.
      * Call mUSBUSARTTxRam to setup the transfer.
@@ -686,7 +686,7 @@ void putsUSBUSART(char *data)
 /**************************************************************************
   Function:
         void putrsUSBUSART(const const char *data)
-    
+
   Summary:
     putrsUSBUSART writes a string of data to the USB including the null
     character. Use this version, 'putrs', to transfer data literals and
@@ -696,7 +696,7 @@ void putsUSBUSART(char *data)
     putrsUSBUSART writes a string of data to the USB including the null
     character. Use this version, 'putrs', to transfer data literals and
     data located in program memory.
-    
+
     Typical Usage:
     <code>
         if(USBUSARTIsTxTrfReady())
@@ -704,7 +704,7 @@ void putsUSBUSART(char *data)
             putrsUSBUSART("Hello World");
         }
     </code>
-    
+
     The transfer mechanism for device-to-host(put) is more flexible than
     host-to-device(get). It can handle a string of data larger than the
     maximum size of bulk IN endpoint. A state machine is used to transfer a
@@ -721,7 +721,7 @@ void putsUSBUSART(char *data)
     const const char *data -  null\-terminated string of constant data. If a
                             null character is not found, 255 uint8_ts of data
                             will be transferred to the host.
-                                                                           
+
   **************************************************************************/
 void putrsUSBUSART(const const char *data)
 {
@@ -757,7 +757,7 @@ void putrsUSBUSART(const const char *data)
         USBUnmaskInterrupts();
         return;
     }
-    
+
     /*
      * While loop counts the number of BYTEs to send including the
      * null character.
@@ -769,7 +769,7 @@ void putrsUSBUSART(const const char *data)
         len++;
         if(len == 255) break;       // Break loop once max len is reached.
     }while(*pData++);
-    
+
     /*
      * Second piece of information (length of data to send) is ready.
      * Call mUSBUSARTTxRom to setup the transfer.
@@ -785,7 +785,7 @@ void putrsUSBUSART(const const char *data)
 /************************************************************************
   Function:
         void CDCTxService(void)
-    
+
   Summary:
     CDCTxService handles device-to-host transaction(s). This function
     should be called once per Main Program loop after the device reaches
@@ -794,12 +794,12 @@ void putrsUSBUSART(const const char *data)
     CDCTxService handles device-to-host transaction(s). This function
     should be called once per Main Program loop after the device reaches
     the configured state (after the CDCIniEP() function has already executed).
-    This function is needed, in order to advance the internal software state 
+    This function is needed, in order to advance the internal software state
     machine that takes care of sending multiple transactions worth of IN USB
-    data to the host, associated with CDC serial data.  Failure to call 
+    data to the host, associated with CDC serial data.  Failure to call
     CDCTxService() periodically will prevent data from being sent to the
     USB host, over the CDC serial data interface.
-    
+
     Typical Usage:
     <code>
     void main(void)
@@ -819,7 +819,7 @@ void putrsUSBUSART(const const char *data)
             {
                 //Keep trying to send data to the PC as required
                 CDCTxService();
-    
+
                 //Run application code.
                 UserApplication();
             }
@@ -830,19 +830,19 @@ void putrsUSBUSART(const const char *data)
     CDCIniEP() function should have already executed/the device should be
     in the CONFIGURED_STATE.
   Remarks:
-    None                                                                 
+    None
   ************************************************************************/
- 
+
 void CDCTxService(void)
 {
     uint8_t byte_to_send;
     uint8_t i;
-    
+
     USBMaskInterrupts();
-    
+
     CDCNotificationHandler();
-    
-    if(USBHandleBusy(CDCDataInHandle)) 
+
+    if(USBHandleBusy(CDCDataInHandle))
     {
         USBUnmaskInterrupts();
         return;
@@ -855,7 +855,7 @@ void CDCTxService(void)
      */
     if(cdc_trf_state == CDC_TX_COMPLETING)
         cdc_trf_state = CDC_TX_READY;
-    
+
     /*
      * If CDC_TX_READY state, nothing to do, just return.
      */
@@ -864,7 +864,7 @@ void CDCTxService(void)
         USBUnmaskInterrupts();
         return;
     }
-    
+
     /*
      * If CDC_TX_BUSY_ZLP state, send zero length packet
      */
@@ -888,9 +888,9 @@ void CDCTxService(void)
          * Subtract the number of bytes just about to be sent from the total.
          */
     	cdc_tx_len = cdc_tx_len - byte_to_send;
-    	  
+
         pCDCDst.bRam = (uint8_t*)&cdc_data_tx; // Set destination pointer
-        
+
         i = byte_to_send;
         if(cdc_mem_type == USB_EP0_ROM)            // Determine type of memory source
         {
@@ -912,7 +912,7 @@ void CDCTxService(void)
                 i--;
             }
         }
-        
+
         /*
          * Lastly, determine if a zero length packet state is necessary.
          * See explanation in USB Specification 2.0: Section 5.8.3
@@ -927,7 +927,7 @@ void CDCTxService(void)
         CDCDataInHandle = USBTxOnePacket(CDC_DATA_EP,(uint8_t*)&cdc_data_tx,byte_to_send);
 
     }//end if(cdc_tx_sate == CDC_TX_BUSY)
-    
+
     USBUnmaskInterrupts();
 }//end CDCTxService
 

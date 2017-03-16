@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -738,7 +738,7 @@ static bool USBHostMSDSCSIRequestSense(uint8_t * address)
     // Fill in the command block with the READ10 parameters.
     commandBlock[0] = 0x03;     // Request Sense
     commandBlock[1] = RDPROTECT_NORMAL | FUA_ALLOW_CACHE;
-    commandBlock[2] = 0;     
+    commandBlock[2] = 0;
     commandBlock[3] = 0;
     commandBlock[4] = 0x12;
     commandBlock[5] = 0;

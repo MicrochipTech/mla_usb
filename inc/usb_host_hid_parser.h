@@ -14,13 +14,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
 
 #ifndef _USB_HOST_HID_PARSER_H_ /* usb_host_hid_parser.h */
-#define _USB_HOST_HID_PARSER_H_ 
+#define _USB_HOST_HID_PARSER_H_
 
 
 #define HIDItem_SizeMask           0x03     // Mask for Size bitfield in Item header
@@ -58,26 +58,26 @@ please contact mla_licensing@microchip.com
 //
 //------------------------------------------------------------------------------
 #define HIDTag_UsagePage           0x00     // UsagePage Tag value
-#define HIDTag_LogicalMinimum      0x01     // Logical Minimum Tag value 
+#define HIDTag_LogicalMinimum      0x01     // Logical Minimum Tag value
 #define HIDTag_LogicalMaximum      0x02     // Logical Maximum Tag value
 #define HIDTag_PhysicalMinimum     0x03     // Physical Minimum Tag value
 #define HIDTag_PhysicalMaximum     0x04     // Physical Maximum Tag value
 #define HIDTag_UnitExponent        0x05     // Unit Exponent Tag value
-#define HIDTag_Unit                0x06     // Unit  Tag value               
-#define HIDTag_ReportSize          0x07     // Report Size  Tag value     
-#define HIDTag_ReportID            0x08     // Report ID  Tag value            
+#define HIDTag_Unit                0x06     // Unit  Tag value
+#define HIDTag_ReportSize          0x07     // Report Size  Tag value
+#define HIDTag_ReportID            0x08     // Report ID  Tag value
 #define HIDTag_ReportCount         0x09     // ReportCount  Tag value
 #define HIDTag_Push                0x0A     // Push  Tag value
-#define HIDTag_Pop                 0x0B     // Pop  Tag value     
+#define HIDTag_Pop                 0x0B     // Pop  Tag value
 
 //------------------------------------------------------------------------------
-//                                     
+//
 // HID Item Tag Definitions - Locals
 //
 //------------------------------------------------------------------------------
 
-#define HIDTag_Usage               0x00     //  Usage Tag value  
-#define HIDTag_UsageMinimum        0x01     //  Usage Minimum Tag value     
+#define HIDTag_Usage               0x00     //  Usage Tag value
+#define HIDTag_UsageMinimum        0x01     //  Usage Minimum Tag value
 #define HIDTag_UsageMaximum        0x02     //  Usage Maximum Tag value
 #define HIDTag_DesignatorIndex     0x03     //  Designator Index Tag value
 #define HIDTag_DesignatorMinimum   0x04     //  Designator Minimum Tag value
@@ -108,10 +108,10 @@ please contact mla_licensing@microchip.com
 #define HIDData_Relative           0x04     //  HID data type relative
 #define HIDData_Absolute           0x00     //  HID data type absolute
 #define HIDData_VariableBit        0x02     //  Variable bit position
-#define HIDData_Variable           0x02     //  HID data type variable 
-#define HIDData_ArrayBit           0x02     //  Array Bit position 
+#define HIDData_Variable           0x02     //  HID data type variable
+#define HIDData_ArrayBit           0x02     //  Array Bit position
 #define HIDData_Array              0x00     //  Array indentifier value
-#define HIDData_ConstantBit        0x01     //  Constant Bit position       
+#define HIDData_ConstantBit        0x01     //  Constant Bit position
 #define HIDData_Constant           0x01     //  Constant data type indentifier value
 
 //------------------------------------------------------------------------------
@@ -131,7 +131,7 @@ typedef enum {
 } HIDReportTypeEnum;
 
 
-    
+
 // *****************************************************************************
 /* HID Item Information
 
@@ -141,14 +141,14 @@ typedef struct _HID_ITEM_INFO
 {
    union
     {
-       struct 
+       struct
        {
            uint8_t             ItemSize :2;        // Numeric expression specifying size of data
            uint8_t             ItemType :2;        // This field identifies type of item(Main, Global or Local)
            uint8_t             ItemTag  :4;        // This field specifies the function of the item
        };
        uint8_t                 val;                // to access the data in byte format
-    }                       ItemDetails;    
+    }                       ItemDetails;
 
     union
     {
@@ -156,7 +156,7 @@ typedef struct _HID_ITEM_INFO
         uint32_t                   uItemData;      // Item Data is stored in unsigned format
         uint8_t                    bItemData[4];
     }   Data;
-}   HID_ITEM_INFO; 
+}   HID_ITEM_INFO;
 
 
 // *****************************************************************************

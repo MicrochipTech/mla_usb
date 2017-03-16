@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -43,7 +43,7 @@ please contact mla_licensing@microchip.com
 // the Meta-Data Message Preamble feature
 #define CLEAR_FEATURE
 
-//An application may choose to use the Get DataStatus request to determine which 
+//An application may choose to use the Get DataStatus request to determine which
 //endpoints on the device have data
 #define GET_DATA_STATUS   0x00
 
@@ -88,7 +88,7 @@ extern volatile FAR unsigned char phdc_data_tx[PHDC_DATA_IN_EP_SIZE];
 /* callback function pointer structure for Application to handle events */
 typedef void(* USB_PHDC_CB)(uint8_t, void *);
 
-extern volatile uint8_t CtrlTrfData[USB_EP0_BUFF_SIZE]; 
+extern volatile uint8_t CtrlTrfData[USB_EP0_BUFF_SIZE];
 /** E X T E R N S ************************************************************/
 typedef struct PHDC_RX_ENDPOINT_STRUCT
 {
@@ -97,7 +97,7 @@ typedef struct PHDC_RX_ENDPOINT_STRUCT
 	uint8_t qos;
 	uint16_t offset;
 	uint8_t size;
-	uint8_t len;	
+	uint8_t len;
 	uint8_t *app_buff;
 	USB_HANDLE PHDCDataOutHandle;
 }PHDC_RX_ENDPOINT,*PTR_PHDC_RX_ENDPOINT;
@@ -108,10 +108,10 @@ typedef struct PHDC_TX_ENDPOINT_STRUCT
 	uint16_t transfer_size;
 	bool memtype;
 	uint8_t qos;
-	uint16_t offset;	
-	uint16_t bytes_to_send;	
+	uint16_t offset;
+	uint16_t bytes_to_send;
 	uint8_t size;
-	uint8_t len;	
+	uint8_t len;
 	uint8_t *app_buff;
 	USB_HANDLE PHDCDataInHandle;
 }PHDC_TX_ENDPOINT,*PTR_PHDC_TX_ENDPOINT;
@@ -122,31 +122,31 @@ extern const uint8_t configDescriptor1[];
 /******************************************************************************
  	Function:
  		void USBDevicePHDCCheckRequest(void)
- 
+
  	Description:
  		This routine checks the setup data packet to see if it
  		is class specific request or vendor specific request
 		and handles it
- 		
+
  	PreCondition:
  		None
 
 	Parameters:
 		None
-		
+
 	Return Values:
 		None
-		
+
 	Remarks:
 		None
-		 
+
   *****************************************************************************/
 void USBDevicePHDCCheckRequest(void);
 
 /**************************************************************************
   Function:
         void PHDCInitEP(void)
-    
+
   Summary:
     This function initializes the PHDC function driver. This function should
     be called after the SET_CONFIGURATION command.
@@ -155,11 +155,11 @@ void USBDevicePHDCCheckRequest(void);
     the default line coding (baud rate, bit parity, number of data bits,
     and format). This function also enables the endpoints and prepares for
     the first transfer from the host.
-    
+
     This function should be called after the SET_CONFIGURATION command.
     This is most simply done by calling this function from the
     USBCBInitEP() function.
-    
+
     Typical Usage:
     <code>
         void USBCBInitEP(void)
@@ -170,13 +170,13 @@ void USBDevicePHDCCheckRequest(void);
   Conditions:
     None
   Remarks:
-    None                                                                   
+    None
   **************************************************************************/
 extern void USBDevicePHDCInit(USB_PHDC_CB);
 /**********************************************************************************
   Function:
         uint8_t USBDevicePHDCReceiveData(uint8_t qos, uint8_t *buffer, uint16_t len)
-    
+
   Summary:
     USBDevicePHDCReceiveData copies a string of BYTEs received through USB PHDC Bulk OUT
     endpoint to a user's specified location. It is a non-blocking function.
@@ -188,12 +188,12 @@ extern void USBDevicePHDCInit(USB_PHDC_CB);
     endpoint to a user's specified location. It is a non-blocking function.
     It does not wait for data if there is no data available. Instead it
     returns '0' to notify the caller that there is no data available.
-    
+
     Typical Usage:
     <code>
         uint8_t numBytes;
         uint8_t buffer[64]
-    
+
         numBytes = USBDevicePHDCReceiveData(buffer,sizeof(buffer)); //until the buffer is free.
         if(numBytes \> 0)
         {
@@ -211,7 +211,7 @@ extern void USBDevicePHDCInit(USB_PHDC_CB);
 	qos - quality of service
     buffer -  Pointer to where received BYTEs are to be stored
     len -     The number of BYTEs expected.
-                                                                                   
+
   **********************************************************************************/
 
 uint8_t USBDevicePHDCReceiveData(uint8_t qos, uint8_t *buffer, uint16_t len);
@@ -219,13 +219,13 @@ uint8_t USBDevicePHDCReceiveData(uint8_t qos, uint8_t *buffer, uint16_t len);
 /******************************************************************************
   Function:
 	void USBDevicePHDCSendData(uint8_t qos, uint8_t *data, uint8_t Length)
-		
+
   Summary:
-    USBDevicePHDCSendData writes an array of data to the USB. 
+    USBDevicePHDCSendData writes an array of data to the USB.
 
   Description:
     USBDevicePHDCSendData writes an array of data to the USB.
-    
+
     Typical Usage:
     <code>
         if(USBUSARTIsTxTrfReady())
@@ -234,7 +234,7 @@ uint8_t USBDevicePHDCReceiveData(uint8_t qos, uint8_t *buffer, uint16_t len);
             USBDevicePHDCSendData(1,data,5);
         }
     </code>
-    
+
     The transfer mechanism for device-to-host(put) is more flexible than
     host-to-device(get). It can handle a string of data larger than the
     maximum size of bulk IN endpoint. A state machine is used to transfer a
@@ -249,13 +249,13 @@ uint8_t USBDevicePHDCReceiveData(uint8_t qos, uint8_t *buffer, uint16_t len);
 	qos - Quality of service information
     *data - pointer to a RAM array of data to be transfered to the host
     length - the number of bytes to be transfered.
-		
+
  *****************************************************************************/
 void USBDevicePHDCSendData(uint8_t qos, uint8_t *data, uint16_t length, bool memtype);
 /************************************************************************
   Function:
         void USBDevicePHDCTxRXService(void)
-    
+
   Summary:
     USBDevicePHDCTxRXService handles device-to-host transaction(s) and host-to-device transaction(s).
 	This function should be called once per Main Program loop after the device reaches
@@ -264,7 +264,7 @@ void USBDevicePHDCSendData(uint8_t qos, uint8_t *data, uint16_t length, bool mem
     USBDevicePHDCTxRXService handles device-to-host transaction(s) and host-to-device transaction(s).
 	This function should be called once per Main Program loop after the device reaches
     the configured state.
-    
+
     Typical Usage:
     <code>
     void main(void)
@@ -284,7 +284,7 @@ void USBDevicePHDCSendData(uint8_t qos, uint8_t *data, uint16_t length, bool mem
             {
                 //Keep trying to send data to the PC as required
                 USBDevicePHDCTxRXService();
-    
+
                 //Run application code.
                 UserApplication();
             }
@@ -294,7 +294,7 @@ void USBDevicePHDCSendData(uint8_t qos, uint8_t *data, uint16_t length, bool mem
   Conditions:
     None
   Remarks:
-    None                                                                 
+    None
   ************************************************************************/
 void USBDevicePHDCTxRXService(USTAT_FIELDS* event);
 
@@ -302,25 +302,25 @@ void USBDevicePHDCTxRXService(USTAT_FIELDS* event);
 /************************************************************************
   Function:
         void USBDevicePHDCUpdateStatus (uint16_t EndpointNo, bool Status)
-    
+
   Summary:
-    USBDevicePHDCUpdateStatus Function Gets the current status of an Endpoint and holds the status in variable phdcEpDataBitmap. The Status is sent to the host upon the 
-    "Get Data Status" request from the host. 
-    
+    USBDevicePHDCUpdateStatus Function Gets the current status of an Endpoint and holds the status in variable phdcEpDataBitmap. The Status is sent to the host upon the
+    "Get Data Status" request from the host.
+
   Description:
-    USBDevicePHDCUpdateStatus Function helps to handle the "Get Data Status" PHDC specfic request received from the Host as mentioned in the 
-    section 7.1.2 of the Personal Healthcare Devices Specification. This function Gets the current status of an Endpoint and holds the status in 
-    variable phdcEpDataBitmap. 
-    
+    USBDevicePHDCUpdateStatus Function helps to handle the "Get Data Status" PHDC specfic request received from the Host as mentioned in the
+    section 7.1.2 of the Personal Healthcare Devices Specification. This function Gets the current status of an Endpoint and holds the status in
+    variable phdcEpDataBitmap.
+
   Input:
-     uint16_t EndpointNo : The number of the endpoint, for which the status is requested. 
-     
-     bool Status:  Current status of the Endpoint. 
-  
+     uint16_t EndpointNo : The number of the endpoint, for which the status is requested.
+
+     bool Status:  Current status of the Endpoint.
+
   Conditions:
     None
   Remarks:
-    None                                                                 
+    None
   ************************************************************************/
 void USBDevicePHDCUpdateStatus (uint16_t EndpointNo, bool Status);
 #endif //PHDC_H

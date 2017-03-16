@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -39,7 +39,7 @@ please contact mla_licensing@microchip.com
 /*****************************************************************************/
 
 
-//Device specific IECx register count.  Useful during interrupt context save and 
+//Device specific IECx register count.  Useful during interrupt context save and
 //restore operations (such as prior to and after entering sleep on suspend).
 //IEC0-IEC5 on PIC24FJ64GB004 Family devices
 //IEC0-IEC5 on PIC24FJ256GB110 Family devices
@@ -49,7 +49,7 @@ please contact mla_licensing@microchip.com
 //IEC0-IEC7 on PIC24FJ128GB204 Family devices
 //IEC0-IEC7 on PIC24FJ256GB412 Family devices
 #if defined(__PIC24FJ64GB004__) || defined(__PIC24FJ64GB002__) || defined(__PIC24FJ32GB004__) || defined(__PIC24FJ32GB002__)    \
-    || defined(__PIC24FJ256GB110__) || defined(__PIC24FJ192GB110__) || defined(__PIC24FJ128GB110__) || defined(__PIC24FJ64GB110__) || defined(__PIC24FJ256GB108__) || defined(__PIC24FJ192GB108__) || defined(__PIC24FJ128GB108__) || defined(__PIC24FJ64GB108__)  || defined(__PIC24FJ256GB106__) || defined(__PIC24FJ192GB106__) || defined(__PIC24FJ128GB106__) || defined(__PIC24FJ64GB106__) 
+    || defined(__PIC24FJ256GB110__) || defined(__PIC24FJ192GB110__) || defined(__PIC24FJ128GB110__) || defined(__PIC24FJ64GB110__) || defined(__PIC24FJ256GB108__) || defined(__PIC24FJ192GB108__) || defined(__PIC24FJ128GB108__) || defined(__PIC24FJ64GB108__)  || defined(__PIC24FJ256GB106__) || defined(__PIC24FJ192GB106__) || defined(__PIC24FJ128GB106__) || defined(__PIC24FJ64GB106__)
 
     #define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  6   //Number of IECx registers implemented in the microcontroller (varies from device to device, make sure this is set correctly for the intended CPU)
     #define USB_HAL_VBUSTristate()                  //No GPIO driver on VBUS on these devices.
@@ -231,7 +231,7 @@ please contact mla_licensing@microchip.com
 //----- U1EP bit definitions --------------------------------------------------
 #define UEP_STALL                       0x0002
 // Cfg Control pipe for this ep
-#define EP_CTRL                         0x0C        
+#define EP_CTRL                         0x0C
 
 
 #define BDT_BASE_ADDR_TAG   __attribute__ ((aligned (512)))
@@ -325,7 +325,7 @@ typedef union _POINTER
         //byte bUpper;
     };
     uint16_t _word;                         // bLow & bHigh
-    
+
     //pFunc _pFunc;                       // Usage: ptr.pFunc(); Init: ptr.pFunc = &<Function>;
 
     uint8_t* bRam;                         // Ram byte pointer: 2 bytes pointer pointing
@@ -352,8 +352,8 @@ typedef union _POINTER
     #define USBMaskInterrupts() {IEC5bits.USB1IE = 0;}
     #define USBUnmaskInterrupts() {IEC5bits.USB1IE = 1;}
 #else
-    #define USBMaskInterrupts() 
-    #define USBUnmaskInterrupts() 
+    #define USBMaskInterrupts()
+    #define USBUnmaskInterrupts()
 #endif
 
 //STALLIE, IDLEIE, TRNIE, and URSTIE are all enabled by default and are required
@@ -381,7 +381,7 @@ typedef union _POINTER
                                             U1EIE = 0x9F;\
                                             U1IE = 0x99 | USB_SOF_INTERRUPT | USB_ERROR_INTERRUPT;\
                                             USBT1MSECIE = 1;\
-                                        } 
+                                        }
 
 
 /********************************************************************
@@ -392,11 +392,11 @@ Summary:
     Places the core into sleep and sets up the USB module
     to wake up the device on USB activity (either USB host resume or
     USB VBUS going away, such as due to USB cable detach).
-    
+
 PreCondition:
     The USBDeviceInit() function should have been called at least once and the
     USB host should have suspended the USB device.
-    
+
 Parameters:
     None
 
@@ -421,44 +421,44 @@ bool USBSleepOnSuspend(void);
 /****************************************************************
     Function:
         void USBPowerModule(void)
-        
+
     Description:
         This macro is used to power up the USB module if required<br>
         PIC18: defines as nothing<br>
         PIC24: defines as U1PWRCbits.USBPWR = 1;<br>
-        
+
     Parameters:
         None
-        
+
     Return Values:
         None
-        
+
     Remarks:
         None
-        
+
   ****************************************************************/
 #define USBPowerModule() U1PWRCbits.USBPWR = 1;
 
 /****************************************************************
     Function:
         void USBModuleDisable(void)
-        
+
     Description:
         This macro is used to disable the USB module.  This will perform a
         USB soft detach operation from the host, if the device was already plugged
         into the host at the time of calling this function.  All USB module
         features including the internal USB 1ms timer and the USB VBUS
         monitoring comparators will be disabled.
-        
+
     Parameters:
         None
-        
+
     Return Values:
         None
-        
+
     Remarks:
         None
-        
+
   ****************************************************************/
 #define USBModuleDisable() {\
     U1CON = 0;\
@@ -467,95 +467,95 @@ bool USBSleepOnSuspend(void);
     U1PWRCbits.USUSPND = 0;\
     U1PWRCbits.USBPWR = 0;\
     USBDeviceState = DETACHED_STATE;\
-}    
+}
 
 /****************************************************************
     Function:
         USBSetBDTAddress(addr)
-        
+
     Description:
         This macro is used to power up the USB module if required
-        
+
     Parameters:
         None
-        
+
     Return Values:
         None
-        
+
     Remarks:
         None
-        
+
   ****************************************************************/
 #define USBSetBDTAddress(addr)         U1BDTP1 = (((unsigned int)addr)/256);
 
 /****************************************************************
     Function:
         void USBClearInterruptRegister(int register)
-        
+
     Description:
         Clears all of the interrupts in the requested register
-        
+
     Parameters:
         register - the register that needs to be cleared.
-        
+
     Return Values:
         None
-        
+
     Remarks:
         Note that on these devices to clear an interrupt you must
         write a '1' to the interrupt location.
-        
+
   ****************************************************************/
 #define USBClearInterruptRegister(reg) reg = 0xFFFF;
 
 /********************************************************************
     Function:
         void USBClearInterruptFlag(register, uint8_t if_flag_offset)
-        
+
     Summary:
         Clears the specified USB interrupt flag.
-        
+
     PreCondition:
         None
-        
+
     Parameters:
-        register - the register mnemonic for the register holding the interrupt 
+        register - the register mnemonic for the register holding the interrupt
                    flag to be cleared
         uint8_t if_flag_offset - the bit position offset (for the interrupt flag to
                    clear) from the "right of the register"
-        
+
     Return Values:
         None
-        
+
     Remarks:
-        Individual USB interrupt flag bits are cleared by writing '1' to the 
+        Individual USB interrupt flag bits are cleared by writing '1' to the
         bit, in a word write operation.
- 
+
  *******************************************************************/
-#define USBClearInterruptFlag(reg_name, if_flag_offset)	(reg_name = (1 << if_flag_offset))	
+#define USBClearInterruptFlag(reg_name, if_flag_offset)	(reg_name = (1 << if_flag_offset))
 
 /********************************************************************
     Function:
         void DisableNonZeroEndpoints(UINT8 last_ep_num)
-        
+
     Summary:
         Clears the control registers for the specified non-zero endpoints
-        
+
     PreCondition:
         None
-        
+
     Parameters:
         UINT8 last_ep_num - the last endpoint number to clear.  This
         number should include all endpoints used in any configuration.
-        
+
     Return Values:
         None
-        
+
     Remarks:
         None
- 
+
  *******************************************************************/
-#define DisableNonZeroEndpoints(last_ep_num) memset((void*)&U1EP1,0x00,(last_ep_num * 2));                                          
+#define DisableNonZeroEndpoints(last_ep_num) memset((void*)&U1EP1,0x00,(last_ep_num * 2));
 
 
 /********************************************************************
@@ -748,7 +748,7 @@ void USBRestoreUSBInterrupts(void);
         extern USB_VOLATILE OUT_PIPE outPipes[1];
     #endif
 	extern volatile BDT_ENTRY* pBDTEntryOut[USB_MAX_EP_NUMBER+1];
-	extern volatile BDT_ENTRY* pBDTEntryIn[USB_MAX_EP_NUMBER+1];	
+	extern volatile BDT_ENTRY* pBDTEntryIn[USB_MAX_EP_NUMBER+1];
 #endif
 
 #endif //USB_HAL_PIC24F_H

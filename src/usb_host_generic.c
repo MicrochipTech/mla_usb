@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -99,7 +99,7 @@ GENERIC_DEVICE  gc_DevData;
     uint32_t flags     - Initialization flags
     uint8_t clientDriverID - ID to send when issuing a Device Request via
                             USBHostIssueDeviceRequest(), USBHostSetDeviceConfiguration(),
-                            or USBHostSetDeviceInterface().  
+                            or USBHostSetDeviceInterface().
 
   Return Values:
     true    - Initialization was successful
@@ -130,7 +130,7 @@ bool USBHostGenericInit ( uint8_t address, uint32_t flags, uint8_t clientDriverI
 
     // Save the Client Driver ID
     gc_DevData.clientDriverID = clientDriverID;
-    
+
     #ifdef DEBUG_MODE
         UART2PrintString( "GEN: USB Generic Client Initalized: flags=0x" );
         UART2PutHex(      flags );

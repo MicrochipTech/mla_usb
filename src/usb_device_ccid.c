@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -35,15 +35,15 @@ POINTER pCCIDSrc;            // Dedicated source pointer
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
 #if defined USB_CCID_SUPPORT_ABORT_REQUEST
     void USB_CCID_ABORT_REQUEST_HANDLER(void);
-#endif 
+#endif
 
 #if defined USB_CCID_SUPPORT_GET_CLOCK_FREQUENCIES_REQUEST
     void USB_CCID_GET_CLOCK_FREQUENCIES_REQUEST_HANDLER(void);
-#endif 
+#endif
 
 #if defined USB_CCID_SUPPORT_GET_DATA_RATES_REQUEST
     void USB_CCID_GET_DATA_RATES_REQUEST_HANDLER(void);
-#endif 
+#endif
 
 
 
@@ -53,25 +53,25 @@ POINTER pCCIDSrc;            // Dedicated source pointer
 /******************************************************************************
  	Function:
  		void USBCheckCCIDRequest(void)
- 
+
  	Description:
  		This routine checks the setup data packet to see if it
  		knows how to handle it
- 		
+
  	PreCondition:
  		None
 
 	Parameters:
 		None
-		
+
 	Return Values:
 		None
-		
+
 	Remarks:
 		None
-		 
+
   *****************************************************************************/
-  void USBCheckCCIDRequest(void)    
+  void USBCheckCCIDRequest(void)
   {
       /*
        * If request recipient is not an interface then return
@@ -93,19 +93,19 @@ POINTER pCCIDSrc;            // Dedicated source pointer
           case USB_CCID_ABORT:
               USB_CCID_ABORT_REQUEST_HANDLER();
               break;
-          #endif 
-          
+          #endif
+
           #if defined (USB_CCID_SUPPORT_GET_CLOCK_FREQUENCIES_REQUEST)
           case USB_CCID_GET_CLOCK_FREQUENCIES:
               USB_CCID_GET_CLOCK_FREQUENCIES_REQUEST_HANDLER();
               break;
-          #endif 
-          
+          #endif
+
           #if defined (USB_CCID_SUPPORT_GET_DATA_RATES_REQUEST)
           case USB_CCID_GET_DATA_RATES:
               USB_CCID_GET_DATA_RATES_REQUEST_HANDLER();
               break;
-          #endif 
+          #endif
           default:
               break;
       }//end switch(SetupPkt.bRequest)
@@ -115,7 +115,7 @@ POINTER pCCIDSrc;            // Dedicated source pointer
 /**************************************************************************
   Function:
         void USBCCIDInitEP(void)
-    
+
   Summary:
     This function initializes the CCID function driver. This function should
     be called after the SET_CONFIGURATION command.
@@ -124,11 +124,11 @@ POINTER pCCIDSrc;            // Dedicated source pointer
     the default line coding (baud rate, bit parity, number of data bits,
     and format). This function also enables the endpoints and prepares for
     the first transfer from the host.
-    
+
     This function should be called after the SET_CONFIGURATION command.
     This is most simply done by calling this function from the
     USBCBInitEP() function.
-    
+
     Typical Usage:
     <code>
         void USBCBInitEP(void)
@@ -139,14 +139,14 @@ POINTER pCCIDSrc;            // Dedicated source pointer
   Conditions:
     None
   Remarks:
-    None                                                                   
+    None
   **************************************************************************/
  void USBCCIDInitEP(void)
  {
-   
+
     usbCcidBulkInTrfState = USB_CCID_BULK_IN_READY;
     usbCcidBulkInLen =0;
-    
+
     /*
      * Do not have to init Cnt of IN pipes here.
      * Reason:  Number of BYTEs to send to the host
@@ -158,21 +158,21 @@ POINTER pCCIDSrc;            // Dedicated source pointer
      *          be known right before the data is
      *          sent.
      */
-     
+
     USBEnableEndpoint(USB_EP_INT_IN,USB_IN_ENABLED|USB_HANDSHAKE_ENABLED|USB_DISALLOW_SETUP);
     USBEnableEndpoint(USB_EP_BULK_IN,USB_IN_ENABLED|USB_OUT_ENABLED|USB_HANDSHAKE_ENABLED|USB_DISALLOW_SETUP);
 
     usbCcidBulkInHandle = 0;
 	usbCcidInterruptInHandle = 0;
     usbCcidBulkOutHandle = USBRxOnePacket(USB_EP_BULK_OUT,(BYTE*)&usbCcidBulkOutEndpoint,USB_EP_SIZE);
-    
+
 }//end CCIDInitEP
 
 
 /************************************************************************
   Function:
         void USBCCIDBulkInService(void)
-    
+
   Summary:
     USBCCIDBulkInService handles device-to-host transaction(s). This function
     should be called once per Main Program loop after the device reaches
@@ -181,7 +181,7 @@ POINTER pCCIDSrc;            // Dedicated source pointer
     USBCCIDBulkInService handles device-to-host transaction(s). This function
     should be called once per Main Program loop after the device reaches
     the configured state.
-    
+
     Typical Usage:
     <code>
     void main(void)
@@ -211,16 +211,16 @@ POINTER pCCIDSrc;            // Dedicated source pointer
   Conditions:
     None
   Remarks:
-    None                                                                 
+    None
   ************************************************************************/
- 
+
 void USBCCIDBulkInService(void)
 {
     WORD byte_to_send;
     BYTE i;
 
     USBMaskInterrupts();
-    if(USBHandleBusy(usbCcidBulkInHandle)) 
+    if(USBHandleBusy(usbCcidBulkInHandle))
     {
         USBUnmaskInterrupts();
         return;
@@ -229,7 +229,7 @@ void USBCCIDBulkInService(void)
 
     if(usbCcidBulkInTrfState == USB_CCID_BULK_IN_COMPLETING)
         usbCcidBulkInTrfState = USB_CCID_BULK_IN_READY;
-    
+
     /*
      * If USB_CCID_BULK_IN_READY state, nothing to do, just return.
      */
@@ -238,7 +238,7 @@ void USBCCIDBulkInService(void)
         USBUnmaskInterrupts();
         return;
     }
-    
+
     /*
      * If USB_CCID_BULK_IN_BUSY_ZLP state, send zero length packet
      */
@@ -247,25 +247,25 @@ void USBCCIDBulkInService(void)
         usbCcidBulkInHandle = USBTxOnePacket(USB_EP_BULK_IN,NULL,0);
         usbCcidBulkInTrfState = USB_CCID_BULK_IN_COMPLETING;
     }
-    else if(usbCcidBulkInTrfState == USB_CCID_BULK_IN_BUSY) 
+    else if(usbCcidBulkInTrfState == USB_CCID_BULK_IN_BUSY)
     {
         /*
          * First, have to figure out how many byte of data to send.
          */
-    	if(usbCcidBulkInLen > sizeof(usbCcidBulkInEndpoint)) 
+    	if(usbCcidBulkInLen > sizeof(usbCcidBulkInEndpoint))
     	    byte_to_send = sizeof(usbCcidBulkInEndpoint);
     	else
     	    byte_to_send = usbCcidBulkInLen;
-            
+
         /*
          * Subtract the number of bytes just about to be sent from the total.
          */
     	usbCcidBulkInLen = usbCcidBulkInLen - byte_to_send;
-    	  
+
         pCCIDDst.bRam = (BYTE*)usbCcidBulkInEndpoint; // Set destination pointer
-        
+
         i = byte_to_send;
-       
+
         while(i)
         {
             *pCCIDDst.bRam = *pCCIDSrc.bRam;
@@ -273,8 +273,8 @@ void USBCCIDBulkInService(void)
             pCCIDSrc.bRam++;
             i--;
         }//end while(byte_to_send._word)
- 
-        
+
+
         /*
          * Lastly, determine if a zero length packet state is necessary.
          * See explanation in USB Specification 2.0: Section 5.8.3
@@ -296,7 +296,7 @@ void USBCCIDBulkInService(void)
 /******************************************************************************
   Function:
 	void USBCCIDSendDataToHost(BYTE *data, WORD length)
-		
+
   Summary:
     USBCCIDSendDataToHost writes an array of data to the USB. Use this version, is
     capable of transfering 0x00 (what is typically a NULL character in any of
@@ -306,8 +306,8 @@ void USBCCIDBulkInService(void)
     USBCCIDSendDataToHost writes an array of data to the USB. Use this version, is
     capable of transfering 0x00 (what is typically a NULL character in any of
     the string transfer functions).
-    
-    
+
+
     The transfer mechanism for device-to-host(put) is more flexible than
     host-to-device(get). It can handle a string of data larger than the
     maximum size of bulk IN endpoint. A state machine is used to transfer a
@@ -315,12 +315,12 @@ void USBCCIDBulkInService(void)
     must be called periodically to keep sending blocks of data to the host.
 
   Conditions:
-    
+
 
   Input:
     BYTE *data - pointer to a RAM array of data to be transfered to the host
-    WORD length - the number of bytes to be transfered 
-		
+    WORD length - the number of bytes to be transfered
+
  *****************************************************************************/
 void USBCCIDSendDataToHost(BYTE *pData, WORD len)
 {

@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -884,7 +884,7 @@ EjectPage:
                         {
                             // Add one for the check digit that we will add.
                             dataLength ++;
-                        }    
+                        }
                         break;
 
                     case USB_PRINTER_POS_BARCODE_ITF:
@@ -982,17 +982,17 @@ EjectPage:
                             // calculate and print the checkdigit for this format.
                             {
                                 uint16_t    sum = 0;
-    
+
                                 for (j=0; j<dataLength-1; j++)
                                 {
                                     sum += _BarcodeCharacterValueCode39( BCD[j] );
                                 }
-    
+
                                 sum %= 43;
-    
+
                                 buffer[i++] = _BarcodeValueCharacterCode39( sum );
                             }
-                        }    
+                        }
                         else
                         {
                             // These must all be ASCII, so copy them straight over.
@@ -1000,7 +1000,7 @@ EjectPage:
                             {
                                 buffer[i++] = BCD[j];
                             }
-                        }                                    
+                        }
                         break;
 
                     case USB_PRINTER_POS_BARCODE_CODABAR:
@@ -1014,26 +1014,26 @@ EjectPage:
                             {
                                 buffer[i++] = BCD[j];
                             }
-    
+
                             // Calculate the check digit.  The printer will not automatically
                             // calculate and print the checkdigit for this format.
                             {
                                 uint16_t    sum = 0;
-    
+
                                 for (j=0; j<dataLength-1; j++)
                                 {
                                     sum += _BarcodeCharacterValueCodabar( BCD[j] );
                                 }
-    
+
                                 sum &= 0x0F;
                                 if (sum != 0)
                                 {
                                     sum = 16 - sum;
                                 }
-    
+
                                 buffer[i++] = _BarcodeValueCharacterCodabar( sum );
                             }
-    
+
                             // Now copy the stop character.
                             buffer[i++] = BCD[dataLength-2];
                         }
@@ -1044,7 +1044,7 @@ EjectPage:
                             {
                                 buffer[i++] = BCD[j];
                             }
-                        }        
+                        }
                         break;
 
                     case USB_PRINTER_POS_BARCODE_ITF:

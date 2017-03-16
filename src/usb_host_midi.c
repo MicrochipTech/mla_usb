@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -59,7 +59,7 @@ Currently this must be set to 1, due to limitations in the USB Host layer.
 // Section: Global Variables
 // *****************************************************************************
 // *****************************************************************************
-     
+
 static MIDI_DEVICE devices[USB_MAX_MIDI_DEVICES];
 
 // *****************************************************************************
@@ -90,7 +90,7 @@ static MIDI_DEVICE devices[USB_MAX_MIDI_DEVICES];
     uint32_t flags         - Initialization flags
     uint8_t clientDriverID - ID to send when issuing a Device Request via
                             USBHostIssueDeviceRequest(), USBHostSetDeviceConfiguration(),
-                            or USBHostSetDeviceInterface().  
+                            or USBHostSetDeviceInterface().
 
   Return Values:
     true    - Initialization was successful
@@ -117,22 +117,22 @@ bool USBHostMIDIInit ( uint8_t address, uint32_t flags, uint8_t clientDriverID )
     uint8_t Protocol;
     uint8_t currentEndpoint;
     uint16_t wTotalLength;
-    
+
     uint8_t index = 0;
     bool error = false;
-    
+
     MIDI_DEVICE *device = &devices[0];
-    
+
     config_descriptor = USBHostGetCurrentConfigurationDescriptor(address);
     ptr = config_descriptor;
-    
+
     // Load up the values from the Configuration Descriptor
     bLength              = *ptr++;
     bDescriptorType      = *ptr++;
     wTotalLength         = *ptr++;           // In case these are not word aligned
     wTotalLength        += (*ptr++) << 8;
     bNumInterfaces       = *ptr++;
-    
+
     // Skip over the rest of the Configuration Descriptor
     index += bLength;
     ptr    = &config_descriptor[index];
@@ -173,16 +173,16 @@ bool USBHostMIDIInit ( uint8_t address, uint32_t flags, uint8_t clientDriverID )
             device->deviceAddress = address;
             device->clientDriverID = clientDriverID;
             device->numEndpoints = bNumEndpoints;
-            
-            
+
+
             // Allocate enough memory for each endpoint
             if ((device->endpoints = (MIDI_ENDPOINT_DATA*)malloc( sizeof(MIDI_ENDPOINT_DATA) * bNumEndpoints)) == NULL)
             {
                 // Out of memory
-                error = true;   
+                error = true;
             }
-             
-            if (!error)   
+
+            if (!error)
             {
                 // Skip over the rest of the Interface Descriptor
                 index += bLength;
@@ -208,21 +208,21 @@ bool USBHostMIDIInit ( uint8_t address, uint32_t flags, uint8_t clientDriverID )
                         device->endpoints[currentEndpoint].endpointSize = *ptr++;
                         device->endpoints[currentEndpoint].endpointSize += (*ptr++) << 8;
                         device->endpoints[currentEndpoint].busy = false;
-                        
+
                         if(device->endpoints[currentEndpoint].endpointSize > 64)
                         {
                             // For full speed bulk endpoints, only 8, 16, 32, and 64 byte packets are supported
                             // But we will accept anything less than or equal to 64.
                             error = true;
                         }
-                        
+
                         // Get ready for the next endpoint.
                         currentEndpoint++;
                         index += bLength;
                         ptr = &config_descriptor[index];
                     }
                 }
-            }    
+            }
 
             // Ensure that we found all the endpoints for this interface.
             if (currentEndpoint != bNumEndpoints)
@@ -237,13 +237,13 @@ bool USBHostMIDIInit ( uint8_t address, uint32_t flags, uint8_t clientDriverID )
         // Destroy whatever list of interfaces, settings, and endpoints we created.
         // The "new" variables point to the current node we are trying to remove.
         if (device->endpoints != NULL)
-        {           
+        {
             free( device->endpoints );
             device->endpoints = NULL;
-        }    
+        }
         return false;
     }
-    
+
     #ifdef DEBUG_MODE
         UART2PrintString( "USB MIDI Client Initalized: " );
         UART2PrintString( " address=" );
@@ -296,7 +296,7 @@ bool USBHostMIDIInit ( uint8_t address, uint32_t flags, uint8_t clientDriverID )
 bool USBHostMIDIEventHandler ( uint8_t address, USB_EVENT event, void *data, uint32_t size )
 {
     unsigned char i;
-    
+
     // Make sure it was for one of our devices
     for( i = 0; i < USB_MAX_MIDI_DEVICES; i++)
     {
@@ -304,13 +304,13 @@ bool USBHostMIDIEventHandler ( uint8_t address, USB_EVENT event, void *data, uin
         {
             break;
         }
-    
+
     }
     if(i == USB_MAX_MIDI_DEVICES)
     {
         return false;
-    }    
-    
+    }
+
     // Handle specific events
     switch (event)
     {
@@ -326,14 +326,14 @@ bool USBHostMIDIEventHandler ( uint8_t address, USB_EVENT event, void *data, uin
                 UART2PrintString( "\r\n" );
             #endif
             return true;
-    
+
         #ifdef USB_ENABLE_TRANSFER_EVENT
         case EVENT_TRANSFER:
             if ( (data != NULL) && (size == sizeof(HOST_TRANSFER_DATA)) )
             {
                 unsigned char currentEndpoint;
                 //uint32_t dataCount = ((HOST_TRANSFER_DATA *)data)->dataCount;
-    
+
                 for(currentEndpoint = 0; currentEndpoint < devices[i].numEndpoints; currentEndpoint++)
                 {
                     if ( ((HOST_TRANSFER_DATA *)data)->bEndpointAddress == devices[i].endpoints[currentEndpoint].endpointAddress )
@@ -342,11 +342,11 @@ bool USBHostMIDIEventHandler ( uint8_t address, USB_EVENT event, void *data, uin
                         USB_HOST_APP_EVENT_HANDLER(devices[i].deviceAddress, EVENT_MIDI_TRANSFER_DONE, &devices[i].endpoints[currentEndpoint], sizeof(MIDI_ENDPOINT_DATA));
                         return true;
                     }
-                }    
+                }
             }
             return false;
         #endif
-    
+
         case EVENT_SUSPEND:
         case EVENT_RESUME:
         case EVENT_BUS_ERROR:
@@ -427,7 +427,7 @@ bool USBHostMIDIEventHandler ( uint8_t address, USB_EVENT event, void *data, uin
     uint32_t USBHostMIDISizeOfEndpoint( void* handle, uint8_t endpointIndex )
 
   Description:
-    This function retrieves the endpoint size of the endpoint at 
+    This function retrieves the endpoint size of the endpoint at
     endpointIndex for device that's located at handle.
 
   Preconditions:
@@ -467,7 +467,7 @@ bool USBHostMIDIEventHandler ( uint8_t address, USB_EVENT event, void *data, uin
   Remarks:
     None
   ***************************************************************************/
-  
+
   // Implemented as a macro. See usb_host_midi.h
 
 
@@ -510,9 +510,9 @@ uint8_t USBHostMIDIRead( void* handle, uint8_t endpointIndex, void *buffer, uint
 {
     MIDI_DEVICE *device = (MIDI_DEVICE*)handle;
     uint8_t RetVal;
-    
+
     RetVal = USBHostRead( device->deviceAddress, device->endpoints[endpointIndex].endpointAddress, (uint8_t *)buffer, length );
-    
+
     if (RetVal == USB_SUCCESS)
     {
         // Set the busy flag
@@ -605,15 +605,15 @@ uint8_t USBHostMIDIRead( void* handle, uint8_t endpointIndex, void *buffer, uint
 bool USBHostMIDITransferIsComplete(void* handle, uint8_t endpointIndex, uint8_t* errorCode, uint32_t *byteCount )
 {
     MIDI_DEVICE* device = (MIDI_DEVICE*)handle;
-    
+
     if (USBHostTransferIsComplete(device->deviceAddress, endpointIndex, errorCode, byteCount) == true)
     {
         device->endpoints[endpointIndex].busy = 0;
         return true;
     }
-    
+
     // Then this transfer is not complete
-    return false;    
+    return false;
 }
 #endif
 
@@ -657,7 +657,7 @@ uint8_t USBHostMIDIWrite(void* handle, uint8_t endpointIndex, void *buffer, uint
 {
     MIDI_DEVICE *device = (MIDI_DEVICE*)handle;
     uint8_t RetVal;
-    
+
     RetVal = USBHostWrite( device->deviceAddress, device->endpoints[endpointIndex].endpointAddress, (uint8_t *)buffer, length );
     if (RetVal == USB_SUCCESS)
     {

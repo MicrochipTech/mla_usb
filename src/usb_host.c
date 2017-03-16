@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -307,14 +307,14 @@ uint8_t USBHostDeviceStatus( uint8_t deviceAddress )
         return usbDeviceInfo.errorCode;
     }
 
-    
-    if ((usbHostState > STATE_ATTACHED) && 
+
+    if ((usbHostState > STATE_ATTACHED) &&
         (usbHostState < STATE_RUNNING)
        )
     {
         return USB_DEVICE_ENUMERATING;
     }
-    
+
     return USB_HOLDING_UNSUPPORTED_DEVICE;
 }
 
@@ -388,9 +388,9 @@ bool USBHostInit(  unsigned long flags  )
 
 /****************************************************************************
   Function:
-    bool USBHostIsochronousBuffersCreate( ISOCHRONOUS_DATA * isocData, 
+    bool USBHostIsochronousBuffersCreate( ISOCHRONOUS_DATA * isocData,
             uint8_t numberOfBuffers, uint16_t bufferSize )
-    
+
   Description:
     This function initializes the isochronous data buffer information and
     allocates memory for each buffer.  This function will not allocate memory
@@ -404,7 +404,7 @@ bool USBHostInit(  unsigned long flags  )
 
   Return Values:
     true    - All buffers are allocated successfully.
-    false   - Not enough heap space to allocate all buffers - adjust the 
+    false   - Not enough heap space to allocate all buffers - adjust the
                 project to provide more heap space.
 
   Remarks:
@@ -447,7 +447,7 @@ bool USBHostIsochronousBuffersCreate( ISOCHRONOUS_DATA * isocData, uint8_t numbe
 /****************************************************************************
   Function:
     void USBHostIsochronousBuffersDestroy( ISOCHRONOUS_DATA * isocData, uint8_t numberOfBuffers )
-    
+
   Description:
     This function releases all of the memory allocated for the isochronous
     data buffers.  It also resets all other information about the buffers.
@@ -486,9 +486,9 @@ void USBHostIsochronousBuffersDestroy( ISOCHRONOUS_DATA * isocData, uint8_t numb
 /****************************************************************************
   Function:
     void USBHostIsochronousBuffersReset( ISOCHRONOUS_DATA * isocData, uint8_t numberOfBuffers )
-    
+
   Description:
-    This function resets all the isochronous data buffers.  It does not do 
+    This function resets all the isochronous data buffers.  It does not do
     anything with the space allocated for the buffers.
 
   Precondition:
@@ -1118,7 +1118,7 @@ void USBHostShutdown( void )
                                         &powerRequest,
                                         sizeof(USB_VBUS_POWER_EVENT_DATA)
                                       );
-            
+
             _USB_NotifyClients( usbDeviceInfo.deviceAddress,
                                 EVENT_DETACH,
                                 &usbDeviceInfo.deviceAddress,
@@ -1333,7 +1333,7 @@ void USBHostTasks( void )
                     usbDeviceInfo.flags.val             = 0;
                     usbDeviceInfo.pInterfaceList        = NULL;
                     usbBusInfo.flags.val                = 0;
-                    
+
                     // Set up the hardware.
                     U1IE                = 0;        // Clear and turn off interrupts.
                     U1IR                = 0xFF;
@@ -1414,7 +1414,7 @@ void USBHostTasks( void )
                             #else
                                 #error "The selected PIC32 device is not currently supported by usb_host.c."
                             #endif
-                            _SetUSBIE(); 
+                            _SetUSBIE();
                         #else
                             #error Cannot enable USB interrupt.
                         #endif
@@ -2890,11 +2890,11 @@ bool _USB_FindClassDriver( uint8_t bClass, uint8_t bSubClass, uint8_t bProtocol,
             // Make sure the application layer does not have a problem with the selection.
             // If the application layer returns false, which it should if the event is not
             // defined, then accept the selection.
-            eventData.idVendor          = pDesc->idVendor;              
-            eventData.idProduct         = pDesc->idProduct;             
-            eventData.bDeviceClass      = bClass;          
-            eventData.bDeviceSubClass   = bSubClass;       
-            eventData.bDeviceProtocol   = bProtocol;       
+            eventData.idVendor          = pDesc->idVendor;
+            eventData.idProduct         = pDesc->idProduct;
+            eventData.bDeviceClass      = bClass;
+            eventData.bDeviceSubClass   = bSubClass;
+            eventData.bDeviceProtocol   = bProtocol;
 
             if (!USB_HOST_APP_EVENT_HANDLER( USB_ROOT_HUB, EVENT_OVERRIDE_CLIENT_DRIVER_SELECTION,
                             &eventData, sizeof(USB_OVERRIDE_CLIENT_DRIVER_EVENT_DATA) ))
@@ -2906,7 +2906,7 @@ bool _USB_FindClassDriver( uint8_t bClass, uint8_t bSubClass, uint8_t bProtocol,
 #endif
 
                 return true;
-            }    
+            }
         }
         i++;
     }
@@ -3002,16 +3002,16 @@ bool _USB_FindDeviceLevelClientDriver( void )
                 (usbTPL[i].device.idProduct == 0xFFFF))
             {
                 USB_OVERRIDE_CLIENT_DRIVER_EVENT_DATA   eventData;
-                     
+
                 // Make sure the application layer does not have a problem with the selection.
                 // If the application layer returns false, which it should if the event is not
                 // defined, then accept the selection.
-                eventData.idVendor          = pDesc->idVendor;              
-                eventData.idProduct         = pDesc->idProduct;             
-                eventData.bDeviceClass      = usbTPL[i].device.bClass;          
-                eventData.bDeviceSubClass   = usbTPL[i].device.bSubClass;       
-                eventData.bDeviceProtocol   = usbTPL[i].device.bProtocol;       
-    
+                eventData.idVendor          = pDesc->idVendor;
+                eventData.idProduct         = pDesc->idProduct;
+                eventData.bDeviceClass      = usbTPL[i].device.bClass;
+                eventData.bDeviceSubClass   = usbTPL[i].device.bSubClass;
+                eventData.bDeviceProtocol   = usbTPL[i].device.bProtocol;
+
                 if (!USB_HOST_APP_EVENT_HANDLER( USB_ROOT_HUB, EVENT_OVERRIDE_CLIENT_DRIVER_SELECTION,
                                 &eventData, sizeof(USB_OVERRIDE_CLIENT_DRIVER_EVENT_DATA) ))
                 {
@@ -3021,7 +3021,7 @@ bool _USB_FindDeviceLevelClientDriver( void )
 
                     usbDeviceInfo.flags.bfUseDeviceClientDriver = 1;
                 }
-            }    
+            }
             #endif
         }
 
@@ -3098,7 +3098,7 @@ USB_ENDPOINT_INFO * _USB_FindEndpoint( uint8_t endpoint )
                 pEndpoint = pEndpoint->next;
             }
         }
-        
+
         // Go to the next interface.
         pInterface = pInterface->next;
     }
@@ -3498,7 +3498,7 @@ void _USB_FindNextToken( void )
                         switch (pCurrentEndpoint->transferState & TSUBSTATE_MASK)
                         {
                             case TSUBSTATE_ISOCHRONOUS_READ_DATA:
-                                // Don't overwrite data the user has not yet processed.  We will skip this interval.    
+                                // Don't overwrite data the user has not yet processed.  We will skip this interval.
                                 if (((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].bfDataLengthValid)
                                 {
                                     // We have buffer overflow.
@@ -3513,7 +3513,7 @@ void _USB_FindNextToken( void )
                                     _USB_SetBDT( USB_TOKEN_IN );
                                     _USB_SendToken( pCurrentEndpoint->bEndpointAddress, USB_TOKEN_IN );
                                     return;
-                                }    
+                                }
                                 break;
 
                             case TSUBSTATE_ISOCHRONOUS_READ_COMPLETE:
@@ -3545,7 +3545,7 @@ void _USB_FindNextToken( void )
                                         pCurrentEndpoint->bmAttributes.val = USB_EVENT_QUEUE_FULL;
                                     }
                                 #endif
-                                
+
                                 // If the user wants an event from the interrupt handler to handle the data as quickly as
                                 // possible, send up the event.  Then mark the packet as used.
                                 #ifdef USB_HOST_APP_DATA_EVENT_HANDLER
@@ -3555,7 +3555,7 @@ void _USB_FindNextToken( void )
                                     }
                                     ((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].bfDataLengthValid = 0;
                                 #endif
-                                
+
                                 // Move to the next data buffer.
                                 ((ISOCHRONOUS_DATA *)pCurrentEndpoint->pUserData)->currentBufferUSB++;
                                 if (((ISOCHRONOUS_DATA *)pCurrentEndpoint->pUserData)->currentBufferUSB >= ((ISOCHRONOUS_DATA *)pCurrentEndpoint->pUserData)->totalBuffers)
@@ -3612,7 +3612,7 @@ void _USB_FindNextToken( void )
                                     _USB_SetBDT( USB_TOKEN_OUT );
                                     _USB_SendToken( pCurrentEndpoint->bEndpointAddress, USB_TOKEN_OUT );
                                     return;
-                                }    
+                                }
                                 break;
 
                             case TSUBSTATE_ISOCHRONOUS_WRITE_COMPLETE:
@@ -3652,14 +3652,14 @@ void _USB_FindNextToken( void )
                                     usbClientDrvTable[pCurrentEndpoint->clientDriver].DataEventHandler( usbDeviceInfo.deviceAddress, EVENT_DATA_ISOC_WRITE, ((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].pBuffer, pCurrentEndpoint->dataCount );
                                 }
                                 #endif
-                                                                
+
                                 // Move to the next data buffer.
                                 ((ISOCHRONOUS_DATA *)pCurrentEndpoint->pUserData)->currentBufferUSB++;
                                 if (((ISOCHRONOUS_DATA *)pCurrentEndpoint->pUserData)->currentBufferUSB >= ((ISOCHRONOUS_DATA *)pCurrentEndpoint->pUserData)->totalBuffers)
                                 {
                                     ((ISOCHRONOUS_DATA *)pCurrentEndpoint->pUserData)->currentBufferUSB = 0;
                                 }
-								((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].bfDataLengthValid = 1;                                
+								((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].bfDataLengthValid = 1;
                                 break;
 
                             case TSUBSTATE_ERROR:
@@ -4870,8 +4870,8 @@ bool _USB_ParseConfigurationDescriptor( void )
                 if ((newInterfaceInfo = (USB_INTERFACE_INFO *)USB_MALLOC( sizeof(USB_INTERFACE_INFO) )) == NULL)
                 {
                     // Out of memory
-                    error = true; 
-                      
+                    error = true;
+
                 }
 
                 if(error == false)
@@ -4881,7 +4881,7 @@ bool _USB_ParseConfigurationDescriptor( void )
                     newInterfaceInfo->clientDriver          = ClientDriver;
                     newInterfaceInfo->pInterfaceSettings    = NULL;
                     newInterfaceInfo->pCurrentSetting       = NULL;
-    
+
                     // Insert it into the list.
                     newInterfaceInfo->next                  = pTempInterfaceList;
                     pTempInterfaceList                      = newInterfaceInfo;
@@ -4894,11 +4894,11 @@ bool _USB_ParseConfigurationDescriptor( void )
                 if ((newSettingInfo = (USB_INTERFACE_SETTING_INFO *)USB_MALLOC( sizeof(USB_INTERFACE_SETTING_INFO) )) == NULL)
                 {
                     // Out of memory
-                    error = true;   
+                    error = true;
                 }
-            }    
-             
-            if (!error)   
+            }
+
+            if (!error)
             {
                 newSettingInfo->next                    = newInterfaceInfo->pInterfaceSettings;
                 newSettingInfo->interfaceAltSetting     = bAlternateSetting;
@@ -4932,7 +4932,7 @@ bool _USB_ParseConfigurationDescriptor( void )
                         if ((newEndpointInfo = (USB_ENDPOINT_INFO *)USB_MALLOC( sizeof(USB_ENDPOINT_INFO) )) == NULL)
                         {
                             // Out of memory
-                            error = true;   
+                            error = true;
                         }
                         newEndpointInfo->bEndpointAddress           = *ptr++;
                         newEndpointInfo->bmAttributes.val           = *ptr++;
@@ -4976,7 +4976,7 @@ bool _USB_ParseConfigurationDescriptor( void )
                         ptr = &pCurrentConfigurationDescriptor[index];
                     }
                 }
-            }    
+            }
 
             // Ensure that we found all the endpoints for this interface.
             if (currentEndpoint != bNumEndpoints)
@@ -5012,33 +5012,33 @@ bool _USB_ParseConfigurationDescriptor( void )
         {
             newInterfaceInfo = pTempInterfaceList;
             pTempInterfaceList = pTempInterfaceList->next;
-            
+
             while (newInterfaceInfo->pInterfaceSettings != NULL)
             {
                 newSettingInfo = newInterfaceInfo->pInterfaceSettings;
                 newInterfaceInfo->pInterfaceSettings = newInterfaceInfo->pInterfaceSettings->next;
-                
+
                 while (newSettingInfo->pEndpointList != NULL)
                 {
                     newEndpointInfo = newSettingInfo->pEndpointList;
                     newSettingInfo->pEndpointList = newSettingInfo->pEndpointList->next;
-                    
+
                     USB_FREE_AND_CLEAR( newEndpointInfo );
-                }    
-    
+                }
+
                 USB_FREE_AND_CLEAR( newSettingInfo );
             }
-    
+
             USB_FREE_AND_CLEAR( newInterfaceInfo );
-        }    
+        }
         return false;
     }
     else
-    {    
+    {
         // Set configuration.
         usbDeviceInfo.currentConfiguration      = currentConfiguration;
         usbDeviceInfo.currentConfigurationPower = bMaxPower;
-    
+
         // Success!
 #if defined (DEBUG_ENABLE)
         DEBUG_PutString( "HOST: Parse Descriptor success\r\n" );
@@ -5046,7 +5046,7 @@ bool _USB_ParseConfigurationDescriptor( void )
 
         usbDeviceInfo.pInterfaceList = pTempInterfaceList;
         return true;
-    }    
+    }
 }
 
 
@@ -5483,7 +5483,7 @@ void USB_HostInterruptHandler(void)
                             // Turn off the timer interrupt.
                             U1OTGIEbits.T1MSECIE = 0;
                         #endif
-    
+
                         if((usbHostState & STATE_MASK) != STATE_DETACHED)
                         {
                             // Advance to the next state.  We can do this here, because the only time
@@ -5756,7 +5756,7 @@ void USB_HostInterruptHandler(void)
             else if ((pBDT->STAT.PID == PID_DATA0) || (pBDT->STAT.PID == PID_DATA1))
             {
                 // We will only get these PID's from an IN packet.
-                
+
                 // Update the count of bytes tranferred.  (If there was an error, this count will be 0.)
                 // The Byte Count is NOT 0 if a NAK occurs.  Therefore, we can only update the
                 // count when an ACK, DATA0, or DATA1 is received.
@@ -5940,15 +5940,15 @@ void USB_HostInterruptHandler(void)
                             pEndpoint->wIntervalCount--;
                         }
                     }
-    
+
                     #ifndef ALLOW_MULTIPLE_NAKS_PER_FRAME
                         pEndpoint->status.bfLastTransferNAKd = 0;
                     #endif
-    
+
                     pEndpoint = pEndpoint->next;
                 }
             }
-            
+
             pInterface = pInterface->next;
         }
 

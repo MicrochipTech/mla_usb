@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -52,11 +52,11 @@ typedef enum _ANDROID_ACCESSORY_STRINGS
 #define USB_INTERFACE_DESC_BINTERFACEPROTOCOL_OFFSET    7
 
 #define USB_CDC_DESC_BDESCRIPTORSUBTYPE_OFFSET          2
-#define USB_CDC_DESC_UNION_BMASTERINTERFACE_OFFSET      3  
+#define USB_CDC_DESC_UNION_BMASTERINTERFACE_OFFSET      3
 
-#define USB_ENDPOINT_DESC_BENDPOINTADDRESS_OFFSET       2 
-#define USB_ENDPOINT_DESC_BMATTRIBUTES_OFFSET           3 
-#define USB_ENDPOINT_DESC_WMAXPACKETSIZE_OFFSET         4 
+#define USB_ENDPOINT_DESC_BENDPOINTADDRESS_OFFSET       2
+#define USB_ENDPOINT_DESC_BMATTRIBUTES_OFFSET           3
+#define USB_ENDPOINT_DESC_WMAXPACKETSIZE_OFFSET         4
 #define USB_ENDPOINT_DESC_BINTERVAL_OFFSET              5
 
 #define ANDROID_ACCESSORY_GET_PROTOCOL              51
@@ -170,7 +170,7 @@ static uint8_t AndroidCommandGetProtocol(ANDROID_DEVICE_DATA* device, uint16_t *
     Initializes the Android protocol version 1 sub-driver
 
   Description:
-    Initializes the Android protocol version 1 sub-driver    
+    Initializes the Android protocol version 1 sub-driver
 
   Precondition:
     None
@@ -245,7 +245,7 @@ uint8_t AndroidAppWrite(void* handle, uint8_t* data, uint32_t size)
     if(device->state < READY)
     {
         return USB_INVALID_STATE;
-    }    
+    }
 
     if(device->status.TXBusy == 1)
     {
@@ -254,7 +254,7 @@ uint8_t AndroidAppWrite(void* handle, uint8_t* data, uint32_t size)
 
     errorCode = USBHostWrite( device->address, ANDROID_GetOUTEndpointNum(device),
                                             data, size );
-    
+
     switch(errorCode)
     {
         case USB_ENDPOINT_BUSY:
@@ -277,8 +277,8 @@ uint8_t AndroidAppWrite(void* handle, uint8_t* data, uint32_t size)
     Check to see if the last write to the Android device was completed
 
   Description:
-    Check to see if the last write to the Android device was completed.  If 
-    complete, returns the amount of data that was sent and the corresponding 
+    Check to see if the last write to the Android device was completed.  If
+    complete, returns the amount of data that was sent and the corresponding
     error code for the transmission.
 
   Precondition:
@@ -325,11 +325,11 @@ bool AndroidAppIsWriteComplete(void* handle, uint8_t* errorCode, uint32_t* size)
     if(device->state < READY)
     {
         return USB_INVALID_STATE;
-    }    
+    }
 
     //If there was a transfer pending, then get the state of the transfer
     if(USBHostTransferIsComplete(
-                                    device->address, 
+                                    device->address,
                                     ANDROID_GetOUTEndpointNum(device),
                                     errorCode,
                                     size
@@ -352,7 +352,7 @@ bool AndroidAppIsWriteComplete(void* handle, uint8_t* errorCode, uint32_t* size)
 
   Description:
     Attempts to read information from the specified Android device.  This
-    function does not block.  Data availability is checked via the 
+    function does not block.  Data availability is checked via the
     AndroidAppIsReadComplete() function.
 
   Precondition:
@@ -400,7 +400,7 @@ uint8_t AndroidAppRead(void* handle, uint8_t* data, uint32_t size)
     if(device->state < READY)
     {
         return USB_INVALID_STATE;
-    }    
+    }
 
     if(device->status.RXBusy == 1)
     {
@@ -414,7 +414,7 @@ uint8_t AndroidAppRead(void* handle, uint8_t* data, uint32_t size)
 
     errorCode = USBHostRead( device->address, ANDROID_GetINEndpointNum(device),
                                             data, ((size / device->INEndpointSize) * device->INEndpointSize) );
-    
+
     switch(errorCode)
     {
         case USB_SUCCESS:
@@ -438,8 +438,8 @@ uint8_t AndroidAppRead(void* handle, uint8_t* data, uint32_t size)
     Check to see if the last read to the Android device was completed
 
   Description:
-    Check to see if the last read to the Android device was completed.  If 
-    complete, returns the amount of data that was sent and the corresponding 
+    Check to see if the last read to the Android device was completed.  If
+    complete, returns the amount of data that was sent and the corresponding
     error code for the transmission.
 
   Precondition:
@@ -486,11 +486,11 @@ bool AndroidAppIsReadComplete(void* handle, uint8_t* errorCode, uint32_t* size)
     if(device->state < READY)
     {
         return USB_INVALID_STATE;
-    }    
+    }
 
     //If there was a transfer pending, then get the state of the transfer
     if(USBHostTransferIsComplete(
-                                    device->address, 
+                                    device->address,
                                     ANDROID_GetINEndpointNum(device),
                                     errorCode,
                                     size
@@ -556,7 +556,7 @@ void AndroidTasks(void)
                 {
                     //If not, then let's send the manufacturer's string
                     AndroidCommandGetProtocol(device, &device->protocol);
-                    
+
                     device->status.EP0TransferPending = 1;
                     device->state = WAIT_FOR_PROTOCOL;
                 }
@@ -567,7 +567,7 @@ void AndroidTasks(void)
                     device->state = SEND_MANUFACTUER_STRING;
                 }
                 break;
-                
+
             case SEND_MANUFACTUER_STRING:
                 if(accessoryInfo->manufacturer == NULL)
                 {
@@ -593,7 +593,7 @@ void AndroidTasks(void)
                     device->state = SEND_DESCRIPTION_STRING;
                     break;
                 }
-                
+
                 if(device->status.EP0TransferPending == 0)
                 {
                     //The manufacturing string is sent.  Now try to send the model string
@@ -602,7 +602,7 @@ void AndroidTasks(void)
                     {
                         //If not, then let's send the manufacturer's string
                         AndroidCommandSendString(device, ANDROID_ACCESSORY_STRING_MODEL, accessoryInfo->model, accessoryInfo->model_size);
-    
+
                         device->status.EP0TransferPending = 1;
                         device->state = SEND_DESCRIPTION_STRING;
                     }
@@ -624,7 +624,7 @@ void AndroidTasks(void)
                     {
                         //If not, then let's send the manufacturer's string
                         AndroidCommandSendString(device, ANDROID_ACCESSORY_STRING_DESCRIPTION, accessoryInfo->description, accessoryInfo->description_size);
-    
+
                         device->status.EP0TransferPending = 1;
                         device->state = SEND_VERSION_STRING;
                     }
@@ -646,7 +646,7 @@ void AndroidTasks(void)
                     {
                         //If not, then let's send the manufacturer's string
                         AndroidCommandSendString(device, ANDROID_ACCESSORY_STRING_VERSION, accessoryInfo->version, accessoryInfo->version_size);
-    
+
                         device->status.EP0TransferPending = 1;
                         device->state = SEND_URI_STRING;
                     }
@@ -668,7 +668,7 @@ void AndroidTasks(void)
                     {
                         //If not, then let's send the manufacturer's string
                         AndroidCommandSendString(device, ANDROID_ACCESSORY_STRING_URI, accessoryInfo->URI, accessoryInfo->URI_size);
-    
+
                         device->status.EP0TransferPending = 1;
                         device->state = SEND_SERIAL_STRING;
                     }
@@ -690,7 +690,7 @@ void AndroidTasks(void)
                     {
                         //If not, then let's send the manufacturer's string
                         AndroidCommandSendString(device, ANDROID_ACCESSORY_STRING_SERIAL, accessoryInfo->serial, accessoryInfo->serial_size);
-    
+
                         device->status.EP0TransferPending = 1;
                         device->state = SEND_AUDIO_MODE;
                     }
@@ -713,8 +713,8 @@ void AndroidTasks(void)
                         //Set the audio mode
                         USBHostIssueDeviceRequest(  device->address,                    //uint8_t deviceAddress,
                                                     USB_SETUP_HOST_TO_DEVICE            //uint8_t bmRequestType,
-                                                        | USB_SETUP_TYPE_VENDOR 
-                                                        | USB_SETUP_RECIPIENT_DEVICE,       
+                                                        | USB_SETUP_TYPE_VENDOR
+                                                        | USB_SETUP_RECIPIENT_DEVICE,
                                                     ANDROID_ACCESSORY_SET_AUDIO_MODE,   //uint8_t bRequest,
                                                     accessoryInfo->audio_mode,          //uint16_t wValue,
                                                     0,                                  //uint16_t wIndex,
@@ -723,7 +723,7 @@ void AndroidTasks(void)
                                                     USB_DEVICE_REQUEST_SET,             //uint8_t dataDirection,
                                                     device->clientDriverID              //uint8_t clientDriverID
                                                  );
-    
+
                         device->status.EP0TransferPending = 1;
                         device->state = START_ACCESSORY;
                     }
@@ -743,7 +743,7 @@ void AndroidTasks(void)
 
                         //If not, then let's send the manufacturer's string
                         AndroidCommandStart(device);
-    
+
                         device->status.EP0TransferPending = 1;
                         device->state = ACCESSORY_STARTING;
                     }
@@ -758,7 +758,7 @@ void AndroidTasks(void)
                     device->countDown = ANDROID_DEVICE_ATTACH_TIMEOUT;
 
                     device->state = WAITING_FOR_ACCESSORY_RETURN;
-                }   
+                }
                 break;
 
             case WAITING_FOR_ACCESSORY_RETURN:
@@ -768,8 +768,8 @@ void AndroidTasks(void)
                 //The accessory has returned and has been initialialized.  It is now ready to use.
                 device->state = READY;
                 USB_HOST_APP_EVENT_HANDLER(device->address,EVENT_ANDROID_ATTACH,device,sizeof(ANDROID_DEVICE_DATA*));
-                break; 
-             
+                break;
+
             case READY:
                 break;
 
@@ -792,9 +792,9 @@ void AndroidTasks(void)
                                                     USB_DEVICE_REQUEST_SET,             //uint8_t dataDirection,
                                                     device->clientDriverID              //uint8_t clientDriverID
                                                  );
-            
+
                         device->status.EP0TransferPending = 1;
-            
+
                         device->state = SENDING_HID_REPORT_DESCRIPTOR;
                     }
                 }
@@ -809,8 +809,8 @@ void AndroidTasks(void)
                         //Set the audio mode
                         USBHostIssueDeviceRequest(  device->address,                    //uint8_t deviceAddress,
                                                     USB_SETUP_HOST_TO_DEVICE            //uint8_t bmRequestType,
-                                                        | USB_SETUP_TYPE_VENDOR 
-                                                        | USB_SETUP_RECIPIENT_DEVICE,       
+                                                        | USB_SETUP_TYPE_VENDOR
+                                                        | USB_SETUP_RECIPIENT_DEVICE,
                                                     ANDROID_ACCESSORY_SET_HID_REPORT_DESC,   //uint8_t bRequest,
                                                     device->hid.id,              //uint16_t wValue,
                                                     device->hid.offset,           //uint16_t wIndex,
@@ -819,7 +819,7 @@ void AndroidTasks(void)
                                                     USB_DEVICE_REQUEST_SET,             //uint8_t dataDirection,
                                                     device->clientDriverID              //uint8_t clientDriverID
                                                  );
-    
+
                         device->status.EP0TransferPending = 1;
 
                         //MCHP: should only make this move if we are completely done...
@@ -933,7 +933,7 @@ bool AndroidAppInitialize ( uint8_t address, uint32_t flags, uint8_t clientDrive
     //  the descriptor list
     config_desc_end = config_descriptor + tempWord;
 
-    //Skip past the configuration part of this descriptor to the next 
+    //Skip past the configuration part of this descriptor to the next
     //  descriptor in the configuration descriptor list.  The size of the config
     //  part of the descriptor is the first uint8_t of the list.
     config_descriptor += *config_descriptor;
@@ -974,7 +974,7 @@ bool AndroidAppInitialize ( uint8_t address, uint32_t flags, uint8_t clientDrive
                     if((config_descriptor[USB_ENDPOINT_DESC_BENDPOINTADDRESS_OFFSET] & 0x80) == 0x80)
                     {
                         //If this is an IN endpoint, record the endpoint number
-                        device->INEndpointNum = config_descriptor[USB_ENDPOINT_DESC_BENDPOINTADDRESS_OFFSET]; 
+                        device->INEndpointNum = config_descriptor[USB_ENDPOINT_DESC_BENDPOINTADDRESS_OFFSET];
 
                         //record the endpoint size (2 uint8_ts)
                         device->INEndpointSize = (config_descriptor[USB_ENDPOINT_DESC_WMAXPACKETSIZE_OFFSET]) + (config_descriptor[USB_ENDPOINT_DESC_WMAXPACKETSIZE_OFFSET+1] << 8);
@@ -982,7 +982,7 @@ bool AndroidAppInitialize ( uint8_t address, uint32_t flags, uint8_t clientDrive
                     else
                     {
                         //Otherwise this is an OUT endpoint, record the endpoint number
-                        device->OUTEndpointNum = config_descriptor[USB_ENDPOINT_DESC_BENDPOINTADDRESS_OFFSET]; 
+                        device->OUTEndpointNum = config_descriptor[USB_ENDPOINT_DESC_BENDPOINTADDRESS_OFFSET];
 
                         //record the endpoint size (2 uint8_ts)
                         device->OUTEndpointSize = (config_descriptor[USB_ENDPOINT_DESC_WMAXPACKETSIZE_OFFSET]) + (config_descriptor[USB_ENDPOINT_DESC_WMAXPACKETSIZE_OFFSET+1] << 8);
@@ -1054,7 +1054,7 @@ bool AndroidAppDataEventHandler( uint8_t address, USB_EVENT event, void *data, u
                             //Device has timed out.  Destroy its info.
                             memset(&devices[i],0x00,sizeof(ANDROID_DEVICE_DATA));
                         }
-                        
+
                         devices[i].countDown--;
                         break;
                     default:
@@ -1113,7 +1113,7 @@ bool AndroidAppEventHandler( uint8_t address, USB_EVENT event, void *data, uint3
             {
                 if(devices[i].address == address)
                 {
-                    if(devices[i].state == ACCESSORY_STARTING) 
+                    if(devices[i].state == ACCESSORY_STARTING)
                     {
                         devices[i].state = WAITING_FOR_ACCESSORY_RETURN;
                     }
@@ -1125,7 +1125,7 @@ bool AndroidAppEventHandler( uint8_t address, USB_EVENT event, void *data, uint3
                         USBHostTerminateTransfer( device->address, device->OUTEndpointNum );
                         USBHostTerminateTransfer( device->address, device->INEndpointNum );
                         USB_HOST_APP_EVENT_HANDLER(device->address,EVENT_ANDROID_DETACH,device,sizeof(ANDROID_DEVICE_DATA*));
-                        
+
                         //Device has timed out.  Destroy its info.
                         memset(&devices[i],0x00,sizeof(ANDROID_DEVICE_DATA));
                     }
@@ -1156,7 +1156,7 @@ bool AndroidAppEventHandler( uint8_t address, USB_EVENT event, void *data, uint3
             //Otherwise, handle the data
             if(transfer_data->bEndpointAddress == 0x00)
             {
-                //If the transfer was EP0, just clear the pending bit and 
+                //If the transfer was EP0, just clear the pending bit and
                 //  we will handle the rest in the tasks function so we don't
                 //  duplicate state machine changes both here and there
                 device->status.EP0TransferPending = 0;
@@ -1167,7 +1167,7 @@ bool AndroidAppEventHandler( uint8_t address, USB_EVENT event, void *data, uint3
                     USB_HOST_APP_EVENT_HANDLER(device->address, EVENT_ANDROID_HID_SEND_EVENT_COMPLETE, device, sizeof(ANDROID_DEVICE_DATA*));
                 }
             }
-            
+
             return true;
         case EVENT_RESUME:           // Device-mode resume received
             return true;
@@ -1210,7 +1210,7 @@ uint8_t AndroidAppHIDSendEvent(uint8_t address, uint8_t id, uint8_t* report, uin
     {
         return USB_UNKNOWN_DEVICE;
     }
-    
+
     if(device->status.EP0TransferPending == 0)
     {
         //MCHP: should switch this to use the transfer events instead.  It is safer.
@@ -1242,7 +1242,7 @@ uint8_t AndroidAppHIDSendEvent(uint8_t address, uint8_t id, uint8_t* report, uin
         }
     }
 
-    return errorCode; 
+    return errorCode;
 }
 
 bool AndroidAppHIDRegister(uint8_t address, uint8_t id, uint8_t* descriptor, uint8_t length)
@@ -1264,7 +1264,7 @@ bool AndroidAppHIDRegister(uint8_t address, uint8_t id, uint8_t* descriptor, uin
     {
         return USB_UNKNOWN_DEVICE;
     }
-    
+
     if(device->state != READY)
     {
         return false;
@@ -1288,10 +1288,10 @@ bool AndroidAppHIDRegister(uint8_t address, uint8_t id, uint8_t* descriptor, uin
     static uint8_t AndroidCommandSendString(void *handle, ANDROID_ACCESSORY_STRINGS stringType, const char *string, uint16_t stringLength)
 
   Summary:
-    Sends a command String to the Android device using the EP0 command 
+    Sends a command String to the Android device using the EP0 command
 
   Description:
-    Sends a command String to the Android device using the EP0 command 
+    Sends a command String to the Android device using the EP0 command
 
   Precondition:
     None
@@ -1320,8 +1320,8 @@ static uint8_t AndroidCommandSendString(void *handle, ANDROID_ACCESSORY_STRINGS 
 
     return USBHostIssueDeviceRequest (  device->address,                    //uint8_t deviceAddress,
                                         USB_SETUP_HOST_TO_DEVICE            //uint8_t bmRequestType,
-                                            | USB_SETUP_TYPE_VENDOR 
-                                            | USB_SETUP_RECIPIENT_DEVICE,       
+                                            | USB_SETUP_TYPE_VENDOR
+                                            | USB_SETUP_RECIPIENT_DEVICE,
                                         ANDROID_ACCESSORY_SEND_STRING,      //uint8_t bRequest,
                                         0,                                  //uint16_t wValue,
                                         (uint16_t)stringType,                   //uint16_t wIndex,
@@ -1337,7 +1337,7 @@ static uint8_t AndroidCommandSendString(void *handle, ANDROID_ACCESSORY_STRINGS 
     static uint8_t AndroidCommandStart(void *handle)
 
   Summary:
-    Sends a the start command that makes the Android device go into accessory mode 
+    Sends a the start command that makes the Android device go into accessory mode
 
   Description:
     Sends a the start command that makes the Android device go into accessory mode
@@ -1366,8 +1366,8 @@ static uint8_t AndroidCommandStart(void *handle)
 
     return USBHostIssueDeviceRequest (  device->address,                    //uint8_t deviceAddress,
                                         USB_SETUP_HOST_TO_DEVICE            //uint8_t bmRequestType,
-                                            | USB_SETUP_TYPE_VENDOR 
-                                            | USB_SETUP_RECIPIENT_DEVICE,       
+                                            | USB_SETUP_TYPE_VENDOR
+                                            | USB_SETUP_RECIPIENT_DEVICE,
                                         ANDROID_ACCESSORY_START,            //uint8_t bRequest,
                                         0,                                  //uint16_t wValue,
                                         0,                                  //uint16_t wIndex,

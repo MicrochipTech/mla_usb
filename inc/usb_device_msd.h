@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -73,14 +73,14 @@ please contact mla_licensing@microchip.com
     #define MSD_DATA_OUT                        0x02
     //MSD_SEND_CSW is when the device is waiting to send the CSW (returned by MSDTasks())
     #define MSD_SEND_CSW                        0x03
-    
+
     //States of the MSDProcessCommand state machine
     #define MSD_COMMAND_WAIT                    0xFF
     #define MSD_COMMAND_ERROR                   0xFE
     #define MSD_COMMAND_RESPONSE                0xFD
     #define MSD_COMMAND_RESPONSE_SEND           0xFC
     #define MSD_COMMAND_STALL                   0xFB
-    
+
     /* SCSI Transparent Command Set Sub-class code */
     #define MSD_INQUIRY                     	0x12
     #define MSD_READ_FORMAT_CAPACITY         	0x23
@@ -93,7 +93,7 @@ please contact mla_licensing@microchip.com
     #define MSD_TEST_UNIT_READY             	0x00
     #define MSD_VERIFY                         	0x2f
     #define MSD_STOP_START                     	0x1b
-    
+
     #define MSD_READ10_WAIT                     0x00
     #define MSD_READ10_BLOCK                    0x01
     #define MSD_READ10_SECTOR                   0x02
@@ -103,14 +103,14 @@ please contact mla_licensing@microchip.com
     #define MSD_READ10_XMITING_DATA             0x06
     #define MSD_READ10_AWAITING_COMPLETION      0x07
     #define MSD_READ10_ERROR                    0xFF
-    
+
     #define MSD_WRITE10_WAIT                    0x00
     #define MSD_WRITE10_BLOCK                   0x01
     #define MSD_WRITE10_SECTOR                  0x02
     #define MSD_WRITE10_RX_SECTOR               0x03
     #define MSD_WRITE10_RX_PACKET               0x04
 
-//Define MSD_USE_BLOCKING in order to block the code in an 
+//Define MSD_USE_BLOCKING in order to block the code in an
 //attempt to get better throughput.
 //#define MSD_USE_BLOCKING
 
@@ -165,7 +165,7 @@ please contact mla_licensing@microchip.com
 
 //------------------------------------------------------------------------------
 //ASC/ASCQ Codes for Sense Data (only those that we plan to use):
-//The ASC/ASCQ code expand on the information provided in the sense key error 
+//The ASC/ASCQ code expand on the information provided in the sense key error
 //code, and provide the host with more details about the specific issue/status.
 //------------------------------------------------------------------------------
 //For use with sense key Illegal request for a command not supported
@@ -222,7 +222,7 @@ please contact mla_licensing@microchip.com
 
 /** S T R U C T U R E S ******************************************************/
 /********************** ******************************************************/
- 
+
 typedef struct _USB_MSD_CBW         //31 bytes total Command Block Wrapper
 {
     uint32_t dCBWSignature;            // 55 53 42 43h
@@ -297,7 +297,7 @@ typedef struct {                    // Read Capacity 10
 	uint32_t LBA;                // Logical Block Address
 	uint16_t Reserved2;
 	uint8_t PMI;                // Partial medium Indicator b0 only
-	uint8_t Control; 
+	uint8_t Control;
 } ReadCapacityCB;
 
 typedef struct {                    // Request Sense 0x03
@@ -357,7 +357,7 @@ typedef struct _USB_MSD_CSW	        // Command Status Wrapper
     uint8_t bCSWStatus;                // 00h Command Passed, 01h Command Failed, 02h Phase Error, rest obsolete/reserved
 } USB_MSD_CSW;
 
-typedef struct 
+typedef struct
 {
     uint8_t Peripheral;                 // Peripheral_Qualifier:3; Peripheral_DevType:5;
     uint8_t Removble;                   // removable medium bit7 = 0 means non removable, rest reserved
@@ -457,7 +457,7 @@ typedef union __attribute__((packed)){
     LUN_FUNCTIONS is a structure of function pointers that tells the stack
     where to find each of the physical layer functions it is looking for.
     This structure needs to be defined for any project for PIC24F or PIC32.
-    
+
     Typical Usage:
     <code>
         LUN_FUNCTIONS LUN[MAX_LUN + 1] =
@@ -473,7 +473,7 @@ typedef union __attribute__((packed)){
             }
         };
     </code>
-    
+
     In the above code we are passing the address of the SDSPI functions to
     the corresponding member of the LUN_FUNCTIONS structure. In the above
     case we have created an array of LUN_FUNCTIONS structures so that it is
@@ -482,15 +482,15 @@ typedef union __attribute__((packed)){
     Please take caution to insure that each function is in the the correct
     location in the structure. Incorrect alignment will cause the USB stack
     to call the incorrect function for a given command.
-    
+
     See the MDD File System Library for additional information about the
     available physical media, their requirements, and how to use their
-    associated functions.                                                  
+    associated functions.
   **************************************************************************/
 typedef struct
 {
     // Function pointer to the MediaInitialize() function of the physical media
-    //  being used. 
+    //  being used.
     FILEIO_MEDIA_INFORMATION* (*MediaInitialize)(void * config);
     // Function pointer to the ReadCapacity() function of the physical media
     //  being used.
@@ -536,32 +536,32 @@ void USBMSDInit(void);
 
 /**************************************************************************
     Function: bool MSDWasLastCBWValid(void)
-    
+
     Summary:
-        Returns the BOOLean status of the most recently received command block 
+        Returns the BOOLean status of the most recently received command block
         wrapper (CBW).  If the last CBW passed the MSD "is valid" tests, then
         this function will return true.  If the last received CBW was
         not valid, then the return value will be false.
-    
+
     Description:
-        Returns the BOOLean status of the most recently received command block 
+        Returns the BOOLean status of the most recently received command block
         wrapper (CBW).  If the last CBW passed the "is valid" tests, then
         this function will return true.  If the last received CBW was
         not valid, then the return value will be false.  This function would
-        typically be used following a host initiated clear endpoint halt 
+        typically be used following a host initiated clear endpoint halt
         operation on an MSD bulk IN or OUT endpoint.  In this case, the firmware
         needs to check if the last received CBW was valid, in order to know
         if the firmware should re-stall the endpoint following the clear halt.
         This is necessary to fully comply with the MSD BOT error case handling
-        related specifications, which dictate that the MSD device must 
+        related specifications, which dictate that the MSD device must
         persistently STALL the bulk endpoints when a non-valid CBW is received.
-        The host must issue an MSD reset command over EP0, prior to clear 
-        endpoint halt, in order to clear the stall condition in this special 
+        The host must issue an MSD reset command over EP0, prior to clear
+        endpoint halt, in order to clear the stall condition in this special
         scenario.
-            
+
     Parameters:
         None
-    
+
     Return Values:
         bool:  true - if last received CBW was valid
                false - if the last received CBW was not valid
@@ -569,7 +569,7 @@ void USBMSDInit(void);
     Remarks:
         None
 
-                    
+
   **************************************************************************/
 #define MSDWasLastCBWValid() (MSDCBWValid)
 
@@ -577,49 +577,49 @@ void USBMSDInit(void);
 /**************************************************************************
     Function:
     void LUNSoftDetach(uint8_t LUN)
-    
+
     Summary:
-    
+
     Description:
-    
+
     Parameters:
         LUN - logical unit number to detach
-    
+
     Return Values:
         None
 
     Remarks:
         Once a soft detached is initiated a soft attached, LUNSoftAttach(),
         on the same LUN must be performed before the device will re-attach
-                    
+
   **************************************************************************/
 #define LUNSoftDetach(LUN) SoftDetach[LUN]=true;
 
 /**************************************************************************
     Function:
     void LUNSoftAttach(uint8_t LUN)
-    
+
     Summary:
-    
+
     Description:
-    
+
     Parameters:
         LUN - logical unit number to detach
-    
+
     Return Values:
         None
 
     Remarks:
         Once a soft detached is initiated a soft attached, LUNSoftAttach(),
         on the same LUN must be performed before the device will re-attach
-                    
+
   **************************************************************************/
 #define LUNSoftAttach(LUN) SoftDetach[LUN]=false;
 
 /******************************************************************************
  	Function:
  		void MSDTransferTerminated(USB_HANDLE handle)
- 		
+
  	Description:
         Check if the host recently did a clear endpoint halt on the MSD OUT endpoint.
         In this case, we want to re-arm the MSD OUT endpoint, so we are prepared
@@ -631,16 +631,16 @@ void USBMSDInit(void);
  	PreCondition:
         A transfer was terminated.  This should be called from the transfer
         terminated event handler.
- 		
+
  	Parameters:
         USB_HANDLE handle - the handle of the transfer that was terminated.
 
  	Return Values:
  		None
- 		
+
  	Remarks:
  		None
- 			
+
   *****************************************************************************/
 void MSDTransferTerminated(USB_HANDLE handle);
 

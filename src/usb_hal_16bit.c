@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -51,20 +51,20 @@ static unsigned char USBIESave;
 /********************************************************************
 Function:
     bool USBSleepOnSuspend(void)
-    
+
 Summary:
     Places the core into sleep and sets up the USB module
     to wake up the device on USB activity.
-    
+
 PreCondition:
-    
+
 Parameters:
     None
-    
+
 Return Values:
     true  - if entered sleep successfully
     false - if there was an error entering sleep
-    
+
 Remarks:
     Please note that before calling this function that it is the
     responsibility of the application to place all of the other
@@ -117,7 +117,7 @@ bool USBSleepOnSuspend(void)
     if(USBRESUMEIF == 0)
     {
         //We woke up by some means other than resume from the host.  Figure out what that source was.
-        
+
         //Check the VBUS level.  If VBUS is no longer present, then a user detach event
         //must have occurred, or, the cable is still plugged in, but the host itself
         //powered down.
@@ -138,7 +138,7 @@ bool USBSleepOnSuspend(void)
             //Try to wake up the host.
             USBRemoteWakeupAssertBlocking();
         }
-        #endif        
+        #endif
     }
 
 
@@ -147,7 +147,7 @@ bool USBSleepOnSuspend(void)
     //to their exact same USB state/operating condition after the end of suspend,
     //as they were in prior to entering suspend.
     USBRestorePreviousInterruptSettings();
-    
+
     return true;
 }
 
@@ -358,12 +358,12 @@ int8_t USBVBUSSessionValidStateGet(bool AllowInvasiveReads)
 
             //Restore normal USB interrupt settings.
             USBRestoreUSBInterrupts();
-                
+
             return retValue;
         }
         else
         {
-            //Couldn't read the value...  Module is not in a state where the 
+            //Couldn't read the value...  Module is not in a state where the
             //value can be meaningful, and the caller didn't allow us to make
             //module setting changes.
 
