@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -175,9 +175,9 @@ This requires a tighter integration between the host layer and the application
 layer to manage the streaming data.
 
 If an application uses isochronous transfers, it must allocate one variable
-of type ISOCHRONOUS_DATA for each concurrent transfer.  When the device 
+of type ISOCHRONOUS_DATA for each concurrent transfer.  When the device
 attaches, the client driver must inform the application layer of the maximum
-transfer size.  At this point, the application must allocate space for the 
+transfer size.  At this point, the application must allocate space for the
 data buffers, and set the data buffer points in this structure to point to them.
 */
 
@@ -194,10 +194,10 @@ typedef struct _ISOCHRONOUS_DATA
     uint8_t    currentBufferUSB;   // The current buffer the USB peripheral is accessing.
     uint8_t    currentBufferUser;  // The current buffer the user is reading/writing.
     uint8_t    *pDataUser;         // User pointer for accessing data.
-    
+
     ISOCHRONOUS_DATA_BUFFER buffers[USB_MAX_ISOCHRONOUS_DATA_BUFFERS];  // Data buffer information.
 } ISOCHRONOUS_DATA;
-    
+
 
 // *****************************************************************************
 /* Targeted Peripheral List
@@ -326,7 +326,7 @@ typedef bool (*USB_CLIENT_EVENT_HANDLER) ( uint8_t address, USB_EVENT event, voi
     uint32_t flags         - Initialization flags
     uint8_t clientDriverID - ID to send when issuing a Device Request via
                             USBHostIssueDeviceRequest() or USBHostSetDeviceConfiguration().
-                            
+
   Return Values:
     true    - Successful
     false   - Not successful
@@ -415,7 +415,7 @@ typedef bool (*USB_CLIENT_INIT)   ( uint8_t address, uint32_t flags, uint8_t cli
     passed to this event handler.
 
     If the application can handle the event successfully, the function
-    should return true.  
+    should return true.
 
   Precondition:
     None
@@ -456,11 +456,11 @@ typedef struct _CLIENT_DRIVER_TABLE
 {
     USB_CLIENT_INIT          Initialize;     // Initialization routine
     USB_CLIENT_EVENT_HANDLER EventHandler;   // Event routine
-    
+
     #ifdef USB_HOST_APP_DATA_EVENT_HANDLER
     USB_CLIENT_EVENT_HANDLER DataEventHandler;  // Data Event routine
     #endif
-    
+
     uint32_t                    flags;          // Initialization flags
 
 } CLIENT_DRIVER_TABLE;
@@ -659,7 +659,7 @@ uint8_t    USBHostDeviceStatus( uint8_t deviceAddress );
 /****************************************************************************
   Function:
     uint8_t USBHostGetStringDescriptor ( uint8_t deviceAddress,  uint8_t stringNumber,
-                        uint8_t LangID, uint8_t *stringDescriptor, uint8_t stringLength, 
+                        uint8_t LangID, uint8_t *stringDescriptor, uint8_t stringLength,
                         uint8_t clientDriverID )
 
   Summary:
@@ -680,7 +680,7 @@ uint8_t    USBHostDeviceStatus( uint8_t deviceAddress );
         LangID,
         stringDescriptorBuffer,
         sizeof(stringDescriptorBuffer),
-        0xFF 
+        0xFF
         );
 
     while(1)
@@ -715,7 +715,7 @@ uint8_t    USBHostDeviceStatus( uint8_t deviceAddress );
     *stringDescriptor   - Pointer to where to store the string.
     stringLength        - Maximum length of the returned string.
     clientDriverID      - Client driver to return the completion event to.
-    
+
   Return Values:
     USB_SUCCESS             - The request was started successfully.
     USB_UNKNOWN_DEVICE      - Device not found
@@ -771,9 +771,9 @@ bool USBHostInit(  unsigned long flags  );
 
 /****************************************************************************
   Function:
-    bool USBHostIsochronousBuffersCreate( ISOCHRONOUS_DATA * isocData, 
+    bool USBHostIsochronousBuffersCreate( ISOCHRONOUS_DATA * isocData,
             uint8_t numberOfBuffers, uint16_t bufferSize )
-    
+
   Description:
     This function initializes the isochronous data buffer information and
     allocates memory for each buffer.  This function will not allocate memory
@@ -787,7 +787,7 @@ bool USBHostInit(  unsigned long flags  );
 
   Return Values:
     true    - All buffers are allocated successfully.
-    false   - Not enough heap space to allocate all buffers - adjust the 
+    false   - Not enough heap space to allocate all buffers - adjust the
                 project to provide more heap space.
 
   Remarks:
@@ -803,7 +803,7 @@ bool USBHostIsochronousBuffersCreate( ISOCHRONOUS_DATA * isocData, uint8_t numbe
 /****************************************************************************
   Function:
     void USBHostIsochronousBuffersDestroy( ISOCHRONOUS_DATA * isocData, uint8_t numberOfBuffers )
-    
+
   Description:
     This function releases all of the memory allocated for the isochronous
     data buffers.  It also resets all other information about the buffers.
@@ -830,9 +830,9 @@ void USBHostIsochronousBuffersDestroy( ISOCHRONOUS_DATA * isocData, uint8_t numb
 /****************************************************************************
   Function:
     void USBHostIsochronousBuffersReset( ISOCHRONOUS_DATA * isocData, uint8_t numberOfBuffers )
-    
+
   Description:
-    This function resets all the isochronous data buffers.  It does not do 
+    This function resets all the isochronous data buffers.  It does not do
     anything with the space allocated for the buffers.
 
   Precondition:
@@ -911,7 +911,7 @@ void USBHostIsochronousBuffersReset( ISOCHRONOUS_DATA * isocData, uint8_t number
   ***************************************************************************/
 
 uint8_t    USBHostIssueDeviceRequest( uint8_t deviceAddress, uint8_t bmRequestType, uint8_t bRequest,
-             uint16_t wValue, uint16_t wIndex, uint16_t wLength, uint8_t *data, uint8_t dataDirection, 
+             uint16_t wValue, uint16_t wIndex, uint16_t wLength, uint8_t *data, uint8_t dataDirection,
              uint8_t clientDriverID );
 
 
@@ -984,7 +984,7 @@ uint8_t    USBHostRead( uint8_t deviceAddress, uint8_t endpoint, uint8_t *data, 
     attached device.  If the endpoint is not isochronous, use USBHostRead().
 
     Once started, an isochronous transfer will continue with no upper layer
-    intervention until USBHostTerminateTransfer() is called.  
+    intervention until USBHostTerminateTransfer() is called.
 
   Precondition:
     None
@@ -1103,7 +1103,7 @@ uint8_t    USBHostResumeDevice( uint8_t deviceAddress );
   Parameters:
     uint8_t deviceAddress  - Device address
     uint8_t configuration  - Index of the new configuration
-    
+
   Return Values:
     USB_SUCCESS         - Process of changing the configuration was started
                             successfully.

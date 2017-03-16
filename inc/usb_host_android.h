@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -22,10 +22,10 @@ please contact mla_licensing@microchip.com
 #include <stdint.h>
 #include <stdbool.h>
 
-/* Error code indicating that the buffer passed to the read function was too small.  
+/* Error code indicating that the buffer passed to the read function was too small.
    Since the USB host can't control how much data it will receive in a single packet,
    the user must provide a buffer that is at least the size of the endpoint of the
-   attached device.  If a buffer is passed in that is too small, the read will not 
+   attached device.  If a buffer is passed in that is too small, the read will not
    start and this error is returned to the user. */
 #define USB_ERROR_BUFFER_TOO_SMALL      USB_ERROR_CLASS_DEFINED + 0
 
@@ -44,10 +44,10 @@ please contact mla_licensing@microchip.com
 #endif
 
 #ifndef NUM_ANDROID_DEVICES_SUPPORTED
-    /* Defines the number of concurrent Android devices this implementation is allowed to 
+    /* Defines the number of concurrent Android devices this implementation is allowed to
        talk to.  This definition is only used for implementations where the accessory is
        the host and the Android device is the slave.  This is also most often defined to
-       be 1.  If this is not defined by the user, a default of 1 is used. 
+       be 1.  If this is not defined by the user, a default of 1 is used.
 
        This option is only used when compiling the source version of the library. This
        value is set to 1 for pre-compiled versions of the library. */
@@ -59,7 +59,7 @@ please contact mla_licensing@microchip.com
 
 
 /* This event is thrown when an Android device is attached and successfully entered into
-   accessory mode already.  The data portion of this event is the handle that is 
+   accessory mode already.  The data portion of this event is the handle that is
    required to communicate to the device and should be saved so that it can be passed to
    all of the transfer functions.  Always use this definition in the code and never put
    a static value as the value of this event may change based on various build options. */
@@ -88,10 +88,10 @@ typedef enum
     ANDROID_AUDIO_MODE__44K_16B_PCM = 1
 } ANDROID_AUDIO_MODE;
 
-/* This structure contains the informatin that is required to successfully create a link 
-   between the Android device and the accessory.  This information must match the 
-   information entered in the accessory filter in the Android application in order for 
-   the Android application to access the device.  An instance of this structure should be 
+/* This structure contains the informatin that is required to successfully create a link
+   between the Android device and the accessory.  This information must match the
+   information entered in the accessory filter in the Android application in order for
+   the Android application to access the device.  An instance of this structure should be
    passed into the AndroidAppStart() at initialization. */
 typedef struct
 {
@@ -129,7 +129,7 @@ typedef struct
   Description:
     Sets the accessory information and initializes the client driver information
     after the initial power cycles.  Since this resets all device information
-    this function should be used only after a compete system reset.  This should 
+    this function should be used only after a compete system reset.  This should
     not be called while the USB is active or while connected to a device.
 
   Precondition:
@@ -218,8 +218,8 @@ uint8_t AndroidAppWrite(void* handle, uint8_t* data, uint32_t size);
     Check to see if the last write to the Android device was completed
 
   Description:
-    Check to see if the last write to the Android device was completed.  If 
-    complete, returns the amount of data that was sent and the corresponding 
+    Check to see if the last write to the Android device was completed.  If
+    complete, returns the amount of data that was sent and the corresponding
     error code for the transmission.
 
   Precondition:
@@ -260,7 +260,7 @@ bool AndroidAppIsWriteComplete(void* handle, uint8_t* errorCode, uint32_t* size)
 
   Description:
     Attempts to read information from the specified Android device.  This
-    function does not block.  Data availability is checked via the 
+    function does not block.  Data availability is checked via the
     AndroidAppIsReadComplete() function.
 
   Precondition:
@@ -287,7 +287,7 @@ bool AndroidAppIsWriteComplete(void* handle, uint8_t* errorCode, uint32_t* size)
     USB_ENDPOINT_NOT_FOUND          - Invalid endpoint.
     USB_ERROR_BUFFER_TOO_SMALL      - The buffer passed to the read function was
                                         smaller than the endpoint size being used
-                                        (buffer must be larger than or equal to 
+                                        (buffer must be larger than or equal to
                                         the endpoint size).
 
   Remarks:
@@ -303,8 +303,8 @@ uint8_t AndroidAppRead(void* handle, uint8_t* data, uint32_t size);
     Check to see if the last read to the Android device was completed
 
   Description:
-    Check to see if the last read to the Android device was completed.  If 
-    complete, returns the amount of data that was sent and the corresponding 
+    Check to see if the last read to the Android device was completed.  If
+    complete, returns the amount of data that was sent and the corresponding
     error code for the transmission.
 
   Precondition:

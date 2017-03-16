@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -52,20 +52,20 @@ static unsigned char USBIESave;
 /********************************************************************
 Function:
     bool USBSleepOnSuspend(void)
-    
+
 Summary:
     Places the core into sleep and sets up the USB module
     to wake up the device on USB activity.
-    
+
 PreCondition:
-    
+
 Parameters:
     None
-    
+
 Return Values:
     true  - if entered sleep successfully
     false - if there was an error entering sleep
-    
+
 Remarks:
     Please note that before calling this function that it is the
     responsibility of the application to place all of the other
@@ -124,7 +124,7 @@ bool USBSleepOnSuspend(void)
             //either due to the USB host sending resume signaling, or, it could be due
             //to VBUS falling below the SESSVD threshold, due to either a USB detach event,
             //or the host powering itself down fully (and thereby turning off the +5V VBUS supply).
-            
+
             //Check the VBUS level.  If VBUS is no longer present, then a user detach event
             //must have occurred, or, the cable is still plugged in, but the host itself
             //powered down.
@@ -134,11 +134,11 @@ bool USBSleepOnSuspend(void)
                 //continue executing code in this case, or, go back to sleep until
                 //the next re-attachment event.
 
-                
-                //Uncomment below break statement, if you want to continue executing 
+
+                //Uncomment below break statement, if you want to continue executing
                 //code during the detached interval.
                 //break;
-                
+
                 //If the user left the above break statement commented, then
                 //just clear the prior wake up event and go back to sleep.
                 USBClearInterruptFlag(USBActivityIFReg, USBActivityIFBitNum);
@@ -165,17 +165,17 @@ bool USBSleepOnSuspend(void)
             {
                 //Clear the wakeup source interrupt status flag, since we are now consuming/processing it.
                 YOUR_REMOTE_WAKEUP_TRIGGER_SOURCE_FLAG = 0;     //Replace with real code (ex: IFS0CLR = _IFS0_CNAIF_MASK;, etc.)
-                                
+
                 //Try to wake up the host.
                 if(USBRemoteWakeupAssertBlocking() == true)
                 {
                     //It was legal to send remote wakeup signaling, and it was sent.
                     //Exit the while(1) loop, so we stay out of sleep.
-                    break;                    
+                    break;
                 }
-                
+
             }
-            #endif    
+            #endif
         }
     }
 
@@ -185,7 +185,7 @@ bool USBSleepOnSuspend(void)
     //to their exact same USB state/operating condition after the end of suspend,
     //as they were in prior to entering suspend.
     USBRestorePreviousInterruptSettings();
-    
+
     return true;
 }
 
@@ -396,12 +396,12 @@ int8_t USBVBUSSessionValidStateGet(bool AllowInvasiveReads)
 
             //Restore normal USB interrupt settings.
             USBRestoreUSBInterrupts();
-                
+
             return retValue;
         }
         else
         {
-            //Couldn't read the value...  Module is not in a state where the 
+            //Couldn't read the value...  Module is not in a state where the
             //value can be meaningful, and the caller didn't allow us to make
             //module setting changes.
 
@@ -457,7 +457,7 @@ Remarks:
 void USBMaskAllUSBInterrupts(void)
 {
     unsigned int tempInterruptStatus;
-    
+
     //Save and clear the USBIE bit to prevent USB interrupt vectoring.
     tempInterruptStatus = __builtin_get_isr_state();
     __builtin_disable_interrupts(); //Disable all interrupts to make sure the USB interrupt enable state doesn't change in an interrupt handler
@@ -546,16 +546,16 @@ static void USBSaveAndPrepareInterruptsForSleep(void)
     unsigned int i;
     volatile unsigned int* pRegister;
 
-    
-    //Save status and then disable all (maskable) interrupts 
+
+    //Save status and then disable all (maskable) interrupts
     CPUIPLSave = __builtin_get_isr_state();     //Save the current interrupt enable and CPU IPL state info
     __builtin_disable_interrupts();             //Disable all maskable interrupts
-    
-    //Set CPU priority level to 0, so that it can be woken up by a new USB interrupt 
+
+    //Set CPU priority level to 0, so that it can be woken up by a new USB interrupt
     //(at IPL = 4, which is higher than the CPU priority) but without going to the interrupt vector location.
     //Note: If the USB stack is operated in USB_INTERRUPT mode, then the current
     //CPU IPL may currently be 4, since this code is already operating within the interrupt context
-    //of the USB interrupt (ex: IDLEIF asserted, causing the USB stack to call 
+    //of the USB interrupt (ex: IDLEIF asserted, causing the USB stack to call
     //the user suspend handler, which then called the USBSleepOnSuspend() handler,
     //which then called this function).  In this case, we need to lower the CPU priority
     //level to < USB IPL, so that the CPU can wake back up from sleep.

@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -32,7 +32,7 @@ typedef union
             uint8_t MIDI_0;
             uint8_t MIDI_1;
             uint8_t MIDI_2;
-        }; 
+        };
         struct
         {
             uint8_t CodeIndexNumber :4;

@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -81,9 +81,9 @@ uint8_t    USBHostMSDSCSIMediaDetect( uint8_t * address);
   Returns:
     The function returns a pointer to the MEDIA_INFORMATION structure.  The
     errorCode member may contain the following values:
-        * MEDIA_NO_ERROR - The media initialized successfully, and the 
-                sector size should be valid (confirm using the validityFlags 
-                bit). 
+        * MEDIA_NO_ERROR - The media initialized successfully, and the
+                sector size should be valid (confirm using the validityFlags
+                bit).
         * MEDIA_DEVICE_NOT_PRESENT - The requested device is not attached.
         * MEDIA_CANNOT_INITIALIZE - Cannot initialize the media.
 

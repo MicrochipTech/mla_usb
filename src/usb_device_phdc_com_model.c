@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -651,7 +651,7 @@ static void PHDPrstApduHandler(BYTE* apdu_val)
     		{
                 //We have received the response for the measurement that we sent.
                 PhdConfirmTimeoutStatus = TIMEOUT_DISABLED;
-                AppCB(PHD_MEASUREMENT_SENT); 
+                AppCB(PHD_MEASUREMENT_SENT);
             }
 		}
 		else if (data.Val == ROIV_CMIP_CONFIRMED_ACTION_CHOSEN)

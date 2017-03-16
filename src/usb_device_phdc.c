@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -42,7 +42,7 @@ please contact mla_licensing@microchip.com
     //The phdc_data_rx[] and phdc_data_tx[] arrays are used as
     //USB packet buffers in this firmware.  Therefore, they must be located in
     //a USB module accessible portion of microcontroller RAM.
-    #if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50) 
+    #if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50)
         #pragma udata usbram2
     #elif defined(__18F2455) || defined(__18F2550) || defined(__18F4455) || defined(__18F4550)\
         || defined(__18F2458) || defined(__18F2553) || defined(__18F4458) || defined(__18F4553)\
@@ -61,7 +61,7 @@ volatile FAR unsigned char phdc_data_tx[PHDC_DATA_IN_EP_SIZE];
 
 #if defined(__18CXX)
     #pragma udata
-#endif 
+#endif
 
 POINTER pPHDCSrc;            // Dedicated source pointer
 POINTER pPHDCDst;            // Dedicated destination pointer
@@ -88,23 +88,23 @@ extern BYTE_VAL *pDst;
 /******************************************************************************
  	Function:
  		void USBDevicePHDCCheckRequest(void)
- 
+
  	Description:
  		This routine checks the setup data packet to see if it
  		knows how to handle it
- 		
+
  	PreCondition:
  		None
 
 	Parameters:
 		None
-		
+
 	Return Values:
 		None
-		
+
 	Remarks:
 		None
-		 
+
   *****************************************************************************/
 void USBDevicePHDCCheckRequest(void)
 {
@@ -123,19 +123,19 @@ void USBDevicePHDCCheckRequest(void)
      * PHDC class, else return
      */
     if(SetupPkt.bIntfID != PHDC_INTF_ID)return;
-    
+
     switch(SetupPkt.bRequest)
     {
         //****** These commands are required ******//
         case GET_DATA_STATUS :
             if(SetupPkt.wValue == 0)
             {
-                CtrlTrfData[0] = (UINT8 )phdcEpDataBitmap; 
+                CtrlTrfData[0] = (UINT8 )phdcEpDataBitmap;
                 CtrlTrfData[1] = (UINT8) phdcEpDataBitmap >> 8;
                 USBEP0SendRAMPtr((BYTE*)CtrlTrfData, 2, USB_EP0_NO_OPTIONS);
             }
-            
-        break; 
+
+        break;
         default:
             break;
     }//end switch(SetupPkt.bRequest)
@@ -147,7 +147,7 @@ void USBDevicePHDCCheckRequest(void)
 /**************************************************************************
   Function:
         void USBDevicePHDCInit(USB_PHDC_CB callback)
-    
+
   Summary:
     This function initializes the PHDC function driver. This function should
     be called during the init process.
@@ -155,8 +155,8 @@ void USBDevicePHDCCheckRequest(void)
     This function initializes the PHDC function driver. This function initializes
    the end point data structures. A call back function from the upper layer is also
 	registered.
-    
-       
+
+
     Typical Usage:
     <code>
      void PHDCAppInit(PHDC_APP_CB callback)
@@ -168,42 +168,42 @@ void USBDevicePHDCCheckRequest(void)
   Conditions:
     None
   Remarks:
-    None                                                                   
+    None
   **************************************************************************/
 void USBDevicePHDCInit(USB_PHDC_CB callback)
-{    
+{
 	PhdcRXEP[0].ep_num=PHDC_DATA_EP;
 	PhdcRXEP[0].offset =0;
-	PhdcRXEP[0].qos = PHDC_BULK_OUT_QOS;	
+	PhdcRXEP[0].qos = PHDC_BULK_OUT_QOS;
 	PhdcRXEP[0].transfer_size =0;
-	PhdcRXEP[0].transfer_size =0; 
+	PhdcRXEP[0].transfer_size =0;
 	PhdcRXEP[0].size = PHDC_DATA_OUT_EP_SIZE;
-	
+
 	PhdcTXEP[0].ep_num=PHDC_DATA_EP;
 	PhdcTXEP[0].offset =0;
-	PhdcTXEP[0].qos = PHDC_BULK_IN_QOS;	
+	PhdcTXEP[0].qos = PHDC_BULK_IN_QOS;
 	PhdcTXEP[0].transfer_size =0;
-	PhdcTXEP[0].bytes_to_send = 0; 
+	PhdcTXEP[0].bytes_to_send = 0;
 	PhdcTXEP[0].size =PHDC_DATA_IN_EP_SIZE;
 
     #if defined USE_PHDC_INTERRUPT_ENDPOINT
 		PhdcTXEP[1].ep_num=PHDC_INT_EP;
 		PhdcTXEP[1].offset =0;
-		PhdcTXEP[1].qos = PHDC_INT_IN_QOS;	
+		PhdcTXEP[1].qos = PHDC_INT_IN_QOS;
 		PhdcTXEP[1].transfer_size =0;
-		PhdcTXEP[1].bytes_to_send = 0; 
+		PhdcTXEP[1].bytes_to_send = 0;
 		PhdcTXEP[1].size =PHDC_INT_IN_EP_SIZE;
-	#endif 
+	#endif
 
 	PhdAppCB = callback;
 	phdcEpDataBitmap = 0;
-	  
+
 }//end PHDCInitEP
 
 /**********************************************************************************
   Function:
         UINT8 USBDevicePHDCReceiveData(UINT8 qos, UINT8 *buffer, UINT16 len)
-    
+
   Summary:
     USBDevicePHDCReceiveData copies a string of BYTEs received through USB PHDC Bulk OUT
     endpoint to a user's specified location. It is a non-blocking function.
@@ -215,10 +215,10 @@ void USBDevicePHDCInit(USB_PHDC_CB callback)
     endpoint to a user's specified location. It is a non-blocking function.
     It does not wait for data if there is no data available. Instead it
     returns '0' to notify the caller that there is no data available.
-    
+
     Typical Usage:
     <code>
-     
+
     </code>
   Conditions:
     Value of input argument 'len' should be smaller than the maximum
@@ -229,14 +229,14 @@ void USBDevicePHDCInit(USB_PHDC_CB callback)
 	qos - quality of service
     buffer -  Pointer to where received BYTEs are to be stored
     len -     The number of BYTEs expected.
-                                                                                   
+
   **********************************************************************************/
 UINT8 USBDevicePHDCReceiveData(UINT8 qos, UINT8* buffer, UINT16 len)
-{	
+{
  	PTR_PHDC_RX_ENDPOINT recv_endpoint;
 	UINT8 index;
 	UINT8 phdc_rx_len = 0;
-    
+
 	for(index=0; index< PHDC_RX_ENDPOINTS;index++)
 	{
 		if((PhdcRXEP[index].qos & qos) != 0)
@@ -247,7 +247,7 @@ UINT8 USBDevicePHDCReceiveData(UINT8 qos, UINT8* buffer, UINT16 len)
 	{
 		return 0; //no endpoint supports the qos
 	}
-		
+
 	recv_endpoint = &PhdcRXEP[index];
 
 	recv_endpoint->app_buff = (UINT8*)buffer;
@@ -257,26 +257,26 @@ UINT8 USBDevicePHDCReceiveData(UINT8 qos, UINT8* buffer, UINT16 len)
 	recv_endpoint->PHDCDataOutHandle = USBRxOnePacket(recv_endpoint->ep_num,
 										   (UINT8*) phdc_data_rx,
 										   recv_endpoint->size);
-   
+
     return phdc_rx_len;
-    
+
 }//end getsUSBUSART
 
 /******************************************************************************
   Function:
 	void USBDevicePHDCSendData(UINT8 qos, UINT8 *data, UINT8 Length)
-		
+
   Summary:
-    USBDevicePHDCSendData writes an array of data to the USB. 
+    USBDevicePHDCSendData writes an array of data to the USB.
 
   Description:
     USBDevicePHDCSendData writes an array of data to the USB.
-    
+
     Typical Usage:
     <code>
-       
+
     </code>
-    
+
     The transfer mechanism for device-to-host(put) is more flexible than
     host-to-device(get). It can handle a string of data larger than the
     maximum size of bulk IN endpoint. A state machine is used to transfer a
@@ -291,7 +291,7 @@ UINT8 USBDevicePHDCReceiveData(UINT8 qos, UINT8* buffer, UINT16 len)
     *data - pointer to a RAM/ROM array of data to be transfered to the host
     length - the number of bytes to be transfered.
 	memtype - Indicates whether the data array is in ROM or RAM
-		
+
  *****************************************************************************/
 void USBDevicePHDCSendData(UINT8 qos, UINT8 *data, UINT16 length,BOOL memtype)
 {
@@ -309,25 +309,25 @@ void USBDevicePHDCSendData(UINT8 qos, UINT8 *data, UINT16 length,BOOL memtype)
         return; //no endpoint supports the qos
     }
     tx_endpoint = &PhdcTXEP[index];
-		
+
     if(	(tx_endpoint->transfer_size ==0) && (tx_endpoint->offset ==0) ) //new packet
     {
 	tx_endpoint->transfer_size = length;
 	tx_endpoint->memtype= memtype;
 	if(tx_endpoint->transfer_size > tx_endpoint->size)
-	{	
+	{
         	tx_endpoint->bytes_to_send = tx_endpoint->size; //multiple send
 	}
 	else
 	{
 	    tx_endpoint->bytes_to_send = tx_endpoint->transfer_size; //only packet to send
-	}		
+	}
     }
     else
     {
         return; //send in progress
     }
-    USBMaskInterrupts();	
+    USBMaskInterrupts();
     tx_endpoint->app_buff = (UINT8*)data;
     i= tx_endpoint->bytes_to_send;
     pPHDCDst.bRam = (BYTE*)phdc_data_tx; // Set destination pointer
@@ -340,7 +340,7 @@ void USBDevicePHDCSendData(UINT8 qos, UINT8 *data, UINT16 length,BOOL memtype)
              pPHDCDst.bRam++;
              pPHDCSrc.bRom++;
              i--;
-        }//end while(byte_to_send)		
+        }//end while(byte_to_send)
     }
     else // _RAM
     {
@@ -351,12 +351,12 @@ void USBDevicePHDCSendData(UINT8 qos, UINT8 *data, UINT16 length,BOOL memtype)
              pPHDCDst.bRam++;
              pPHDCSrc.bRam++;
              i--;
-        }//end while(byte_to_send._word)	
+        }//end while(byte_to_send._word)
     }//end if(phdc_mem_type...)
-           
+
     tx_endpoint->PHDCDataInHandle = USBTxOnePacket(tx_endpoint->ep_num,
 	(BYTE*)phdc_data_tx,tx_endpoint->bytes_to_send);
-    USBDevicePHDCUpdateStatus(tx_endpoint->ep_num, 1); // update the endpoint status. '1' if endpoint has data. '0' otherwise. 
+    USBDevicePHDCUpdateStatus(tx_endpoint->ep_num, 1); // update the endpoint status. '1' if endpoint has data. '0' otherwise.
 	USBUnmaskInterrupts();
 }//end USBDevicePHDCSendData
 
@@ -364,22 +364,22 @@ void USBDevicePHDCSendData(UINT8 qos, UINT8 *data, UINT16 length,BOOL memtype)
 /************************************************************************
   Function:
         void USBDevicePHDCTxRXService(PTR_USTAT_STRUCT val)
-    
+
   Summary:
     USBDevicePHDCTxRXService handles device-to-host transaction(s) and host-to-device transaction(s).
 	This function is automatically called when a transfer event occurs.Device should be in configured state.
-  
+
 Description:
     USBDevicePHDCTxRXService handles device-to-host transaction(s) and host-to-device transaction(s).
 	This function is automatically called when a transfer event occurs.Device should be in configured state.
-    
+
     Typical Usage:
     <code>
     BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
 {
     switch(event)
     {
-        case EVENT_CONFIGURED: 
+        case EVENT_CONFIGURED:
             USBCBInitEP();
             break;
         case EVENT_SET_DESCRIPTOR:
@@ -406,18 +406,18 @@ Description:
             break;
         default:
             break;
-    }      
-    return TRUE; 
+    }
+    return TRUE;
 }
     </code>
   Conditions:
     None
   Remarks:
-    None                                                                 
+    None
   ************************************************************************/
 void USBDevicePHDCTxRXService(USTAT_FIELDS* pdata)
 {
-	
+
     UINT8 i;
 	PTR_PHDC_TX_ENDPOINT tx_endpoint;
 	PTR_PHDC_RX_ENDPOINT recv_endpoint;
@@ -426,30 +426,30 @@ void USBDevicePHDCTxRXService(USTAT_FIELDS* pdata)
 	val = *pdata;
 
     if(USBHALGetLastDirection(val) == DIR_IN)
-	{   
+	{
         /* Find which Endpoint needs to send data based on the qos value  */
         for(index = 0; index < PHDC_TX_ENDPOINTS; index++)
         {
             if(PhdcTXEP[index].ep_num == USBHALGetLastEndpoint(val))
             break;
         }
-        
+
 		tx_endpoint = &PhdcTXEP[index];
-		
+
         USBDevicePHDCUpdateStatus(tx_endpoint->ep_num, 0);
-        
+
 		tx_endpoint->offset += USBHandleGetLength(tx_endpoint->PHDCDataInHandle);
-		if((tx_endpoint->offset == tx_endpoint->transfer_size)&& 
+		if((tx_endpoint->offset == tx_endpoint->transfer_size)&&
 				(USBHandleGetLength(tx_endpoint->PHDCDataInHandle) !=0)) //send zero lenght packet
 		{
 			if(tx_endpoint->transfer_size % tx_endpoint->size == 0)
 			{
 				tx_endpoint->PHDCDataInHandle = USBTxOnePacket(tx_endpoint->ep_num,NULL,0);
-				USBDevicePHDCUpdateStatus(tx_endpoint->ep_num, 1); 
-				return;	
+				USBDevicePHDCUpdateStatus(tx_endpoint->ep_num, 1);
+				return;
 			}
 		}
-        
+
         //data sent. Also ZLP
 		if(tx_endpoint->offset >= tx_endpoint->transfer_size)
 		{
@@ -466,18 +466,18 @@ void USBDevicePHDCTxRXService(USTAT_FIELDS* pdata)
 			{
 				tx_endpoint->bytes_to_send = tx_endpoint->size; //multiple send
 			}
-			
+
 		}
 
 		USBMaskInterrupts();
-		
+
 		i= tx_endpoint->bytes_to_send;
-        pPHDCDst.bRam = (BYTE*)phdc_data_tx; // Set destination pointer		
+        pPHDCDst.bRam = (BYTE*)phdc_data_tx; // Set destination pointer
 
         if(tx_endpoint->memtype == MEM_ROM)            // Determine type of memory source
         {
 			pPHDCSrc.bRom = (ROM UINT8*)(tx_endpoint->app_buff + tx_endpoint->offset);
-			
+
             while(i)
             {
                 *pPHDCDst.bRam = *pPHDCSrc.bRom;
@@ -485,7 +485,7 @@ void USBDevicePHDCTxRXService(USTAT_FIELDS* pdata)
                 pPHDCSrc.bRom++;
                 i--;
             }//end while(byte_to_send)
-		
+
         }
         else // _RAM
         {
@@ -497,19 +497,19 @@ void USBDevicePHDCTxRXService(USTAT_FIELDS* pdata)
                 pPHDCSrc.bRam++;
                 i--;
             }//end while(byte_to_send._word)
-		
+
         }//end if(phdc_mem_type...)
-           
+
         tx_endpoint->PHDCDataInHandle = USBTxOnePacket(tx_endpoint->ep_num,
 																(UINT8*)phdc_data_tx,
 																tx_endpoint->bytes_to_send);
-	    USBDevicePHDCUpdateStatus(tx_endpoint->ep_num, 1); 
-		USBUnmaskInterrupts();		
+	    USBDevicePHDCUpdateStatus(tx_endpoint->ep_num, 1);
+		USBUnmaskInterrupts();
 	}
-	
+
 	else //DIR_OUT
 	{
-		
+
 		for(index = 0; index < PHDC_RX_ENDPOINTS; index++)
         {
             if(PhdcRXEP[index].ep_num == USBHALGetLastEndpoint(val))
@@ -524,13 +524,13 @@ void USBDevicePHDCTxRXService(USTAT_FIELDS* pdata)
 				 recv_endpoint->offset =0;
 				 memcpy(recv_endpoint->app_buff,(void *)phdc_data_rx,recv_endpoint->len );
 			     PhdAppCB(USB_APP_GET_TRANSFER_SIZE,&TransferSize);
-				 recv_endpoint->transfer_size = TransferSize;			
+				 recv_endpoint->transfer_size = TransferSize;
 			}
 			else if(recv_endpoint->transfer_size > PHDC_MAX_APDU_SIZE)
 			{
-    			// do not copy the data to appbuffer if transfer size is more than maximum APDU size specified by the user. 
-    			recv_endpoint->offset = 0; 
-            } 			
+    			// do not copy the data to appbuffer if transfer size is more than maximum APDU size specified by the user.
+    			recv_endpoint->offset = 0;
+            }
 			else
 			{
 				/* copy the data starting from the previuos offset*/
@@ -543,56 +543,56 @@ void USBDevicePHDCTxRXService(USTAT_FIELDS* pdata)
 		if((recv_endpoint->offset >= recv_endpoint->transfer_size) ||
 				((recv_endpoint->len % recv_endpoint->size!=0)))
 		{
-		    if(((recv_endpoint->transfer_size % recv_endpoint->size)==0)&& 
+		    if(((recv_endpoint->transfer_size % recv_endpoint->size)==0)&&
 					(recv_endpoint->len!=0))
 			{
 				//zero length packet receive here
 				USBRxOnePacket(recv_endpoint->ep_num,NULL,0);
 		    }
-			recv_endpoint->offset =0;	
+			recv_endpoint->offset =0;
 			recv_endpoint->transfer_size =0;
 			PhdAppCB(USB_APP_DATA_RECEIVED,NULL);/*inform the application*/
 			USBUnmaskInterrupts();
 			return;
 		}
-		 		
-	
+
+
 		USBRxOnePacket(recv_endpoint->ep_num,(BYTE *)phdc_data_rx,
 								(recv_endpoint->transfer_size-recv_endpoint->offset));
-                
-	        									 
+
+
 	}
 	USBUnmaskInterrupts();
 }
 
-  
+
 /******************************************************************************
  	Function:
  		void USBDevicePHDCUpdateStatus (WORD EndpointNo, BIT Status)
- 
+
  	Description:
- 		This routine handles the Get Data Status request received from the PHDC Host. 
- 		
+ 		This routine handles the Get Data Status request received from the PHDC Host.
+
  	PreCondition:
  		None
 
 	Parameters:
 		None
-		
+
 	Return Values:
 		None
-		
+
 	Remarks:
 		None
-		 
+
  *****************************************************************************/
 void USBDevicePHDCUpdateStatus (WORD EndpointNo, BIT Status)
 {
     if (Status == 1)
         phdcEpDataBitmap |= 1 << EndpointNo ;
-    else 
-        phdcEpDataBitmap &= ~(1 << EndpointNo);     
-}    
+    else
+        phdcEpDataBitmap &= ~(1 << EndpointNo);
+}
 
 
 #endif //USB_USE_PHDC

@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -157,11 +157,11 @@ please contact mla_licensing@microchip.com
 #define SAMPLING_FREQ_CONTROL 0x01
 #define PITCH_CONTROL 0x02
 
-/*********** Terminal Types***********************/ 
-/*A complete list of Terminal Type codes is provided in 
-the document USB Audio Terminal Types */ 
+/*********** Terminal Types***********************/
+/*A complete list of Terminal Type codes is provided in
+the document USB Audio Terminal Types */
 #define USB_STREAMING 0x01, 0x01
-#define MICROPHONE 0x01,0x02 
+#define MICROPHONE 0x01,0x02
 #define SPEAKER 0x01,0x03
 #define HEADPHONES 0x02,0x03
 
@@ -177,27 +177,27 @@ extern volatile uint8_t CtrlTrfData[USB_EP0_BUFF_SIZE];
 /********************************************************************
     Function:
  		void USBCheckAudioRequest(void)
-        
+
     Summary:
  		This routine checks the setup data packet to see if it
  		knows how to handle it
-        
+
     Description:
  		This routine checks the setup data packet to see if it
  		knows how to handle it
 
     PreCondition:
         None
-        
+
     Parameters:
 		None
-        
+
     Return Values:
 		None
-        
+
     Remarks:
         None
-  
+
  *******************************************************************/
 void USBCheckAudioRequest(void);
 #endif //AUDIO_H

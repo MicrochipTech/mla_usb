@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -92,7 +92,7 @@ extern const struct{uint8_t report[HID_RPT01_SIZE];}hid_rpt01;
 
 #if defined USER_SET_REPORT_HANDLER
     extern void USER_SET_REPORT_HANDLER(void);
-#endif     
+#endif
 
 // *****************************************************************************
 // *****************************************************************************
@@ -148,13 +148,13 @@ extern const struct{uint8_t report[HID_RPT01_SIZE];}hid_rpt01;
 
 	Remarks:
 		None
- 
+
  *******************************************************************/
 void USBCheckHIDRequest(void)
 {
     if(SetupPkt.Recipient != USB_SETUP_RECIPIENT_INTERFACE_BITFIELD) return;
     if(SetupPkt.bIntfID != HID_INTF_ID) return;
-    
+
     /*
      * There are two standard requests that hid.c may support.
      * 1. GET_DSC(DSC_HID,DSC_RPT,DSC_PHY);
@@ -164,7 +164,7 @@ void USBCheckHIDRequest(void)
     {
         switch(SetupPkt.bDescriptorType)
         {
-            case DSC_HID: //HID Descriptor          
+            case DSC_HID: //HID Descriptor
                 if(USBActiveConfiguration == 1)
                 {
                     USBEP0SendROMPtr(
@@ -173,7 +173,7 @@ void USBCheckHIDRequest(void)
                         USB_EP0_INCLUDE_ZERO);
                 }
                 break;
-            case DSC_RPT:  //Report Descriptor           
+            case DSC_RPT:  //Report Descriptor
                 //if(USBActiveConfiguration == 1)
                 {
                     USBEP0SendROMPtr(
@@ -197,7 +197,7 @@ void USBCheckHIDRequest(void)
                 break;
         }//end switch(SetupPkt.bDescriptorType)
     }//end if(SetupPkt.bRequest == GET_DSC)
-    
+
     if(SetupPkt.RequestType != USB_SETUP_TYPE_CLASS_BITFIELD)
     {
         return;
@@ -213,7 +213,7 @@ void USBCheckHIDRequest(void)
         case SET_REPORT:
             #if defined USER_SET_REPORT_HANDLER
                 USER_SET_REPORT_HANDLER();
-            #endif       
+            #endif
             break;
         case GET_IDLE:
             USBEP0SendRAMPtr(
@@ -243,12 +243,12 @@ void USBCheckHIDRequest(void)
 /********************************************************************
     Function:
         USB_HANDLE HIDTxPacket(uint8_t ep, uint8_t* data, uint16_t len)
-        
+
     Summary:
         Sends the specified data out the specified endpoint
 
     Description:
-        This function sends the specified data out the specified 
+        This function sends the specified data out the specified
         endpoint and returns a handle to the transfer information.
 
         Typical Usage:
@@ -261,32 +261,32 @@ void USBCheckHIDRequest(void)
             USBInHandle = HIDTxPacket(HID_EP,(uint8_t*)&ToSendDataBuffer[0],sizeof(ToSendDataBuffer));
         }
         </code>
-        
+
     PreCondition:
         None
-        
+
     Parameters:
         uint8_t ep    - the endpoint you want to send the data out of
         uint8_t* data - pointer to the data that you wish to send
         uint16_t len   - the length of the data that you wish to send
-        
+
     Return Values:
         USB_HANDLE - a handle for the transfer.  This information
         should be kept to track the status of the transfer
-        
+
     Remarks:
         None
-  
+
  *******************************************************************/
  // Implemented as a macro. See usb_function_hid.h
 
 /********************************************************************
     Function:
         USB_HANDLE HIDRxPacket(uint8_t ep, uint8_t* data, uint16_t len)
-        
+
     Summary:
         Receives the specified data out the specified endpoint
-        
+
     Description:
         Receives the specified data out the specified endpoint.
 
@@ -300,22 +300,22 @@ void USBCheckHIDRequest(void)
 
     PreCondition:
         None
-        
+
     Parameters:
         uint8_t ep    - the endpoint you want to receive the data into
         uint8_t* data - pointer to where the data will go when it arrives
         uint16_t len   - the length of the data that you wish to receive
-        
+
     Return Values:
         USB_HANDLE - a handle for the transfer.  This information
         should be kept to track the status of the transfer
-        
+
     Remarks:
         None
-  
+
  *******************************************************************/
   // Implemented as a macro. See usb_function_hid.h
-  
+
 /*******************************************************************************
  End of File
 */

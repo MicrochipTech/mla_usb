@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -365,59 +365,59 @@ typedef union
     decrease CPU utiliazation.
 ********************************************************************/
 #if defined USB_DISABLE_SUSPEND_HANDLER
-    #define USB_SUSPEND_HANDLER(event,pointer,size) 
-    
-    #warning "Disabling the suspend handler is not recommended.  Proper suspend handling is required to create a compliant USB device."                
+    #define USB_SUSPEND_HANDLER(event,pointer,size)
+
+    #warning "Disabling the suspend handler is not recommended.  Proper suspend handling is required to create a compliant USB device."
 #else
     #define USB_SUSPEND_HANDLER(event,pointer,size)             USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)
 #endif
 
 #if defined USB_DISABLE_WAKEUP_FROM_SUSPEND_HANDLER
-    #define USB_WAKEUP_FROM_SUSPEND_HANDLER(event,pointer,size) 
+    #define USB_WAKEUP_FROM_SUSPEND_HANDLER(event,pointer,size)
 
-    #warning "Disabling the wake from suspend handler is not recommended.  Proper suspend handling is required to create a compliant USB device."                
+    #warning "Disabling the wake from suspend handler is not recommended.  Proper suspend handling is required to create a compliant USB device."
 #else
-    #define USB_WAKEUP_FROM_SUSPEND_HANDLER(event,pointer,size) USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)   
+    #define USB_WAKEUP_FROM_SUSPEND_HANDLER(event,pointer,size) USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)
 #endif
 
 #if defined USB_DISABLE_SOF_HANDLER
-    #define USB_SOF_HANDLER(event,pointer,size)                
+    #define USB_SOF_HANDLER(event,pointer,size)
 #else
     #define USB_SOF_HANDLER(event,pointer,size)                 USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)
 #endif
 
 #if defined USB_DISABLE_TRANSFER_TERMINATED_HANDLER
-    #define USB_TRANSFER_TERMINATED_HANDLER(event,pointer,size)                
+    #define USB_TRANSFER_TERMINATED_HANDLER(event,pointer,size)
 #else
     #define USB_TRANSFER_TERMINATED_HANDLER(event,pointer,size)                 USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)
 #endif
 
-#if defined USB_DISABLE_ERROR_HANDLER 
-    #define USB_ERROR_HANDLER(event,pointer,size)             
+#if defined USB_DISABLE_ERROR_HANDLER
+    #define USB_ERROR_HANDLER(event,pointer,size)
 #else
     #define USB_ERROR_HANDLER(event,pointer,size)               USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)
 #endif
 
-#if defined USB_DISABLE_NONSTANDARD_EP0_REQUEST_HANDLER 
-    #define USB_NONSTANDARD_EP0_REQUEST_HANDLER(event,pointer,size)                 
+#if defined USB_DISABLE_NONSTANDARD_EP0_REQUEST_HANDLER
+    #define USB_NONSTANDARD_EP0_REQUEST_HANDLER(event,pointer,size)
 #else
     #define USB_NONSTANDARD_EP0_REQUEST_HANDLER(event,pointer,size)       USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)
 #endif
 
-#if defined USB_DISABLE_SET_DESCRIPTOR_HANDLER 
-    #define USB_SET_DESCRIPTOR_HANDLER(event,pointer,size)                
+#if defined USB_DISABLE_SET_DESCRIPTOR_HANDLER
+    #define USB_SET_DESCRIPTOR_HANDLER(event,pointer,size)
 #else
-    #define USB_SET_DESCRIPTOR_HANDLER(event,pointer,size)      USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size) 
+    #define USB_SET_DESCRIPTOR_HANDLER(event,pointer,size)      USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)
 #endif
 
 #if defined USB_DISABLE_SET_CONFIGURATION_HANDLER
-    #define USB_SET_CONFIGURATION_HANDLER(event,pointer,size)                
+    #define USB_SET_CONFIGURATION_HANDLER(event,pointer,size)
 #else
     #define USB_SET_CONFIGURATION_HANDLER(event,pointer,size)             USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)
 #endif
 
-#if defined USB_DISABLE_TRANSFER_COMPLETE_HANDLER 
-    #define USB_TRANSFER_COMPLETE_HANDLER(event,pointer,size)               
+#if defined USB_DISABLE_TRANSFER_COMPLETE_HANDLER
+    #define USB_TRANSFER_COMPLETE_HANDLER(event,pointer,size)
 #else
     #define USB_TRANSFER_COMPLETE_HANDLER(event,pointer,size)    USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)
 #endif

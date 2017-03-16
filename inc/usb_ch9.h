@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -179,7 +179,7 @@ typedef struct __attribute__ ((packed)) _USB_ENDPOINT_DESCRIPTOR
 #define EP_SM_PKT_BULK_FS   8       // Small full-speed bulk packet
 
 /* Descriptor IDs
-The descriptor ID type defines the information required by the HOST during a 
+The descriptor ID type defines the information required by the HOST during a
 GET_DESCRIPTOR request
 */
 typedef struct
@@ -521,7 +521,7 @@ typedef union __attribute__ ((packed))
 /********************************************************************
 USB Endpoint Definitions
 USB Standard EP Address Format: DIR:X:X:X:EP3:EP2:EP1:EP0
-This is used in the descriptors. 
+This is used in the descriptors.
 ********************************************************************/
 #define _EP_IN      0x80
 #define _EP_OUT     0x00

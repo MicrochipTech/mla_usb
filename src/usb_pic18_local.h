@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-To request to license the code under the MLA license (www.microchip.com/mla_license), 
+To request to license the code under the MLA license (www.microchip.com/mla_license),
 please contact mla_licensing@microchip.com
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -71,7 +71,7 @@ typedef union
 /********************************************************************
  * Buffer Descriptor Status Register
  *******************************************************************/
-    
+
 /* Buffer Descriptor Status Register Initialization Parameters */
 #define _BSTALL     0x04        //Buffer Stall enable
 #define _DTSEN      0x08        //Data Toggle Synch enable
@@ -148,46 +148,46 @@ typedef union __BDT
 /****************************************************************
   	Function:
   		void USBPowerModule(void)
-  		
+
   	Description:
   		This macro is used to power up the USB module if required<br>
   		PIC18: defines as nothing<br>
   		PIC24: defines as U1PWRCbits.USBPWR = 1;<br>
-  	
+
   	Precondition:
   		None
-  		
+
   	Parameters:
   		None
-  		
+
   	Return Values:
   		None
-  		
+
   	Remarks:
   		None
-  	
+
   ****************************************************************/
 #define USBPowerModule()
 
 /****************************************************************
   	Function:
   		USBSetBDTAddress(addr)
-  		
+
   	Description:
   		This macro is used to power up the USB module if required
-  		
+
   	Precondition:
   		None
-  		
+
   	Parameters:
   		None
-  		
+
   	Return Values:
   		None
-  		
+
   	Remarks:
   		None
-  	 
+
   ****************************************************************/
 #define USBSetBDTAddress(addr)
 #define USBPingPongBufferReset UCONbits.PPBRST
