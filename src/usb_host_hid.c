@@ -130,7 +130,7 @@ typedef struct _USB_HID_TRANSFER_INFO
     uint8_t                             state;                 // State of the endpoint.
     uint16_t                            reportId;              // Report ID of the current transfer.
     uint8_t                             *userData;              // Data pointer to application buffer.
-    uint8_t                             bytesTransferred;      // Number of bytes transferred to/from the user's data buffer.
+    uint16_t                             bytesTransferred;      // Number of bytes transferred to/from the user's data buffer.
     uint8_t                             endpoint;              // Endpoint to use for the transfer.
     uint8_t                             reportSize;            // Size of report currently requested for transfer.
     uint8_t                             interface;             // Interface number of current transfer.
