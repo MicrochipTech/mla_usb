@@ -776,7 +776,7 @@ void putsUSBUSART(char *data);
                             will be transferred to the host.
 
   **************************************************************************/
-void putrsUSBUSART(const const char *data);
+void putrsUSBUSART(const char *data);
 
 /************************************************************************
   Function:
@@ -835,6 +835,11 @@ void CDCTxService(void);
 
 /* Line Coding Structure */
 #define LINE_CODING_LENGTH          0x07
+#if defined(__XC8)
+    #define PACKED
+#else
+    #define PACKED __attribute__((packed))
+#endif
 
 typedef union _LINE_CODING
 {
@@ -865,7 +870,7 @@ typedef union _CONTROL_SIGNAL_BITMAP
 /* Functional Descriptor Structure - See CDC Specification 1.1 for details */
 
 /* Header Functional Descriptor */
-typedef struct __attribute__((packed)) _USB_CDC_HEADER_FN_DSC
+typedef struct PACKED _USB_CDC_HEADER_FN_DSC
 {
     uint8_t bFNLength;
     uint8_t bDscType;
@@ -874,7 +879,7 @@ typedef struct __attribute__((packed)) _USB_CDC_HEADER_FN_DSC
 } USB_CDC_HEADER_FN_DSC;
 
 /* Abstract Control Management Functional Descriptor */
-typedef struct __attribute__((packed)) _USB_CDC_ACM_FN_DSC
+typedef struct PACKED _USB_CDC_ACM_FN_DSC
 {
     uint8_t bFNLength;
     uint8_t bDscType;
@@ -883,7 +888,7 @@ typedef struct __attribute__((packed)) _USB_CDC_ACM_FN_DSC
 } USB_CDC_ACM_FN_DSC;
 
 /* Union Functional Descriptor */
-typedef struct __attribute__((packed)) _USB_CDC_UNION_FN_DSC
+typedef struct PACKED _USB_CDC_UNION_FN_DSC
 {
     uint8_t bFNLength;
     uint8_t bDscType;
@@ -893,7 +898,7 @@ typedef struct __attribute__((packed)) _USB_CDC_UNION_FN_DSC
 } USB_CDC_UNION_FN_DSC;
 
 /* Call Management Functional Descriptor */
-typedef struct __attribute__((packed)) _USB_CDC_CALL_MGT_FN_DSC
+typedef struct PACKED _USB_CDC_CALL_MGT_FN_DSC
 {
     uint8_t bFNLength;
     uint8_t bDscType;
@@ -902,7 +907,7 @@ typedef struct __attribute__((packed)) _USB_CDC_CALL_MGT_FN_DSC
     uint8_t bDataInterface;
 } USB_CDC_CALL_MGT_FN_DSC;
 
-typedef union __attribute__((packed)) _CDC_NOTICE
+typedef union PACKED _CDC_NOTICE
 {
     LINE_CODING GetLineCoding;
     LINE_CODING SetLineCoding;

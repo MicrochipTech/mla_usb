@@ -44,7 +44,11 @@ please contact mla_licensing@microchip.com
 #include "usb_config.h"
 
 #if defined(__XC8)
-    #define __attribute__(a)
+    #define PACKED
+    #define ALIGNED
+#else
+    #define PACKED __attribute__((packed))
+    #define ALIGNED __attribute__((aligned))
 #endif
 
 /** DEFINITIONS ****************************************************/
@@ -1987,9 +1991,9 @@ typedef union
 // Definition of the PIPE structure
 //  This structure is used to keep track of data that is sent out
 //  of the stack automatically.
-typedef struct __attribute__ ((packed))
+typedef struct PACKED
 {
-    union __attribute__ ((packed))
+    union PACKED
     {
         //Various options of pointers that are available to
         // get the data from
@@ -1998,9 +2002,9 @@ typedef struct __attribute__ ((packed))
         uint16_t *wRam;
         const uint16_t *wRom;
     }pSrc;
-    union __attribute__ ((packed))
+    union PACKED
     {
-        struct __attribute__ ((packed))
+        struct PACKED
         {
             //is this transfer from RAM or const?
             uint8_t ctrl_trf_mem          :1;
@@ -2013,23 +2017,23 @@ typedef struct __attribute__ ((packed))
         }bits;
         uint8_t Val;
     }info;
-    uint16_t_VAL __attribute__((aligned)) wCount;
+    uint16_t_VAL ALIGNED wCount;
 }IN_PIPE;
 
 extern USB_VOLATILE IN_PIPE inPipes[];
 
-typedef struct __attribute__ ((packed))
+typedef struct PACKED
 {
-    union __attribute__ ((packed))
+    union PACKED
     {
         //Various options of pointers that are available to
         // get the data from
         uint8_t *bRam;
         uint16_t *wRam;
     }pDst;
-    union __attribute__ ((packed))
+    union PACKED
     {
-        struct __attribute__ ((packed))
+        struct PACKED
         {
             uint8_t reserved              :7;
             //is this PIPE currently in use
@@ -2049,6 +2053,6 @@ extern USB_VOLATILE uint8_t USBTicksSinceSuspendEnd;
 /******************************************************************************/
 /* DOM-IGNORE-END */
 
-#include <usb_hal.h>
+#include "usb_hal.h"
 
 #endif //USB_DEVICE_H

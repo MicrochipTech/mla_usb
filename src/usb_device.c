@@ -197,7 +197,11 @@ volatile uint8_t CtrlTrfData[USB_EP0_BUFF_SIZE] CTRL_TRF_DATA_ADDR_TAG;
 	volatile USB_MSD_CSW msd_csw MSD_CSW_ADDR_TAG;  //Must be located in USB module accessible RAM
 
     #if defined(__18CXX) || defined(__XC8)
+        #if(__XC8_VERSION < 2000)
         volatile char msd_buffer[512] @ MSD_BUFFER_ADDRESS;
+        #else
+            volatile char msd_buffer[512] __at(MSD_BUFFER_ADDRESS);
+        #endif
     #else
         volatile char msd_buffer[512];
 	#endif
@@ -2157,6 +2161,7 @@ static void USBStdGetStatusHandler(void)
             /*
              * [0]: bit0: Halt Status [0] Not Halted [1] Halted
              */
+            if(SetupPkt.EPNum != 0)
             {
                 BDT_ENTRY *p;
 
@@ -2170,9 +2175,11 @@ static void USBStdGetStatusHandler(void)
                 }
 
                 if((p->STAT.UOWN == 1) && (p->STAT.BSTALL == 1))
+                {
                     CtrlTrfData[0]=0x01;    // Set bit0
-                break;
+                }
             }
+            break;
     }//end switch
 
     if(inPipes[0].info.bits.busy == 1)
@@ -2561,7 +2568,7 @@ static void USBCtrlTrfOutHandler(void)
         }
         else
         {
-                BothEP0OutUOWNsSet = false;
+            BothEP0OutUOWNsSet = false;
         }
     }
 }
@@ -2760,40 +2767,6 @@ static void USBStdFeatureReqHandler(void)
     #else
         unsigned char* pUEP;
     #endif
-
-
-    #ifdef	USB_SUPPORT_OTG
-    //Check for USB On-The-Go (OTG) specific requests
-    if ((SetupPkt.bFeature == OTG_FEATURE_B_HNP_ENABLE)&&
-        (SetupPkt.Recipient == USB_SETUP_RECIPIENT_DEVICE_BITFIELD))
-    {
-        inPipes[0].info.bits.busy = 1;
-        if(SetupPkt.bRequest == USB_REQUEST_SET_FEATURE)
-            USBOTGEnableHnp();
-        else
-            USBOTGDisableHnp();
-    }
-
-    if ((SetupPkt.bFeature == OTG_FEATURE_A_HNP_SUPPORT)&&
-        (SetupPkt.Recipient == USB_SETUP_RECIPIENT_DEVICE_BITFIELD))
-    {
-        inPipes[0].info.bits.busy = 1;
-        if(SetupPkt.bRequest == USB_REQUEST_SET_FEATURE)
-            USBOTGEnableSupportHnp();
-        else
-            USBOTGDisableSupportHnp();
-    }
-
-    if ((SetupPkt.bFeature == OTG_FEATURE_A_ALT_HNP_SUPPORT)&&
-        (SetupPkt.Recipient == USB_SETUP_RECIPIENT_DEVICE_BITFIELD))
-    {
-        inPipes[0].info.bits.busy = 1;
-        if(SetupPkt.bRequest == USB_REQUEST_SET_FEATURE)
-            USBOTGEnableAltHnp();
-        else
-            USBOTGDisableAltHnp();
-    }
-    #endif   //#ifdef USB_SUPPORT_OTG
 
     //Check if the host sent a valid SET or CLEAR feature (remote wakeup) request.
     if((SetupPkt.bFeature == USB_FEATURE_DEVICE_REMOTE_WAKEUP)&&

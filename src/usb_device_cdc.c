@@ -55,9 +55,10 @@ please contact mla_licensing@microchip.com
     #define IN_DATA_BUFFER_ADDRESS_TAG
     #define OUT_DATA_BUFFER_ADDRESS_TAG
     #define CONTROL_BUFFER_ADDRESS_TAG
+    #define DRIVER_DATA_ADDRESS_TAG
 #endif
 
-#if !defined(IN_DATA_BUFFER_ADDRESS_TAG) || !defined(OUT_DATA_BUFFER_ADDRESS_TAG) || !defined(CONTROL_BUFFER_ADDRESS_TAG)
+#if !defined(IN_DATA_BUFFER_ADDRESS_TAG) || !defined(OUT_DATA_BUFFER_ADDRESS_TAG) || !defined(CONTROL_BUFFER_ADDRESS_TAG) || !defined(DRIVER_DATA_ADDRESS_TAG)
     #error "One of the fixed memory address definitions is not defined.  Please define the required address tags for the required buffers."
 #endif
 
@@ -77,7 +78,7 @@ LINE_CODING line_coding;    // Buffer to store line coding information
 CDC_NOTICE cdc_notice;
 
 #if defined(USB_CDC_SUPPORT_DSR_REPORTING)
-    SERIAL_STATE_NOTIFICATION SerialStatePacket;
+    SERIAL_STATE_NOTIFICATION SerialStatePacket DRIVER_DATA_ADDRESS_TAG;
 #endif
 
 uint8_t cdc_rx_len;            // total rx length
@@ -723,10 +724,10 @@ void putsUSBUSART(char *data)
                             will be transferred to the host.
 
   **************************************************************************/
-void putrsUSBUSART(const const char *data)
+void putrsUSBUSART(const char *data)
 {
     uint8_t len;
-    const const char *pData;
+    const char *pData;
 
     /*
      * User should have checked that cdc_trf_state is in CDC_TX_READY state

@@ -41,7 +41,7 @@ please contact mla_licensing@microchip.com
 #if defined(__32MM0256GPM064__) || defined(__32MM0128GPM064__) || defined(__32MM0064GPM064__) || \
     defined(__32MM0256GPM048__) || defined(__32MM0128GPM048__) || defined(__32MM0064GPM048__) || \
     defined(__32MM0256GPM036__) || defined(__32MM0128GPM036__) || defined(__32MM0064GPM036__) || \
-    defined(__32MM0256GPM028__) || defined(__32MM0128GPM028__) || defined(__32MM0064PM028__)
+    defined(__32MM0256GPM028__) || defined(__32MM0128GPM028__) || defined(__32MM0064GPM028__)
 
     #define DEVICE_SPECIFIC_IEC_REGISTER_COUNT  4   //Number of IECx registers implemented in the microcontroller (varies from device to device, make sure this is set correctly for the intended CPU)
     #define USB_HAL_VBUSTristate()              {TRISBbits.TRISB6 = 1;}

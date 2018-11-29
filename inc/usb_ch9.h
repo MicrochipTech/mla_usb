@@ -42,7 +42,9 @@ please contact mla_licensing@microchip.com
 #include <stdint.h>
 
 #if defined(__XC8)
-    #define __attribute__(a)
+    #define PACKED
+#else
+    #define PACKED __attribute__((packed))
 #endif
 
 // *****************************************************************************
@@ -66,7 +68,7 @@ please contact mla_licensing@microchip.com
 
 This struct defines the structure of a USB Device Descriptor.
 */
-typedef struct __attribute__ ((packed)) _USB_DEVICE_DESCRIPTOR
+typedef struct PACKED _USB_DEVICE_DESCRIPTOR
 {
     uint8_t bLength;               // Length of this descriptor.
     uint8_t bDescriptorType;       // DEVICE descriptor type (USB_DESCRIPTOR_DEVICE).
@@ -90,7 +92,7 @@ typedef struct __attribute__ ((packed)) _USB_DEVICE_DESCRIPTOR
 
 This struct defines the structure of a USB Configuration Descriptor.
 */
-typedef struct __attribute__ ((packed)) _USB_CONFIGURATION_DESCRIPTOR
+typedef struct PACKED _USB_CONFIGURATION_DESCRIPTOR
 {
     uint8_t bLength;               // Length of this descriptor.
     uint8_t bDescriptorType;       // CONFIGURATION descriptor type (USB_DESCRIPTOR_CONFIGURATION).
@@ -113,7 +115,7 @@ typedef struct __attribute__ ((packed)) _USB_CONFIGURATION_DESCRIPTOR
 
 This struct defines the structure of a USB Interface Descriptor.
 */
-typedef struct __attribute__ ((packed)) _USB_INTERFACE_DESCRIPTOR
+typedef struct PACKED _USB_INTERFACE_DESCRIPTOR
 {
     uint8_t bLength;               // Length of this descriptor.
     uint8_t bDescriptorType;       // INTERFACE descriptor type (USB_DESCRIPTOR_INTERFACE).
@@ -132,7 +134,7 @@ typedef struct __attribute__ ((packed)) _USB_INTERFACE_DESCRIPTOR
 
 This struct defines the structure of a USB Endpoint Descriptor.
 */
-typedef struct __attribute__ ((packed)) _USB_ENDPOINT_DESCRIPTOR
+typedef struct PACKED _USB_ENDPOINT_DESCRIPTOR
 {
     uint8_t bLength;               // Length of this descriptor.
     uint8_t bDescriptorType;       // ENDPOINT descriptor type (USB_DESCRIPTOR_ENDPOINT).
@@ -197,7 +199,7 @@ This struct defines the structure of a USB OTG Descriptor.  Note that this
 structure may need to be packed, or even accessed as uint8_ts, to properly access
 the correct fields when used on some device architectures.
 */
-typedef struct __attribute__ ((packed)) _USB_OTG_DESCRIPTOR
+typedef struct PACKED _USB_OTG_DESCRIPTOR
 {
     uint8_t bLength;               // Length of this descriptor.
     uint8_t bDescriptorType;       // OTG descriptor type (USB_DESCRIPTOR_OTG).
@@ -221,7 +223,7 @@ typedef struct __attribute__ ((packed)) _USB_OTG_DESCRIPTOR
 // array of unicode characters making up the string, must be allocated
 // immediately following this header with no padding between them.
 
-typedef struct __attribute__ ((packed)) _USB_STRING_DSC
+typedef struct PACKED _USB_STRING_DSC
 {
     uint8_t   bLength;             // Size of this descriptor
     uint8_t   bDescriptorType;     // Type, USB_DSC_STRING
@@ -240,7 +242,7 @@ typedef struct __attribute__ ((packed)) _USB_STRING_DSC
 // If so, it may need to implement the the device qualifier and other
 // speed descriptors.
 
-typedef struct __attribute__ ((packed)) _USB_DEVICE_QUALIFIER_DESCRIPTOR
+typedef struct PACKED _USB_DEVICE_QUALIFIER_DESCRIPTOR
 {
     uint8_t bLength;               // Size of this descriptor
     uint8_t bType;                 // Type, always USB_DESCRIPTOR_DEVICE_QUALIFIER
@@ -263,10 +265,10 @@ typedef struct __attribute__ ((packed)) _USB_DEVICE_QUALIFIER_DESCRIPTOR
 //
 // Note: Refer to the USB 2.0 specification for additional details on the
 // usage of the setup packet and standard device requests.
-typedef union __attribute__ ((packed))
+typedef union PACKED
 {
     /** Standard Device Requests ***********************************/
-    struct __attribute__ ((packed))
+    struct PACKED
     {
         uint8_t bmRequestType; //from table 9-2 of USB2.0 spec
         uint8_t bRequest; //from table 9-2 of USB2.0 spec
@@ -274,7 +276,7 @@ typedef union __attribute__ ((packed))
         uint16_t wIndex; //from table 9-2 of USB2.0 spec
         uint16_t wLength; //from table 9-2 of USB2.0 spec
     };
-    struct __attribute__ ((packed))
+    struct PACKED
     {
         unsigned :8;
         unsigned :8;
@@ -311,7 +313,7 @@ typedef union __attribute__ ((packed))
             } byte;
         } W_Length;
     };
-    struct __attribute__ ((packed))
+    struct PACKED
     {
         unsigned Recipient:5;   //Device,Interface,Endpoint,Other
         unsigned RequestType:2; //Standard,Class,Vendor,Reserved
@@ -324,7 +326,7 @@ typedef union __attribute__ ((packed))
         unsigned :8;
         unsigned :8;
     };
-    struct __attribute__ ((packed))
+    struct PACKED
     {
         union                           // offset   description
         {                               // ------   ------------------------
@@ -337,7 +339,7 @@ typedef union __attribute__ ((packed))
             };
         }requestInfo;
     };
-    struct __attribute__ ((packed))
+    struct PACKED
     {
         unsigned :8;
         unsigned :8;
@@ -347,7 +349,7 @@ typedef union __attribute__ ((packed))
         unsigned :8;
         unsigned :8;
     };
-    struct __attribute__ ((packed))
+    struct PACKED
     {
         unsigned :8;
         unsigned :8;
@@ -358,7 +360,7 @@ typedef union __attribute__ ((packed))
         unsigned :8;
         unsigned :8;
     };
-    struct __attribute__ ((packed))
+    struct PACKED
     {
         unsigned :8;
         unsigned :8;
@@ -369,7 +371,7 @@ typedef union __attribute__ ((packed))
         unsigned :8;
         unsigned :8;
     };
-    struct __attribute__ ((packed))
+    struct PACKED
     {
         unsigned :8;
         unsigned :8;
@@ -380,7 +382,7 @@ typedef union __attribute__ ((packed))
         unsigned :8;
         unsigned :8;
     };
-    struct __attribute__ ((packed))
+    struct PACKED
     {
         unsigned :8;
         unsigned :8;
@@ -391,7 +393,7 @@ typedef union __attribute__ ((packed))
         unsigned :8;
         unsigned :8;
     };
-    struct __attribute__ ((packed))
+    struct PACKED
     {
         unsigned :8;
         unsigned :8;

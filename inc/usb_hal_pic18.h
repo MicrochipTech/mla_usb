@@ -218,17 +218,28 @@ please contact mla_licensing@microchip.com
     #define CTRL_TRF_SETUP_ADDRESS (USB_BDT_ADDRESS+(BDT_NUM_ENTRIES*4))
     #define CTRL_TRF_DATA_ADDRESS (CTRL_TRF_SETUP_ADDRESS + USB_EP0_BUFF_SIZE)
 
-    #define BDT_BASE_ADDR_TAG   @USB_BDT_ADDRESS
-    #define CTRL_TRF_SETUP_ADDR_TAG @CTRL_TRF_SETUP_ADDRESS
-    #define CTRL_TRF_DATA_ADDR_TAG @CTRL_TRF_DATA_ADDRESS
+    #if(__XC8_VERSION < 2000)
+        #define BDT_BASE_ADDR_TAG   @USB_BDT_ADDRESS
+        #define CTRL_TRF_SETUP_ADDR_TAG @CTRL_TRF_SETUP_ADDRESS
+        #define CTRL_TRF_DATA_ADDR_TAG @CTRL_TRF_DATA_ADDRESS
+    #else
+        #define BDT_BASE_ADDR_TAG   __at(USB_BDT_ADDRESS)
+        #define CTRL_TRF_SETUP_ADDR_TAG __at(CTRL_TRF_SETUP_ADDRESS)
+        #define CTRL_TRF_DATA_ADDR_TAG __at(CTRL_TRF_DATA_ADDRESS)
+    #endif
 
     #if defined(USB_USE_MSD)
         //MSD application specific USB endpoint buffer placement macros (so they
         //get linked to a USB module accessible portion of RAM)
         #define MSD_CBW_ADDRESS (CTRL_TRF_DATA_ADDRESS + USB_EP0_BUFF_SIZE)
         #define MSD_CSW_ADDRESS (MSD_CBW_ADDRESS + MSD_OUT_EP_SIZE)
-        #define MSD_CBW_ADDR_TAG    @MSD_CBW_ADDRESS
-        #define MSD_CSW_ADDR_TAG    @MSD_CSW_ADDRESS
+        #if(__XC8_VERSION < 2000)
+            #define MSD_CBW_ADDR_TAG    @MSD_CBW_ADDRESS
+            #define MSD_CSW_ADDR_TAG    @MSD_CSW_ADDRESS
+        #else
+            #define MSD_CBW_ADDR_TAG    __at(MSD_CBW_ADDRESS)
+            #define MSD_CSW_ADDR_TAG    __at(MSD_CSW_ADDRESS)
+        #endif
     #endif
 #else
     #define BDT_BASE_ADDR_TAG   __attribute__ ((aligned (512)))
